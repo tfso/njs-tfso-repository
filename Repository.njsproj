@@ -73,6 +73,7 @@
     <TypeScriptCompile Include="src\expressions\methodexpression.ts" />
     <TypeScriptCompile Include="src\expressions\reducervisitor.ts" />
     <TypeScriptCompile Include="src\expressions\unaryexpression.ts" />
+    <TypeScriptCompile Include="src\main.ts" />
     <TypeScriptCompile Include="src\repository\filters\filter.ts" />
     <TypeScriptCompile Include="src\repository\filters\filtercriteria.ts" />
     <TypeScriptCompile Include="src\repository\filters\filters.ts" />
