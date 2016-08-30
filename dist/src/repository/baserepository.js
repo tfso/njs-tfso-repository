@@ -1,6 +1,6 @@
 "use strict";
 const filters_1 = require('./filters/filters');
-class Repository {
+class BaseRepository {
     beginTransaction() {
         return Promise.resolve();
     }
@@ -24,5 +24,6 @@ class Repository {
         };
     }
 }
-exports.Repository = Repository;
-//# sourceMappingURL=repository.js.map
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = BaseRepository;
+//# sourceMappingURL=baserepository.js.map

@@ -1,6 +1,6 @@
 "use strict";
 const assert = require('assert');
-const repository_1 = require('./../src/repository/repository');
+const baserepository_1 = require('./../src/repository/baserepository');
 describe("When using repository to read all", () => {
     var repository;
     beforeEach(() => {
@@ -72,7 +72,7 @@ describe("When using repository to read all", () => {
         assert.ok(list.groups[0].criteria.length == 1, "Expected a single criteria");
     });
 });
-class CarRepository extends repository_1.Repository {
+class CarRepository extends baserepository_1.default {
     constructor() {
         super();
     }

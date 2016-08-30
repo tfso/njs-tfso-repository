@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\repository\filters\" />
+    <Folder Include="src\repository\db\" />
     <Folder Include="test\" />
     <Folder Include="src\" />
     <Folder Include="src\expressions\" />
@@ -74,10 +75,12 @@
     <TypeScriptCompile Include="src\expressions\reducervisitor.ts" />
     <TypeScriptCompile Include="src\expressions\unaryexpression.ts" />
     <TypeScriptCompile Include="src\main.ts" />
+    <TypeScriptCompile Include="src\repository\db\query.ts" />
+    <TypeScriptCompile Include="src\repository\db\recordset.ts" />
     <TypeScriptCompile Include="src\repository\filters\filter.ts" />
     <TypeScriptCompile Include="src\repository\filters\filtercriteria.ts" />
     <TypeScriptCompile Include="src\repository\filters\filters.ts" />
-    <TypeScriptCompile Include="src\repository\repository.ts" />
+    <TypeScriptCompile Include="src\repository\baserepository.ts" />
     <TypeScriptCompile Include="test\expressionvisitor_binary_expression.ts">
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>

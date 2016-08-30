@@ -1,6 +1,6 @@
 ﻿import { IFilters, Filters } from './filters/filters';
 
-export interface IRepository<TEntity, TEntityId> {
+export interface IBaseRepository<TEntity, TEntityId> {
     create(entity: TEntity): Promise<TEntity>
 
     read(id: TEntityId): Promise<TEntity>
@@ -10,7 +10,7 @@ export interface IRepository<TEntity, TEntityId> {
     delete(entity: TEntity): Promise<boolean>
 }
 
-export abstract class Repository<TEntity, TEntityId> implements IRepository<TEntity, TEntityId>
+abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEntity, TEntityId>
 {
     abstract read(id: TEntityId): Promise<TEntity>
 
@@ -50,4 +50,6 @@ export abstract class Repository<TEntity, TEntityId> implements IRepository<TEnt
         };
     }
 }
+
+export default BaseRepository
 

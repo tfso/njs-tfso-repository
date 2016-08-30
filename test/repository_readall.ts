@@ -1,5 +1,5 @@
 ﻿import assert = require('assert');
-import { IRepository, Repository } from './../src/repository/repository';
+import Repository from './../src/repository/baserepository';
 
 describe("When using repository to read all", () => {
     var repository: CarRepository;
