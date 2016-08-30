@@ -1,6 +1,6 @@
 "use strict";
 const assert = require('assert');
-const Expr = require('./../src/expressions/expressionvisitor');
+const Expr = require('./../lib/expressions/expressionvisitor');
 describe("When using ExpressionVisitor for logical Lambda expression", () => {
     var visitor, expr;
     beforeEach(() => {

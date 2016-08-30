@@ -1,6 +1,6 @@
 "use strict";
 const assert = require('assert');
-const Expr = require('./../src/expressions/expressionvisitor');
+const Expr = require('./../lib/expressions/expressionvisitor');
 describe("When using ExpressionVisitor with input parameters", () => {
     var visitor, expr;
     beforeEach(() => {

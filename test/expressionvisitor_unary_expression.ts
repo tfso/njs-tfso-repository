@@ -1,5 +1,5 @@
 ﻿import assert = require('assert');
-import * as Expr from './../src/expressions/expressionvisitor';
+import * as Expr from './../lib/expressions/expressionvisitor';
 
 describe("When using ExpressionVisitor for logical Lambda expression", () => {
     var visitor: Expr.ExpressionVisitor,

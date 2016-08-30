@@ -1,6 +1,6 @@
 ﻿import assert = require('assert');
-import * as Expr from './../src/expressions/expressionvisitor';
-import { ReducerVisitor } from './../src/expressions/reducervisitor';
+import * as Expr from './../lib/expressions/expressionvisitor';
+import { ReducerVisitor } from './../lib/expressions/reducervisitor';
 
 describe("When using Reducer for ExpressionVisitor", () => {
     var reducer: ReducerVisitor,

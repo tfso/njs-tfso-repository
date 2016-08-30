@@ -52,35 +52,35 @@
     <Content Include="typings.json" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="src\repository\filters\" />
-    <Folder Include="src\repository\db\" />
+    <Folder Include="lib\repository\filters\" />
+    <Folder Include="lib\repository\db\" />
     <Folder Include="test\" />
-    <Folder Include="src\" />
-    <Folder Include="src\expressions\" />
-    <Folder Include="src\repository\" />
+    <Folder Include="lib\" />
+    <Folder Include="lib\expressions\" />
+    <Folder Include="lib\repository\" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="src\expressions\arrayexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\binaryexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\compoundexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\conditionalexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\expression.ts" />
-    <TypeScriptCompile Include="src\expressions\expressionvisitor.ts" />
-    <TypeScriptCompile Include="src\expressions\identifierexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\lambdaexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\literalexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\logicalexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\memberexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\methodexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\reducervisitor.ts" />
-    <TypeScriptCompile Include="src\expressions\unaryexpression.ts" />
-    <TypeScriptCompile Include="src\main.ts" />
-    <TypeScriptCompile Include="src\repository\db\query.ts" />
-    <TypeScriptCompile Include="src\repository\db\recordset.ts" />
-    <TypeScriptCompile Include="src\repository\filters\filter.ts" />
-    <TypeScriptCompile Include="src\repository\filters\filtercriteria.ts" />
-    <TypeScriptCompile Include="src\repository\filters\filters.ts" />
-    <TypeScriptCompile Include="src\repository\baserepository.ts" />
+    <TypeScriptCompile Include="lib\expressions\arrayexpression.ts" />
+    <TypeScriptCompile Include="lib\expressions\binaryexpression.ts" />
+    <TypeScriptCompile Include="lib\expressions\compoundexpression.ts" />
+    <TypeScriptCompile Include="lib\expressions\conditionalexpression.ts" />
+    <TypeScriptCompile Include="lib\expressions\expression.ts" />
+    <TypeScriptCompile Include="lib\expressions\expressionvisitor.ts" />
+    <TypeScriptCompile Include="lib\expressions\identifierexpression.ts" />
+    <TypeScriptCompile Include="lib\expressions\lambdaexpression.ts" />
+    <TypeScriptCompile Include="lib\expressions\literalexpression.ts" />
+    <TypeScriptCompile Include="lib\expressions\logicalexpression.ts" />
+    <TypeScriptCompile Include="lib\expressions\memberexpression.ts" />
+    <TypeScriptCompile Include="lib\expressions\methodexpression.ts" />
+    <TypeScriptCompile Include="lib\expressions\reducervisitor.ts" />
+    <TypeScriptCompile Include="lib\expressions\unaryexpression.ts" />
+    <TypeScriptCompile Include="lib\main.ts" />
+    <TypeScriptCompile Include="lib\repository\db\query.ts" />
+    <TypeScriptCompile Include="lib\repository\db\recordset.ts" />
+    <TypeScriptCompile Include="lib\repository\filters\filter.ts" />
+    <TypeScriptCompile Include="lib\repository\filters\filtercriteria.ts" />
+    <TypeScriptCompile Include="lib\repository\filters\filters.ts" />
+    <TypeScriptCompile Include="lib\repository\baserepository.ts" />
     <TypeScriptCompile Include="test\expressionvisitor_binary_expression.ts">
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>

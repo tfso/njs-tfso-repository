@@ -1,6 +1,6 @@
 "use strict";
 const assert = require('assert');
-const baserepository_1 = require('./../src/repository/baserepository');
+const baserepository_1 = require('./../lib/repository/baserepository');
 describe("When using repository to read all", () => {
     var repository;
     beforeEach(() => {

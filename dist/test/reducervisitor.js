@@ -1,7 +1,7 @@
 "use strict";
 const assert = require('assert');
-const Expr = require('./../src/expressions/expressionvisitor');
-const reducervisitor_1 = require('./../src/expressions/reducervisitor');
+const Expr = require('./../lib/expressions/expressionvisitor');
+const reducervisitor_1 = require('./../lib/expressions/reducervisitor');
 describe("When using Reducer for ExpressionVisitor", () => {
     var reducer, expr;
     beforeEach(() => {
