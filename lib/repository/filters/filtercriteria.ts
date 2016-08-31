@@ -154,13 +154,9 @@ export class FilterCriteria implements IFilterCriteria {
     public static visit(expression: ILogicalExpression): Array<IFilterCriteria> {
         var result: Array<IFilterCriteria> = [];
 
-        if (expression.operator == LogicalOperatorType.Or)
-            return result;
-
         switch (expression.operator) {
             case LogicalOperatorType.Or:
-
-                break;
+                return result;
 
             case LogicalOperatorType.And:
                 if (expression.left.type == ExpressionType.Logical)

@@ -34,14 +34,14 @@ describe("When using ExpressionVisitor for logical Lambda expression", () => {
     });
 
     it("it should handle logical operation for equal", () => {
-        expr = visitor.visitLambda(() => 5 == 2);
+        expr = visitor.visitLambda(() => <number>5 == <number>2);
 
         assert.ok(expr.type == Expr.ExpressionType.Logical, "Expected a LogicalExpression");
         assert.ok((<Expr.ILogicalExpression>expr).operator == Expr.LogicalOperatorType.Equal, "Expected a binary operation of equal");
     });
 
     it("it should handle logical operation for not equal", () => {
-        expr = visitor.visitLambda(() => 5 != 2);
+        expr = visitor.visitLambda(() => <number>5 != <number>2);
 
         assert.ok(expr.type == Expr.ExpressionType.Logical, "Expected a LogicalExpression");
         assert.ok((<Expr.ILogicalExpression>expr).operator == Expr.LogicalOperatorType.NotEqual, "Expected a binary operation of not equal");

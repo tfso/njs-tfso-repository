@@ -8,10 +8,10 @@ export interface IFilterCriteria {
 export declare class FilterCriteria implements IFilterCriteria {
     private _expression;
     constructor(expression: ILogicalExpression);
-    protected expression: ILogicalExpression;
-    property: string;
-    operator: string;
-    value: any;
-    isValid: boolean;
+    protected readonly expression: ILogicalExpression;
+    readonly property: string;
+    readonly operator: string;
+    readonly value: any;
+    readonly isValid: boolean;
     static visit(expression: ILogicalExpression): Array<IFilterCriteria>;
 }

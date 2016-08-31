@@ -3,6 +3,7 @@
         "target": "ES6",
         "module": "commonjs",
         "declaration": true,
+        "declarationDir": "./typings/internal",
         //"noImplicitAny": true,
         "removeComments": false,
         "sourceMap": true,
@@ -14,8 +15,7 @@
     "exclude": [
         "dist",
         "node_modules",
-        "typings/browser",
-        "typings/browser.d.ts",
+        "typings/internal",
         "examples"
     ]
 }

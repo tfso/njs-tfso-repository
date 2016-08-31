@@ -106,11 +106,9 @@ class FilterCriteria {
     }
     static visit(expression) {
         var result = [];
-        if (expression.operator == expressionvisitor_1.LogicalOperatorType.Or)
-            return result;
         switch (expression.operator) {
             case expressionvisitor_1.LogicalOperatorType.Or:
-                break;
+                return result;
             case expressionvisitor_1.LogicalOperatorType.And:
                 if (expression.left.type == expressionvisitor_1.ExpressionType.Logical)
                     result = result.concat(FilterCriteria.visit(expression.left));
