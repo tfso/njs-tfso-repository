@@ -18,7 +18,7 @@ export declare abstract class Query<TEntity> implements PromiseLike<IRecordSet<T
     protected abstract input(name: string, value: any): void;
     protected abstract input(name: string, type: any, value: any): void;
     protected commandText: string;
-    protected readonly parameters: IInputParameters;
+    protected parameters: IInputParameters;
     /**
          * Execute the query with the values provided in parameters and commandText and returns
          * a promise as a IRecordset of TEntity

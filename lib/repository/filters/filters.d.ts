@@ -8,7 +8,7 @@ export interface IFilters {
 export declare class Filters<TEntity> implements IFilters {
     private _groups;
     constructor(predicate: (it: TEntity) => boolean, ...parameters: any[]);
-    readonly groups: IFilter[];
+    groups: IFilter[];
     getUnion(): IFilterCriteria[];
     getIntersection(): IFilterCriteria[];
 }

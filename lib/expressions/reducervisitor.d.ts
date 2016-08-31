@@ -8,7 +8,7 @@ export declare class ReducerVisitor extends ExpressionVisitor {
     private _params;
     private _isSolvable;
     constructor(...param: Array<any>);
-    readonly isSolvable: boolean;
+    isSolvable: boolean;
     visitLambda(predicate: (it: Object, ...param: Array<any>) => any, ...param: Array<any>): IExpression;
     visitIdentifier(expression: IIdentifierExpression): IExpression;
     visitMember(expression: IMemberExpression): IExpression;

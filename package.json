@@ -5,11 +5,11 @@
   "author": {
     "name": "Nicolai"
   },
-  "main": "./dist/lib/main.js",
-  "typings": "./dist/lib/main",
+  "main": "./lib/main.js",
+  "typings": "./lib/main",
   "scripts": {
-    "test": "node node_modules/mocha/bin/_mocha --reporter spec --recursive dist/test/*.js",
-    "cover": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- --reporter spec --recursive dist/test/*.js"
+    "test": "node node_modules/mocha/bin/_mocha --reporter spec --recursive lib/test/*.js",
+    "cover": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- --reporter spec --recursive lib/test/*.js"
   },
   "dependencies": {
     "jsep": "^0.3.0"

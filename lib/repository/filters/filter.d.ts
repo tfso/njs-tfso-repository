@@ -6,6 +6,6 @@ export interface IFilter {
 export declare class Filter implements IFilter {
     private _criteria;
     constructor(criteria: Array<IFilterCriteria>);
-    readonly criteria: IFilterCriteria[];
+    criteria: IFilterCriteria[];
     static visit(expression: ILogicalExpression): Array<IFilter>;
 }
