@@ -27,7 +27,7 @@ after_test:
   - FOR /f %%n IN ('dir .\node_modules /d /b /a:d ^| findstr /R /C:"^[A-Za-z].*$"') DO npm uninstall %%n
   # git
   - git config --global credential.helper store
-  # - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
   - git config --global user.email "post@24sevenoffice.com"
   - git config --global user.name "24SevenOffice"
   - git tag -a %appveyor_build_version% -m "Release files for version %appveyor_build_version%"
