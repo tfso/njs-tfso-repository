@@ -1,4 +1,6 @@
 ﻿version: 1.0.0.{build}
+environment:
+  nodejs_version: "6"
 build:
   verbosity: minimal
 install:
@@ -14,6 +16,6 @@ artifacts:
 deploy:
 - provider: GitHub
   auth_token:
-    secure: UhSUmE7jZHBJV1PYOHHeAhOBJ1PCFVV7MGdOZ2fDtViuO28CrzFNRrYWMf32XN01e3juRpXwo8PRlq4/tb1B6bBGESABMe7TtE7a7DkNr40=
+    secure: +jk2XUVt/vMWiMD2OepSw72zo5qXtMXJYbByvNUpN53otaJhmnCbtMWVCJe70IKL
   draft: false
   force_update: false
