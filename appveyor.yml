@@ -33,7 +33,7 @@ after_test:
   - git add ./lib
   - git commit -a -m "Adding release files for version %appveyor_build_version%"
   - git tag -a %appveyor_build_version% -m "Release files"
-  - git push origin --tags
+  - git push --follow-tags
 artifacts:
 - path: '\'
   name: tfso-repository
