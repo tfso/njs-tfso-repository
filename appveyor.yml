@@ -1,0 +1,12 @@
+﻿version: 1.0.0.{build}
+build:
+  verbosity: minimal
+artifacts:
+- path: '\'
+  name: tfso-repository
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: UhSUmE7jZHBJV1PYOHHeAhOBJ1PCFVV7MGdOZ2fDtViuO28CrzFNRrYWMf32XN01e3juRpXwo8PRlq4/tb1B6bBGESABMe7TtE7a7DkNr40=
+  draft: false
+  force_update: false
