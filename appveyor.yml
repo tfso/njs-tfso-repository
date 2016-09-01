@@ -1,6 +1,13 @@
 ﻿version: 1.0.0.{build}
 build:
   verbosity: minimal
+install:
+  # Get the latest stable version of Node.js or io.js
+  - ps: Install-Product node $env:nodejs_version
+  # install modules
+  - npm install
+build_script:
+  - node node_modules\typescript\bin\tsc --rootDir ./src/ --outDir ./lib
 artifacts:
 - path: '\'
   name: tfso-repository
