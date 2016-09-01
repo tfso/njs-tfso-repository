@@ -19,6 +19,8 @@ test_script:
 after_test:
   # remove npm_modules as this should be installed whenever this package is used
   - FOR /f %%n IN ('dir .\node_modules /d /b /a:d ^| findstr /R /C:"^[A-Za-z].*$"') DO npm uninstall %%n
+  - git tag -a %appveyor_build_version% -m "Release files"
+  - git push origin --tags
 artifacts:
 - path: '\'
   name: tfso-repository
