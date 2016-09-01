@@ -1,1 +1,0 @@
-C:\Users\Nicolai\Source\Workspaces\Tfso\njs-tfso-repository\bin\Microsoft.NodejsTools.WebRole.dll
