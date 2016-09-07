@@ -12,6 +12,10 @@ export interface IBaseRepository<TEntity, TEntityId> {
 
 abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEntity, TEntityId>
 {
+    constructor() {
+
+    }
+
     abstract read(id: TEntityId): Promise<TEntity>
 
     // ((t) => t.gender == 'female' && t.age >= 16)({gender: 'female', age: 17})     => true
