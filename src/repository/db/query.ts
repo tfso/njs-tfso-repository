@@ -37,7 +37,7 @@ export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>>
         return this._predicate;
     }
 
-    public setPredicate(predicate ?: (entity: TEntity, ...param: any[]) => boolean, ...parameters: any[])
+    public setPredicate(predicate ?: (entity: TEntity, ...param: any[]) => boolean, ...parameters: any[]): void
     {
         if (parameters.length > 0) {
             this._predicate = (entity: TEntity) => {
