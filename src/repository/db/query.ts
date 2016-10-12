@@ -15,16 +15,19 @@ export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>>
 
     private _parameters: IInputParameters = {};
     private _predicate: (entity: TEntity) => boolean;
+    private _predicateFootprint: string;
     private _commandText: string;
     private _hasRun: boolean;
 
-    constructor(predicate?: (entity: TEntity) => boolean) {
-        this._predicate = predicate;
+    constructor(predicate?: (entity: TEntity, ...param: any[]) => boolean, ...parameters: any[])
+    {
         this._hasRun = false;
+        this.setPredicate(predicate, ...parameters);
     }
 
     public set predicate(value: (entity: TEntity) => boolean) {
         this._predicate = value;
+        this._predicateFootprint = "";
     }
 
     public get predicate(): (entity: TEntity) => boolean {
@@ -32,6 +35,19 @@ export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>>
             return (entity) => true;
 
         return this._predicate;
+    }
+
+    public setPredicate(predicate ?: (entity: TEntity, ...param: any[]) => boolean, ...parameters: any[])
+    {
+        if (parameters.length > 0) {
+            this._predicate = (entity: TEntity) => {
+                return predicate.apply({}, [entity].concat(parameters));
+            };
+        } else {
+            this._predicate = predicate;
+        }
+
+        this._predicateFootprint = new Object(predicate).toString();
     }
 
     protected abstract input(name: string, value: any): void
@@ -61,7 +77,7 @@ export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>>
         return this.executeQuery()
             .then((recordset) => {
                 if (recordset.executionTime > 1000 || (recordset.executionTime == 0 && (Date.now() - stamped) > 1000))
-                    console.warn(`[WARNING]: Long running query (${(recordset.executionTime > 0 ? recordset.executionTime : Date.now() - stamped)}ms). Consider narrow down the result length (${recordset.length}pcs);\n   ${this.commandText}`);
+                    console.warn(`[WARNING]: Long running query (${(recordset.executionTime > 0 ? recordset.executionTime : Date.now() - stamped)}ms). Consider narrow down the result length (${recordset.length}pcs)${this._predicateFootprint.length > 0 ? " for predicate " + this._predicateFootprint : ""};\n    ${this.commandText}`);
 
                 if (!this.onFulfilled)
                     return Promise.resolve(recordset);
