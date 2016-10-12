@@ -96,7 +96,7 @@ describe("When using repository to read all", () => {
 
         var list = repository.exposeFilters((car: ICar) => car.location.toLowerCase() == "no");
 
-        if (Date.now() < new Date(2016, 9, 1).getTime())
+        if (Date.now() < new Date(2016, 11, 1).getTime())
             return;
 
         assert.ok(list.groups.length == 1, "Expected a single filter");
