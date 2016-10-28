@@ -1,6 +1,6 @@
 ﻿import * as assert from 'assert';
-import * as Expr from './../expressions/expressionvisitor';
-import { ReducerVisitor } from './../expressions/reducervisitor';
+import * as Expr from './../linq/expressions/expressionvisitor';
+import { ReducerVisitor } from './../linq/expressions/reducervisitor';
 
 describe("When using Reducer for ExpressionVisitor", () => {
     var reducer: ReducerVisitor,

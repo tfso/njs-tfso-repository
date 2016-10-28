@@ -1,5 +1,5 @@
 ﻿import * as assert from 'assert';
-import * as Expr from './../expressions/expressionvisitor';
+import * as Expr from './../linq/expressions/expressionvisitor';
 
 describe("When using ExpressionVisitor for method Lambda expression", () => {
     var visitor: Expr.ExpressionVisitor,

@@ -1,4 +1,6 @@
 ﻿import { IRecordSet } from './recordset';
+import Enumerable, { IEnumerable } from './../../linq/enumerable';
+import { WhereOperator } from './../../linq/operators/whereoperator';
 
 export interface IInputParameters {
     [name: string]: {
@@ -13,41 +15,40 @@ export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>>
     protected onFulfilled: (value: IRecordSet<TEntity>) => any | PromiseLike<any>;
     protected onRejected: (error: any) => any | PromiseLike<any>;
 
+    
+
     private _parameters: IInputParameters = {};
     private _predicate: (entity: TEntity) => boolean;
     private _predicateFootprint: string;
+
+    private _query: IEnumerable<TEntity>;
     private _commandText: string;
     private _hasRun: boolean;
 
-    constructor(predicate?: (entity: TEntity, ...param: any[]) => boolean, ...parameters: any[])
+    constructor(query?: IEnumerable<TEntity>)
     {
         this._hasRun = false;
-        this.setPredicate(predicate, ...parameters);
+        this.query = query;
     }
 
-    public set predicate(value: (entity: TEntity) => boolean) {
-        this._predicate = value;
-        this._predicateFootprint = "";
+    public get query(): IEnumerable<TEntity> {
+        if (this._query == null)
+            this._query = new Enumerable<TEntity>();
+
+        return this._query;
     }
 
-    public get predicate(): (entity: TEntity) => boolean {
-        if (this._predicate == null)
-            return (entity) => true;
+    public set query(value: IEnumerable<TEntity>) {
+        this._query = value;
 
-        return this._predicate;
-    }
+        if (value != null) {
+            for (let operator of value.getOperations())
+                if (operator instanceof WhereOperator) {
+                    this._predicateFootprint = new Object((<WhereOperator<TEntity>>operator).predicate).toString();
 
-    public setPredicate(predicate ?: (entity: TEntity, ...param: any[]) => boolean, ...parameters: any[]): void
-    {
-        if (parameters.length > 0) {
-            this._predicate = (entity: TEntity) => {
-                return predicate.apply({}, [entity].concat(parameters));
-            };
-        } else {
-            this._predicate = predicate;
+                    break;
+                }
         }
-
-        this._predicateFootprint = new Object(predicate).toString();
     }
 
     protected abstract input(name: string, value: any): void

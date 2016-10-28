@@ -1,10 +1,15 @@
 ﻿import { IFilters, Filters } from './filters/filters';
+import Enumerable, { IEnumerable } from './../linq/enumerable';
+import { WhereOperator } from './../linq/operators/whereoperator';
+
+
+export { IEnumerable }
 
 export interface IBaseRepository<TEntity, TEntityId> {
     create(entity: TEntity): Promise<TEntity>
 
     read(id: TEntityId): Promise<TEntity>
-    readAll(predicate: any, ...parameters: any[]): Promise<TEntity[]>
+    readAll(query: IEnumerable<TEntity>): Promise<TEntity[]>
 
     update(entity: TEntity): Promise<boolean>
     delete(entity: TEntity): Promise<boolean>
@@ -20,7 +25,8 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
 
     // ((t) => t.gender == 'female' && t.age >= 16)({gender: 'female', age: 17})     => true
     // ((t) => t.gender == 'female' && t.age >= 16).toString()                       => (t) => t.gender == \'female\' && t.age >= 16
-    abstract readAll(predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: any[]): Promise<TEntity[]>
+
+    abstract readAll(query: IEnumerable<TEntity>): Promise<TEntity[]>
 
     abstract create(entity: TEntity): Promise<TEntity>
     abstract update(entity: TEntity): Promise<boolean>
@@ -44,13 +50,35 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
      * @param predicate
      * @param parameters
      */
-    protected getFilters(predicate: (it: TEntity) => boolean, ...parameters: any[]): IFilters {
+    protected getFilters(query: IEnumerable<TEntity>): IFilters {
+        let predicate: (it: TEntity, ...params: any[]) => boolean,
+            parameters: any[];
+
+        for (let operator of (<Enumerable<TEntity>>query).getOperations())
+            if (operator instanceof WhereOperator) {
+                predicate = (<WhereOperator<TEntity>>operator).predicate;
+                parameters = (<WhereOperator<TEntity>>operator).parameters;
+
+                break;
+            }
+
         return new Filters<TEntity>(predicate, ...parameters);
     }
 
-    public getPredicateFn(predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: any[]): (element: TEntity) => boolean {
+    public getPredicateFn(query: IEnumerable<TEntity>): (element: TEntity) => boolean {
+        let predicate: (it: TEntity, ...params: any[]) => boolean,
+            parameters: any[];
+
+        for (let operator of (<Enumerable<TEntity>>query).getOperations())
+            if (operator instanceof WhereOperator) {
+                predicate = (<WhereOperator<TEntity>>operator).predicate;
+                parameters = (<WhereOperator<TEntity>>operator).parameters;
+
+                break;
+            }
+
         return (entity: TEntity) => {
-            return predicate.apply({}, [entity].concat(parameters));
+            return (predicate == null) ? true : predicate.apply({}, [entity].concat(parameters));
         };
     }
 }

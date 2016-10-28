@@ -1,4 +1,4 @@
-import { IExpression, ExpressionType, ILogicalExpression, LogicalOperatorType, IMemberExpression, ILiteralExpression, IIdentifierExpression } from './../../expressions/expressionvisitor';
+import { IExpression, ExpressionType, ILogicalExpression, LogicalOperatorType, IMemberExpression, ILiteralExpression, IIdentifierExpression } from './../../linq/expressions/expressionvisitor';
 
 export interface IFilterCriteria {
     property: string

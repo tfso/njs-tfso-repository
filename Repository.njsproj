@@ -33,28 +33,36 @@
     <Content Include="typings.json" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="src\linq\" />
+    <Folder Include="src\linq\operators\" />
     <Folder Include="src\repository\filters\" />
     <Folder Include="src\repository\db\" />
     <Folder Include="src\test\" />
     <Folder Include="src\" />
-    <Folder Include="src\expressions\" />
+    <Folder Include="src\linq\expressions\" />
     <Folder Include="src\repository\" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="src\expressions\arrayexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\binaryexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\compoundexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\conditionalexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\expression.ts" />
-    <TypeScriptCompile Include="src\expressions\expressionvisitor.ts" />
-    <TypeScriptCompile Include="src\expressions\identifierexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\lambdaexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\literalexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\logicalexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\memberexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\methodexpression.ts" />
-    <TypeScriptCompile Include="src\expressions\reducervisitor.ts" />
-    <TypeScriptCompile Include="src\expressions\unaryexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\arrayexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\binaryexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\compoundexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\conditionalexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\expression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\expressionvisitor.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\identifierexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\lambdaexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\literalexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\logicalexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\memberexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\methodexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\reducervisitor.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\unaryexpression.ts" />
+    <TypeScriptCompile Include="src\linq\enumerable.ts" />
+    <TypeScriptCompile Include="src\linq\operators\operator.ts" />
+    <TypeScriptCompile Include="src\linq\operators\orderbyoperator.ts" />
+    <TypeScriptCompile Include="src\linq\operators\skipoperator.ts" />
+    <TypeScriptCompile Include="src\linq\operators\takeoperator.ts" />
+    <TypeScriptCompile Include="src\linq\operators\whereoperator.ts" />
     <TypeScriptCompile Include="src\main.ts" />
     <TypeScriptCompile Include="src\repository\db\query.ts" />
     <TypeScriptCompile Include="src\repository\db\recordset.ts" />
@@ -62,6 +70,10 @@
     <TypeScriptCompile Include="src\repository\filters\filtercriteria.ts" />
     <TypeScriptCompile Include="src\repository\filters\filters.ts" />
     <TypeScriptCompile Include="src\repository\baserepository.ts" />
+    <TypeScriptCompile Include="src\test\enumerable.ts">
+      <SubType>Code</SubType>
+      <TestFramework>Mocha</TestFramework>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\test\expressionvisitor_binary_expression.ts">
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>

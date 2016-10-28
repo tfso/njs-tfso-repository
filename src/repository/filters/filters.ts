@@ -1,8 +1,8 @@
 import { IFilter, Filter } from './filter';
 import { IFilterCriteria, FilterCriteria } from './filtercriteria';
 
-import { LambdaExpression } from './../../expressions/lambdaexpression';
-import { ReducerVisitor, Expression, ExpressionType, ILogicalExpression } from './../../expressions/reducervisitor';
+import { LambdaExpression } from './../../linq/expressions/lambdaexpression';
+import { ReducerVisitor, Expression, ExpressionType, ILogicalExpression } from './../../linq/expressions/reducervisitor';
 
 export interface IFilters {
     groups: Array<IFilter>

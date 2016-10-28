@@ -26,7 +26,8 @@
     */
     private parseExpression(lambda: (...it: Array<any>) => any): void {
         var regexs = [
-            /^\(\s*([^)]*?)\s*\)\s*(?:=>)+\s*([^{]+)$/i, //  arrow function
+            /^\(\s*([^)]*?)\s*\)\s*(?:=>)+\s*([^{]+)$/i, //  arrow function; (item) => 5 + 1
+            /^\s*([^)]*?)\s*(?:=>)+\s*([^{]+)$/i, //  arrow function simple; item => 5 + 1
             /^(?:function\s*)?\(\s*([^)]*?)\s*\)\s*(?:=>)?\s*\{\s*.*?(?:return)\s*(.*?)\;?\s*\}\s*$/i // return statements, including arrow function
         ]
 
