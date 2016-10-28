@@ -10,19 +10,19 @@ interface ICar {
 }
 
 describe("When using Enumerable", () => {
-    var list: Array<ICar> = [
-        <ICar>{ id: 1, location: 'SKIEN', registrationYear: 2016 },
-        <ICar>{ id: 2, location: 'PORSGRUNN', registrationYear: 2010 },
-        <ICar>{ id: 3, location: 'PORSGRUNN', registrationYear: 2005 },
-        <ICar>{ id: 4, location: 'LANGESUND', registrationYear: 2004 },
-        <ICar>{ id: 5, location: 'BREVIK', registrationYear: 2009 },
-        <ICar>{ id: 6, location: 'BREVIK', registrationYear: 2014 },
-        <ICar>{ id: 7, location: 'HEISTAD', registrationYear: 2013 },
-        <ICar>{ id: 8, location: 'LARVIK', registrationYear: 2009 }
-    ]; 
+    var list: Array<ICar>;
 
     beforeEach(() => {
-        
+        list = [
+            <ICar>{ id: 1, location: 'SKIEN', registrationYear: 2016 },
+            <ICar>{ id: 2, location: 'PORSGRUNN', registrationYear: 2010 },
+            <ICar>{ id: 3, location: 'PORSGRUNN', registrationYear: 2005 },
+            <ICar>{ id: 4, location: 'LANGESUND', registrationYear: 2004 },
+            <ICar>{ id: 5, location: 'BREVIK', registrationYear: 2009 },
+            <ICar>{ id: 6, location: 'BREVIK', registrationYear: 2014 },
+            <ICar>{ id: 7, location: 'HEISTAD', registrationYear: 2013 },
+            <ICar>{ id: 8, location: 'LARVIK', registrationYear: 2009 }
+        ];        
     })
 
     it("should take top 1", () => {
@@ -59,10 +59,10 @@ describe("When using Enumerable", () => {
     it("should just work", () => {
         let query: IEnumerable<ICar> = new Enumerable<ICar>();
 
-        query.skip(5);
+        query.skip(5)
         query.take(3);
-
-        var ar = (<Enumerable<ICar>>query).toArray(list);
+        
+        var ar = query.toArray(list);
 
         assert.ok(ar.length == 3);
         assert.ok(ar[0].id == 6);
