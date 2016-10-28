@@ -9,6 +9,13 @@ describe("When using repository to read all", () => {
         repository = new CarRepository();
     })
 
+    it("should handle non existing where", () => {
+        var list = repository.exposeFilters(new Enumerable<ICar>().skip(5).take(3))
+
+        assert.ok(list != null, "expected filters")
+        assert.ok(list.groups.length == 0, "Expected 0 filter")
+    })
+
     it("should handle multiple or/and expressions", () => {
         var list = repository.exposeFilters(new Enumerable<ICar>().where((car: ICar) => car.registrationYear >= 2016 || car.location == 'NO' && car.registrationYear > 2000 && car.id != null && (car.registrationYear > 2000 || car.registrationYear == 1999)))
 
