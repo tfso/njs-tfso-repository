@@ -7,6 +7,7 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity> {
     take(count: number): this
     //reverse(): this
 
+    toArray(items: Array<TEntity>): Array<TEntity>
     toArray(): Array<TEntity>
 
     getOperations(): Operation<TEntity>
