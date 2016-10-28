@@ -10,7 +10,7 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity> {
     toArray(items: Array<TEntity>): Array<TEntity>
     toArray(): Array<TEntity>
 
-    getOperations(): Operation<TEntity>
+    readonly operations: Operation<TEntity>
 }
 
 import { Operator } from './operators/operator';
@@ -19,7 +19,7 @@ import { SkipOperator } from './operators/skipoperator';
 import { TakeOperator } from './operators/takeoperator';
 import { WhereOperator } from './operators/whereoperator';
 
-export class Operation<TEntity> implements Iterable<Operator<TEntity>> {
+export class Operation<TEntity> {
     private _stack: Array<Operator<TEntity>>;
 
     constructor() {
@@ -42,9 +42,7 @@ export class Operation<TEntity> implements Iterable<Operator<TEntity>> {
         return false;
     }
 
-    [Symbol.iterator] = function* (): Iterator<Operator<TEntity>> {
-        let counter = 0;
-
+    public* values(): IterableIterator<Operator<TEntity>> {
         while (true) {
             for (let item of this._stack) {
                 var reset = yield item;
@@ -93,7 +91,7 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
     public toArray(items?: Array<TEntity>): Array<TEntity> {
         let ar = items || this.items;
 
-        for (let item of this._operations)
+        for (let item of this._operations.values())
             ar = item.evaluate(ar);
 
         return ar;
@@ -129,7 +127,7 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
     //            return this._stack.splice(i, 1)[0];
     //}
 
-    public getOperations(): Operation<TEntity> {
+    public get operations(): Operation<TEntity> {
         return this._operations;
     }
 

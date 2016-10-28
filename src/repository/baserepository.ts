@@ -54,7 +54,7 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         let predicate: (it: TEntity, ...params: any[]) => boolean,
             parameters: any[];
 
-        for (let operator of (<Enumerable<TEntity>>query).getOperations())
+        for (let operator of query.operations.values())
             if (operator instanceof WhereOperator) {
                 predicate = (<WhereOperator<TEntity>>operator).predicate;
                 parameters = (<WhereOperator<TEntity>>operator).parameters;
@@ -69,7 +69,7 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         let predicate: (it: TEntity, ...params: any[]) => boolean,
             parameters: any[];
 
-        for (let operator of (<Enumerable<TEntity>>query).getOperations())
+        for (let operator of query.operations.values())
             if (operator instanceof WhereOperator) {
                 predicate = (<WhereOperator<TEntity>>operator).predicate;
                 parameters = (<WhereOperator<TEntity>>operator).parameters;

@@ -42,7 +42,7 @@ export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>>
         this._query = value;
 
         if (value != null) {
-            for (let operator of value.getOperations())
+            for (let operator of value.operations.values())
                 if (operator instanceof WhereOperator) {
                     this._predicateFootprint = new Object((<WhereOperator<TEntity>>operator).predicate).toString();
 

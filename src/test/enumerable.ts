@@ -1,5 +1,5 @@
 ﻿import * as assert from 'assert';
-import Enumerable, { } from './../linq/enumerable';
+import Enumerable, { IEnumerable } from './../linq/enumerable';
 
 interface ICar {
 
@@ -9,7 +9,7 @@ interface ICar {
     registrationYear: number
 }
 
-describe("When using enumerable", () => {
+describe("When using Enumerable", () => {
     var list: Array<ICar> = [
         <ICar>{ id: 1, location: 'SKIEN', registrationYear: 2016 },
         <ICar>{ id: 2, location: 'PORSGRUNN', registrationYear: 2010 },
@@ -54,5 +54,35 @@ describe("When using enumerable", () => {
         var ar = new Enumerable(list).take(3);
 
         assert.equal(Array.from(ar).length, 3);
+    })
+
+    it("should just work", () => {
+        let query: IEnumerable<ICar> = new Enumerable<ICar>();
+
+        query.skip(5);
+        query.take(3);
+
+        var ar = (<Enumerable<ICar>>query).toArray(list);
+
+        assert.ok(ar.length == 3);
+        assert.ok(ar[0].id == 6);
+    })
+
+    it("should iterate through operations", () => {
+        let query: IEnumerable<ICar> = new Enumerable<ICar>();
+
+        query.skip(5);
+        query.take(3);
+
+        var operations = (<Enumerable<ICar>>query).operations.values();
+
+        var count = 0;
+        for (let operator of operations) {
+            if (operator) {
+                count++;
+            }
+        }
+
+        assert.equal(count, 2);
     })
 });
