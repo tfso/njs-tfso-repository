@@ -10,7 +10,7 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity> {
     toArray(items: Array<TEntity>): Array<TEntity>
     toArray(): Array<TEntity>
 
-    readonly operations: Operation<TEntity>
+    operations: Operation<TEntity>
 }
 
 import { Operator } from './operators/operator';
