@@ -97,7 +97,7 @@ describe("When using Enumerable", () => {
         query.skip(1);
         query.take(1);
 
-        let op = query.operations.first<ICar>(SkipOperator);
+        let op = query.operations.first(SkipOperator);
 
         assert.notEqual(op, null);
         assert.equal(op.type, OperatorType.Skip);

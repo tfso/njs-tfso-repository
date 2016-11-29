@@ -43,7 +43,9 @@ export class Operation<TEntity> {
         return false;
     }
 
-    public first<T>(operator: { new (...args: any[]): Operator<TEntity> }): Operator<TEntity> 
+    
+    public first<T extends Operator<TEntity>>(operator: { new (...args: any[]): T }): T
+    public first(operator: { new (...args: any[]): Operator<TEntity> }): Operator<TEntity>
     public first(operatorType: OperatorType): Operator<TEntity> 
     public first(o: any): Operator<TEntity> {
         for (let item of this.values())
