@@ -1,5 +1,4 @@
-﻿
-export interface IEnumerable<TEntity> extends Iterable<TEntity> {
+﻿export interface IEnumerable<TEntity> extends Iterable<TEntity> {
     where(predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: any[]): this
     //orderBy(property: (it: TEntity) => void): this
     //range(start: number, count: number): this
@@ -13,11 +12,13 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity> {
     readonly operations: Operation<TEntity>
 }
 
-import { Operator } from './operators/operator';
+import { Operator, OperatorType } from './operators/operator';
 import { OrderByOperator } from './operators/orderbyoperator';
 import { SkipOperator } from './operators/skipoperator';
 import { TakeOperator } from './operators/takeoperator';
 import { WhereOperator } from './operators/whereoperator';
+
+export { OperatorType };
 
 export class Operation<TEntity> {
     private _stack: Array<Operator<TEntity>>;
@@ -40,6 +41,16 @@ export class Operation<TEntity> {
         }
 
         return false;
+    }
+
+    public first<T>(operator: { new (...args: any[]): Operator<TEntity> }): Operator<TEntity> 
+    public first(operatorType: OperatorType): Operator<TEntity> 
+    public first(o: any): Operator<TEntity> {
+        for (let item of this.values())
+            if (item.type === o || (typeof o == 'function' && item instanceof o))
+                return item;
+
+        return null;
     }
 
     public* values(): IterableIterator<Operator<TEntity>> {

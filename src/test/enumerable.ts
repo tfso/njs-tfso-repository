@@ -1,5 +1,6 @@
 ﻿import * as assert from 'assert';
-import Enumerable, { IEnumerable } from './../linq/enumerable';
+import Enumerable, { IEnumerable, OperatorType } from './../linq/enumerable';
+import { SkipOperator } from './../linq/operators/skipoperator';
 
 interface ICar {
 
@@ -74,6 +75,7 @@ describe("When using Enumerable", () => {
         query.skip(5);
         query.take(3);
 
+
         var operations = (<Enumerable<ICar>>query).operations.values();
 
         var count = 0;
@@ -84,5 +86,37 @@ describe("When using Enumerable", () => {
         }
 
         assert.equal(count, 2);
+    })
+
+    it("should be able to get first Operator by class", () => {
+        let query: IEnumerable<ICar> = new Enumerable<ICar>();
+
+        query.where(it => it.location == 'BREVIK');
+        query.skip(5);
+        query.take(3);
+        query.skip(1);
+        query.take(1);
+
+        let op = query.operations.first<ICar>(SkipOperator);
+
+        assert.notEqual(op, null);
+        assert.equal(op.type, OperatorType.Skip);
+        assert.equal((<SkipOperator<ICar>>op).count, 5);
+    })
+
+    it("should be able to get first Operator by type", () => {
+        let query: IEnumerable<ICar> = new Enumerable<ICar>();
+
+        query.where(it => it.location == 'BREVIK');
+        query.skip(5);
+        query.take(3);
+        query.skip(1);
+        query.take(1);
+
+        let op = query.operations.first(OperatorType.Skip);
+
+        assert.notEqual(op, null);
+        assert.equal(op.type, OperatorType.Skip);
+        assert.equal((<SkipOperator<ICar>>op).count, 5);
     })
 });
