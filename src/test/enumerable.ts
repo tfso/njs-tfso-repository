@@ -1,6 +1,5 @@
 ﻿import * as assert from 'assert';
 import Enumerable, { IEnumerable, OperatorType } from './../linq/enumerable';
-import { Operator } from './../linq/operators/operator';
 import { SkipOperator } from './../linq/operators/skipoperator';
 
 interface ICar {
@@ -90,7 +89,7 @@ describe("When using Enumerable", () => {
     })
 
     it("should be able to get first Operator by class", () => {
-        let query: IEnumerable<ICar> = new Enumerable<ICar>();
+        let query: Enumerable<ICar> = new Enumerable<ICar>();
 
         query.where(it => it.location == 'BREVIK');
         query.skip(5);
@@ -106,7 +105,7 @@ describe("When using Enumerable", () => {
     })
 
     it("should be able to get first Operator by type", () => {
-        let query: IEnumerable<ICar> = new Enumerable<ICar>();
+        let query: Enumerable<ICar> = new Enumerable<ICar>();
 
         query.where(it => it.location == 'BREVIK');
         query.skip(5);
@@ -122,7 +121,7 @@ describe("When using Enumerable", () => {
     })
 
     it("should be able to get first Operator by class and remove it for manual operator handling", () => {
-        let query: IEnumerable<ICar> = new Enumerable<ICar>(),
+        let query: Enumerable<ICar> = new Enumerable<ICar>(),
             skip: SkipOperator<ICar>,
             skipCount: number;
 
