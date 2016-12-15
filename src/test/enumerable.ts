@@ -69,6 +69,12 @@ describe("When using Enumerable", () => {
         assert.ok(ar[0].id == 6);
     })
 
+    it("should be able to get first element", () => {
+        var el = new Enumerable(list).orderBy(it => it.location).first();
+
+        assert.equal(el.id, 5);
+    })
+
     it("should iterate through operations", () => {
         let query: IEnumerable<ICar> = new Enumerable<ICar>();
 

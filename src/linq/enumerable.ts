@@ -103,9 +103,9 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
     }
 
     public first(items?: Array<TEntity>): TEntity {
-        let result = this.toArray(items).values().next();
+        let result = this.toArray(items);
 
-        return result.done ? null : result.value;
+        return result.length > 0 ? result[0] : null;
     }
 
     public toArray(items?: Array<TEntity>): Array<TEntity> {
