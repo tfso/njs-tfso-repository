@@ -58,6 +58,7 @@
     <TypeScriptCompile Include="src\linq\expressions\reducervisitor.ts" />
     <TypeScriptCompile Include="src\linq\expressions\unaryexpression.ts" />
     <TypeScriptCompile Include="src\linq\enumerable.ts" />
+    <TypeScriptCompile Include="src\linq\operators\firstoperator.ts" />
     <TypeScriptCompile Include="src\linq\operators\operator.ts" />
     <TypeScriptCompile Include="src\linq\operators\orderbyoperator.ts" />
     <TypeScriptCompile Include="src\linq\operators\skipoperator.ts" />

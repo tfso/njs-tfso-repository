@@ -6,6 +6,7 @@
     take(count: number): this
     //reverse(): this
 
+    first(items?: Array<TEntity>): TEntity
     toArray(items: Array<TEntity>): Array<TEntity>
     toArray(): Array<TEntity>
 
@@ -99,6 +100,12 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
         this._operations.add(new OrderByOperator<TEntity>(property));
 
         return this;
+    }
+
+    public first(items?: Array<TEntity>): TEntity {
+        let result = this.toArray(items).values().next();
+
+        return result.done ? null : result.value;
     }
 
     public toArray(items?: Array<TEntity>): Array<TEntity> {
