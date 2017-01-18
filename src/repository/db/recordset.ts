@@ -1,5 +1,7 @@
 ﻿export interface IRecordSet<TEntity> extends IRecordSetMeta {
     records: TEntity[]
+
+    readonly meta: IRecordSetMeta;
 }
 
 export interface IRecordSetMeta {
@@ -23,5 +25,14 @@ export class RecordSet<TEntity> implements IRecordSet<TEntity> {
 
     public get totalLength() {
         return this._totalLength == -1 ? this.length : this._totalLength;
+    }
+
+    public get meta(): IRecordSetMeta {
+        return <IRecordSetMeta>{
+            affected: this.affected,
+            totalLength: this.totalLength,
+            length: this.length,
+            executionTime: this.executionTime
+        }
     }
 }

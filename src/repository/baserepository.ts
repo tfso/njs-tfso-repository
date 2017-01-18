@@ -22,15 +22,21 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
 
     }
 
+    abstract read(id: TEntityId): Promise<TEntity>
     abstract read(id: TEntityId, meta?: IRecordSetMeta): Promise<TEntity>
 
     // ((t) => t.gender == 'female' && t.age >= 16)({gender: 'female', age: 17})     => true
     // ((t) => t.gender == 'female' && t.age >= 16).toString()                       => (t) => t.gender == \'female\' && t.age >= 16
-
+    abstract readAll(query: IEnumerable<TEntity>): Promise<TEntity[]>
     abstract readAll(query: IEnumerable<TEntity>, meta?: IRecordSetMeta): Promise<TEntity[]>
 
+    abstract create(entity: TEntity): Promise<TEntity>
     abstract create(entity: TEntity, meta?: IRecordSetMeta): Promise<TEntity>
+
+    abstract update(entity: TEntity): Promise<boolean>
     abstract update(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
+
+    abstract delete(entity: TEntity): Promise<boolean>
     abstract delete(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
 
 
