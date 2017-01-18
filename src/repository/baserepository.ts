@@ -2,17 +2,18 @@
 import Enumerable, { IEnumerable } from './../linq/enumerable';
 import { WhereOperator } from './../linq/operators/whereoperator';
 
+import { IRecordSetMeta } from './db/recordset';
 
 export { IEnumerable }
 
 export interface IBaseRepository<TEntity, TEntityId> {
-    create(entity: TEntity): Promise<TEntity>
+    create(entity: TEntity, meta?: IRecordSetMeta): Promise<TEntity>
 
-    read(id: TEntityId): Promise<TEntity>
-    readAll(query: IEnumerable<TEntity>): Promise<TEntity[]>
+    read(id: TEntityId, meta?: IRecordSetMeta): Promise<TEntity>
+    readAll(query: IEnumerable<TEntity>, meta?: IRecordSetMeta): Promise<TEntity[]>
 
-    update(entity: TEntity): Promise<boolean>
-    delete(entity: TEntity): Promise<boolean>
+    update(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
+    delete(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
 }
 
 abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEntity, TEntityId>

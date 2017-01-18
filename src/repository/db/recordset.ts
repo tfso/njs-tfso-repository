@@ -1,9 +1,12 @@
-﻿export interface IRecordSet<TEntity> {
+﻿export interface IRecordSet<TEntity> extends IRecordSetMeta {
+    records: TEntity[]
+}
+
+export interface IRecordSetMeta {
     affected: number
     totalLength: number
     length: number
     executionTime: number
-    records: TEntity[]
 }
 
 export class RecordSet<TEntity> implements IRecordSet<TEntity> {
