@@ -19,6 +19,6 @@ export class RecordSet<TEntity> implements IRecordSet<TEntity> {
     }
 
     public get totalLength() {
-        return this._totalLength == -1 ? this.length : this.totalLength;
+        return this._totalLength == -1 ? this.length : this._totalLength;
     }
 }
