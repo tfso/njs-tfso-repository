@@ -12,18 +12,18 @@ export interface IInputParameters {
 
 export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>> {
 
-    protected onFulfilled: (value: IRecordSet<TEntity>) => any | PromiseLike<any>;
-    protected onRejected: (error: any) => any | PromiseLike<any>;
-
-    
+    //protected onFulfilled: (value: IRecordSet<TEntity>) => any | PromiseLike<any>;
+    //protected onRejected: (error: any) => any | PromiseLike<any>;
 
     private _parameters: IInputParameters = {};
     private _predicate: (entity: TEntity) => boolean;
     private _predicateFootprint: string;
 
-    private _query: IEnumerable<TEntity>;
+    private _query: IEnumerable<TEntity>; 
     private _commandText: string;
     private _hasRun: boolean;
+
+    private _promise: Promise<IRecordSet<TEntity>>;
 
     constructor(query?: IEnumerable<TEntity>)
     {
@@ -55,6 +55,9 @@ export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>>
     protected abstract input(name: string, type: any, value: any): void
 
     protected set commandText(query: string) {
+        if (this._promise)
+            throw new Error('Query promise is executed, impossible to change commandText');
+
         this._commandText = query;
     }
 
@@ -72,45 +75,39 @@ export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>>
          */
     protected abstract executeQuery(): Promise<IRecordSet<TEntity>>
 
-    private execute<U>(): Promise<U> {
+    private execute<U>(onFulfilled?: (value: IRecordSet<TEntity>) => U | PromiseLike<U>, onRejected?: (error: Error) => U | PromiseLike<U>): Promise<IRecordSet<U>> {
         var stamped = Date.now();
 
-        return this.executeQuery()
-            .then((recordset) => {
-                if (recordset.executionTime > 1000 || (recordset.executionTime == 0 && (Date.now() - stamped) > 1000))
-                    console.warn(`[WARNING]: Long running query (${(recordset.executionTime > 0 ? recordset.executionTime : Date.now() - stamped)}ms). Consider narrow down the result length (${recordset.length}pcs)${this._predicateFootprint && this._predicateFootprint.length > 0 ? " for predicate " + this._predicateFootprint : ""};\n    ${this.commandText}`);
+        if (!this._promise) {
+            this._promise = this.executeQuery()
+                .then((recordset) => {
+                    if (recordset.executionTime > 1000 || (recordset.executionTime == 0 && (Date.now() - stamped) > 1000))
+                        console.warn(`[WARNING]: Long running query (${(recordset.executionTime > 0 ? recordset.executionTime : Date.now() - stamped)}ms). Consider narrow down the result length (${recordset.length}pcs)${this._predicateFootprint && this._predicateFootprint.length > 0 ? " for predicate " + this._predicateFootprint : ""};\n    ${this.commandText}`);
 
-                if (!this.onFulfilled)
+                    return recordset;
+                });
+        }
+
+        return this._promise
+            .then((recordset) => {          
+                if (!onFulfilled)
                     return Promise.resolve(recordset);
 
-                return this.onFulfilled(recordset);
+                return onFulfilled(recordset);
             }, (err) => {
-                if (!this.onRejected)
+                if (!onRejected)
                     return Promise.reject(err);
 
-                return this.onRejected(err);
+                return onRejected(err);
             })
     }
 
     public then<U>(onFulfilled?: (value: IRecordSet<TEntity>) => U | PromiseLike<U>, onRejected?: (error: Error) => U | PromiseLike<U>): Promise<U> {
-        if (this._hasRun == true)
-            throw new Error('Query is not thread safe currently, please dispose Query after use');
-
-        this._hasRun = true;
-
-        this.onFulfilled = onFulfilled;
-        this.onRejected = onRejected;
-
-        return this.execute<U>();
+        return this.execute<U>(onFulfilled, onRejected);
     }
 
     public catch<U>(onRejected?: (error: Error) => U | PromiseLike<U>): Promise<U> {
-        if (this._hasRun == true)
-            throw new Error('Query is not thread safe currently, please dispose Query after use');
-
-        this.onRejected = onRejected;
-
-        return this.execute<U>()
+        return this.execute<U>(undefined, onRejected);
     }
 }
 
