@@ -15,20 +15,38 @@ export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>>
     //protected onFulfilled: (value: IRecordSet<TEntity>) => any | PromiseLike<any>;
     //protected onRejected: (error: any) => any | PromiseLike<any>;
 
+
     private _parameters: IInputParameters = {};
     private _predicate: (entity: TEntity) => boolean;
     private _predicateFootprint: string;
 
     private _query: IEnumerable<TEntity>; 
+    private _maxExecutionTime: number = 5000;
     private _commandText: string;
     private _hasRun: boolean;
 
     private _promise: Promise<IRecordSet<TEntity>>;
 
-    constructor(query?: IEnumerable<TEntity>)
+    constructor(maxExecutionTime?: number)
+    constructor(query?: IEnumerable<TEntity>, maxExecutionTime?: number)
+    constructor()
     {
+        switch (arguments.length) {
+            case 1:
+                if (typeof arguments[1] == 'object')
+                    this.query = arguments[0];
+                else
+                    this._maxExecutionTime = Number(arguments[0]) || 5000;
+
+                break;
+
+            case 2:
+                this.query = arguments[0];
+                this._maxExecutionTime = Number(arguments[1]);
+                break;
+        }
+
         this._hasRun = false;
-        this.query = query;
     }
 
     public get query(): IEnumerable<TEntity> {
@@ -81,7 +99,7 @@ export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>>
         if (!this._promise) {
             this._promise = this.executeQuery()
                 .then((recordset) => {
-                    if (recordset.executionTime > 1000 || (recordset.executionTime == 0 && (Date.now() - stamped) > 1000))
+                    if (recordset.executionTime > this._maxExecutionTime || (recordset.executionTime == 0 && (Date.now() - stamped) > this._maxExecutionTime))
                         console.warn(`[WARNING]: Long running query (${(recordset.executionTime > 0 ? recordset.executionTime : Date.now() - stamped)}ms). Consider narrow down the result length (${recordset.length}pcs)${this._predicateFootprint && this._predicateFootprint.length > 0 ? " for predicate " + this._predicateFootprint : ""};\n    ${this.commandText}`);
 
                     return recordset;
