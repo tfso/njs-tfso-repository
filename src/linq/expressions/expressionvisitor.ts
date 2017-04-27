@@ -1,4 +1,5 @@
-﻿import * as jsep  from 'jsep';
+﻿import * as jsep from 'jsep';
+import * as OData from 'odata-parser';
 
 import { IExpression, Expression, ExpressionType } from './expression';
 import { ILiteralExpression, LiteralExpression } from './literalexpression';
@@ -19,6 +20,25 @@ export class ExpressionVisitor {
 
     constructor() {
 
+    }
+
+    public visitOData(filter: string): IExpression {
+        var expression = null;
+
+        if (expression) {
+            let ast = OData.parse(filter);
+
+            try {
+                if (ast.filter) {
+                    return this.visit(this.transformOData(filter));
+                }
+            }
+            catch (ex) {
+                throw new Error(ex.message);
+            }
+        }
+
+        return null;
     }
 
     public visitLambda(predicate: (it: Object, ...param: Array<any>) => any): IExpression {
@@ -113,6 +133,111 @@ export class ExpressionVisitor {
 
         return expression;
 
+    }
+
+    /**
+     * transform odata expression ast tree to our internal ast tree to make it easier to swap expression parser at a later time
+     * @see
+     * http://www.odata.org/documentation/odata-version-2-0/uri-conventions/
+     * https://github.com/auth0/node-odata-parser/blob/master/src/odata.pegjs
+     *
+     * @param filter odata filter, eg; Name eq 'John' and LastName lt 'Doe'
+     */
+    private transformOData(expression: any): IExpression {
+        var child: IExpression;
+
+        switch (expression.type) {
+            case 'property':
+                return new IdentifierExpression(expression.name)
+
+            case 'functioncall':
+                let methodName = '',
+                    args: Array<IExpression> = [];
+
+                switch (expression.func) 
+                {
+                    // String Functions
+                    case 'substringof': // bool substringof(string po, string p1)
+                        //expression.args ? expression.args.map((arg) => this.transform(arg))
+
+                    case 'endswith': // bool endswith(string p0, string p1)
+                    case 'startswith': // bool startswith(string p0, string p1)
+                    case 'length': // int length(string p0)
+                    case 'indexof': // int indexof(string p0, string p1)
+                    case 'replace': // string replace(string p0, string find, string replace)
+                    case 'substring': // string substring(string p0, int pos, int? length)
+                    case 'tolower': // string tolower(string p0)
+                    case 'toupper': // string toupper(string p0)
+                    case 'trim': // string trim(string p0)
+                    case 'concat': // string concat(string p0, string p1)
+                    // Date Functions
+                    case 'day': // int day(DateTime p0)
+                    case 'hour': // int hour(DateTime p0)
+                    case 'minute': // int minute(DateTime p0)
+                    case 'month': // int month(DateTime p0)
+                    case 'second': // int second(DateTime p0)
+                    case 'year': // int year(DateTime p0)
+                    // Math Functions
+                    case 'round': // number round(number p0)
+                    case 'floor': // number floor(number p0)
+                    case 'ceiling': // number ceiling(number p0)
+                    // Type Functions
+                    case 'isof': // bool IsOf(type p0) | bool IsOf(expression p0, type p1)
+                       
+                    default:
+                        methodName = expression.func;
+                }
+
+                return new MethodExpression(methodName, args, null);
+
+            case 'literal':
+                return new LiteralExpression(expression.value)
+            
+            case 'and':
+                return new LogicalExpression(LogicalOperatorType.And, this.transform(expression.left), this.transform(expression.right));
+
+            case 'or':
+                return new LogicalExpression(LogicalOperatorType.Or, this.transform(expression.left), this.transform(expression.right));
+
+            case 'not':
+                return new UnaryExpression(UnaryOperatorType.Invert, UnaryAffixType.Prefix, this.transform(expression.argument));
+
+            case 'eq': // equal
+                return new LogicalExpression(LogicalOperatorType.Equal, this.transform(expression.left), this.transform(expression.right));
+
+            case 'ne': // not equal
+                return new LogicalExpression(LogicalOperatorType.NotEqual, this.transform(expression.left), this.transform(expression.right));
+
+            case 'lt': // lesser
+                return new LogicalExpression(LogicalOperatorType.Lesser, this.transform(expression.left), this.transform(expression.right));
+
+            case 'le': // lesser or equal
+                return new LogicalExpression(LogicalOperatorType.LesserOrEqual, this.transform(expression.left), this.transform(expression.right));
+
+            case 'gt': // greater
+                return new LogicalExpression(LogicalOperatorType.Greater, this.transform(expression.left), this.transform(expression.right));
+
+            case 'ge': // greater or equal
+                return new LogicalExpression(LogicalOperatorType.GreaterOrEqual, this.transform(expression.left), this.transform(expression.right));
+
+            case 'add': // addition
+                return new BinaryExpression(BinaryOperatorType.Addition, this.transform(expression.left), this.transform(expression.right));
+
+            case 'sub': // subtraction
+                return new BinaryExpression(BinaryOperatorType.Subtraction, this.transform(expression.left), this.transform(expression.right));
+
+            case 'mul': // multiplication
+                return new BinaryExpression(BinaryOperatorType.Multiplication, this.transform(expression.left), this.transform(expression.right));
+
+            case 'div': // division
+                return new BinaryExpression(BinaryOperatorType.Division, this.transform(expression.left), this.transform(expression.right));
+
+            case 'mod': // modulus
+                return new BinaryExpression(BinaryOperatorType.Modulus, this.transform(expression.left), this.transform(expression.right));
+
+            default:
+                throw new Error('Expression type "' + expression.type + '" is unknown');
+        }
     }
 
     /**
