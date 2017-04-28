@@ -1,20 +1,21 @@
 ﻿{
-    "compilerOptions": {
-        "target": "ES6",
-        "module": "commonjs",
-        "declaration": true,
-        "newLine": "LF",
-        //"noImplicitAny": true,
-        "removeComments": false,
-        "sourceMap": true,
-        "inlineSources": true,
-        "preserveConstEnums": true
-        //"outDir": "./lib",
-        //"rootDir": "./src"
-    },
-    "exclude": [
-        //"lib",
-        "node_modules",
-        "examples"
-    ]
+  "compileOnSave": true,
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "declaration": true,
+    "newLine": "LF",
+    //"noImplicitAny": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "inlineSources": true,
+    "preserveConstEnums": true
+    //"outDir": "./lib",
+    //"rootDir": "./src"
+  },
+  "exclude": [
+    //"lib",
+    "node_modules",
+    "examples"
+  ]
 }
