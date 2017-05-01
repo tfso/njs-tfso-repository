@@ -56,6 +56,7 @@
     <TypeScriptCompile Include="src\linq\expressions\logicalexpression.ts" />
     <TypeScriptCompile Include="src\linq\expressions\memberexpression.ts" />
     <TypeScriptCompile Include="src\linq\expressions\methodexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\odatavisitor.ts" />
     <TypeScriptCompile Include="src\linq\expressions\reducervisitor.ts" />
     <TypeScriptCompile Include="src\linq\expressions\unaryexpression.ts" />
     <TypeScriptCompile Include="src\linq\enumerable.ts" />
@@ -96,6 +97,10 @@
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\test\expressionvisitor_unary_expression.ts">
+      <SubType>Code</SubType>
+      <TestFramework>Mocha</TestFramework>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\odatavisitor.ts">
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>

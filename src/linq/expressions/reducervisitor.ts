@@ -36,6 +36,12 @@ export class ReducerVisitor extends ExpressionVisitor {
         return super.visitLambda(predicate);
     }
 
+    public visitLiteral(expression: ILiteralExpression): IExpression {
+        let value = this.evaluate(expression);
+
+        return new LiteralExpression(value);
+    }
+
     public visitIdentifier(expression: IIdentifierExpression): IExpression {
         var obj = this.evaluate(expression);
 
@@ -152,8 +158,6 @@ export class ReducerVisitor extends ExpressionVisitor {
         if (lvalue != null && rvalue != null) {
             switch (expression.operator) {
                 case LogicalOperatorType.Equal:
-
-
                     return new LiteralExpression(lvalue == rvalue);
                 case LogicalOperatorType.NotEqual:
                     return new LiteralExpression(lvalue != rvalue);
@@ -183,7 +187,7 @@ export class ReducerVisitor extends ExpressionVisitor {
         return expression;
     }
 
-    private evaluate(expression: IExpression): any {
+    public evaluate(expression: IExpression): any {
         var value: any = null;
 
         switch (expression.type) {
