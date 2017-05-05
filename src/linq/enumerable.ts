@@ -1,5 +1,17 @@
 ﻿export interface IEnumerable<TEntity> extends Iterable<TEntity> {
+
+    /**
+    * Where clause using OData $filter expression returning either true or false. Any parameters used is properties of TEntity
+    * @param predicate OData expression
+    */
+    where(predicate: string): this
+    /**
+     * Where clause using Javascript expression returning either true or false
+     * @param predicate javascript expression
+     * @param parameters any javascript parameters has to be declared
+     */
     where(predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: any[]): this
+
     //orderBy(property: (it: TEntity) => void): this
     //range(start: number, count: number): this
     skip(count: number): this
@@ -78,8 +90,36 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
         this._operations = new Operation<TEntity>();
     }
 
-    public where(predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: any[]): this {
-        this._operations.add(new WhereOperator<TEntity>(predicate, ...parameters));
+    /**
+     * Where clause using OData $filter expression returning either true or false. Any parameters used is properties of TEntity
+     * @param predicate OData expression
+     */
+    public where(predicate: string): this 
+    /**
+     * Where clause using Javascript expression returning either true or false
+     * @param predicate javascript expression
+     * @param parameters any javascript parameters has to be declared
+     */
+    public where(predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: any[]): this
+    public where(): this {
+        let predicate: any = arguments[0],
+            parameters: Array<any> = [];
+
+        if (arguments.length == 2 && Array.isArray(arguments[1]))
+            parameters = arguments[1];
+
+        switch (typeof predicate) {
+            case 'string':
+                this._operations.add(new WhereOperator<TEntity>('OData', predicate));
+                break;
+
+            case 'function':
+                this._operations.add(new WhereOperator<TEntity>('Javascript', predicate, ...parameters));
+                break;
+
+            default:
+                throw new Error('Where operator can not recognize predicate either as javascript or odata');
+        }
 
         return this;
     }

@@ -1,8 +1,7 @@
 import { IFilter, Filter } from './filter';
 import { IFilterCriteria, FilterCriteria } from './filtercriteria';
 
-import { LambdaExpression } from './../../linq/expressions/lambdaexpression';
-import { ReducerVisitor, Expression, ExpressionType, ILogicalExpression } from './../../linq/expressions/reducervisitor';
+import { IExpression, ExpressionType, ILogicalExpression } from './../../linq/expressions/expression';
 
 export interface IFilters {
     groups: Array<IFilter>
@@ -14,19 +13,9 @@ export interface IFilters {
 export class Filters<TEntity> implements IFilters {
     private _groups: Array<IFilter> = [];
 
-    constructor(predicate: (it: TEntity) => boolean, ...parameters: any[]) {
-
-        var lambda = new LambdaExpression(predicate),
-            visitor = new ReducerVisitor();
-
-        var expression = visitor.visitLambda(predicate, ...parameters);
-
-        if (visitor.isSolvable == true) {
-            if (expression != null && expression.type == ExpressionType.Logical)
-                this._groups = Filter.visit(<ILogicalExpression>expression);
-        } else {
-            throw new Error('Predicate is not solvable');
-        }
+    constructor(expression: IExpression) {
+        if (expression != null && expression.type == ExpressionType.Logical)
+            this._groups = Filter.visit(<ILogicalExpression>expression);
     }
 
     public get groups() {

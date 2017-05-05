@@ -55,26 +55,27 @@ export class ReducerVisitor extends ExpressionVisitor {
     }
 
     public visitMember(expression: IMemberExpression): IExpression {
-        var obj;
+        let object, property;
 
-        if (expression.object.type != ExpressionType.Identifier)
-            expression.object = expression.object.accept(this);
+        if ((object = expression.object).type != ExpressionType.Identifier)
+            object = expression.object.accept(this);
 
-        if (expression.object.type != ExpressionType.Identifier)
-            expression.property = expression.property.accept(this);
+        if ((property = expression.property).type != ExpressionType.Identifier)
+            property = expression.property.accept(this);
 
-        var obj = this.evaluate(expression.object);
+        let obj = this.evaluate(object);
+
         if (obj != null && typeof obj == 'object') {
             var idx;
-            switch (expression.property.type) {
+            switch (property.type) {
                 case ExpressionType.Identifier:
-                    idx = (<IIdentifierExpression>expression.property).name;
+                    idx = (<IIdentifierExpression>property).name;
 
                     break;
 
                 case ExpressionType.Array:
-                    if ((<IArrayExpression>expression.property).elements.length == 1)
-                        idx = this.evaluate((<IArrayExpression>expression.property).elements[0]);
+                    if ((<IArrayExpression>property).elements.length == 1)
+                        idx = this.evaluate((<IArrayExpression>property).elements[0]);
 
                     break;
             }
@@ -96,105 +97,104 @@ export class ReducerVisitor extends ExpressionVisitor {
             }
         }
         else {
-            if (expression.object.type == ExpressionType.Identifier)
-                if ((<IIdentifierExpression>expression.object).name != this._lambdaExpression.parameters[0])
+            if (object.type == ExpressionType.Identifier)
+                if ((<IIdentifierExpression>object).name != this._lambdaExpression.parameters[0])
                     this._isSolvable = false;
         }
 
-        return expression;
+        return new MemberExpression(object, property);
     }
 
     public visitBinary(expression: IBinaryExpression): IExpression {
-        expression.left = expression.left.accept(this);
-        expression.right = expression.right.accept(this);
+        let left = expression.left.accept(this),
+            right = expression.right.accept(this);
 
-        var lvalue = this.evaluate(expression.left);
-        var rvalue = this.evaluate(expression.right);
+        if (left.type == ExpressionType.Literal && right.type == ExpressionType.Literal)
+        {
+            let leftValue = (<LiteralExpression>left).value,
+                rightValue = (<LiteralExpression>right).value;
 
-        if (lvalue != null && rvalue != null) {
             switch (expression.operator) {
                 case BinaryOperatorType.Addition:
-                    return new LiteralExpression(lvalue + rvalue);
+                    return new LiteralExpression(leftValue + rightValue);
 
                 case BinaryOperatorType.Subtraction:
-                    return new LiteralExpression(lvalue - rvalue);
+                    return new LiteralExpression(leftValue - rightValue);
 
                 case BinaryOperatorType.Multiplication:
-                    return new LiteralExpression(lvalue * rvalue);
+                    return new LiteralExpression(leftValue * rightValue);
 
                 case BinaryOperatorType.Division:
-                    return new LiteralExpression(lvalue / rvalue);
+                    return new LiteralExpression(leftValue / rightValue);
 
                 case BinaryOperatorType.Modulus:
-                    return new LiteralExpression(lvalue % rvalue);
+                    return new LiteralExpression(leftValue % rightValue);
 
                 case BinaryOperatorType.And:
-                    return new LiteralExpression(lvalue & rvalue);
+                    return new LiteralExpression(leftValue & rightValue);
 
                 case BinaryOperatorType.Or:
-                    return new LiteralExpression(lvalue | rvalue);
+                    return new LiteralExpression(leftValue | rightValue);
 
                 case BinaryOperatorType.ExclusiveOr:
-                    return new LiteralExpression(lvalue ^ rvalue);
+                    return new LiteralExpression(leftValue ^ rightValue);
 
                 case BinaryOperatorType.LeftShift:
-                    return new LiteralExpression(lvalue << rvalue);
+                    return new LiteralExpression(leftValue << rightValue);
 
                 case BinaryOperatorType.RightShift:
-                    return new LiteralExpression(lvalue >> rvalue);
+                    return new LiteralExpression(leftValue >> rightValue);
             }
         }
 
-        return expression;
+        return new BinaryExpression(expression.operator, left, right);
     }
 
     public visitLogical(expression: ILogicalExpression): IExpression {
-        expression.left = expression.left.accept(this);
-        expression.right = expression.right.accept(this);
+        let left = expression.left.accept(this),
+            right = expression.right.accept(this);
 
-        var lvalue = this.evaluate(expression.left);
-        var rvalue = this.evaluate(expression.right);
+        if (left.type == ExpressionType.Literal && right.type == ExpressionType.Literal) {
+            let leftValue = (<LiteralExpression>left).value,
+                rightValue = (<LiteralExpression>right).value;
 
-        if (lvalue != null && rvalue != null) {
             switch (expression.operator) {
                 case LogicalOperatorType.Equal:
-                    return new LiteralExpression(lvalue == rvalue);
+                    return new LiteralExpression(leftValue == rightValue);
                 case LogicalOperatorType.NotEqual:
-                    return new LiteralExpression(lvalue != rvalue);
+                    return new LiteralExpression(leftValue != rightValue);
                 case LogicalOperatorType.And:
-                    return new LiteralExpression(lvalue && rvalue);
+                    return new LiteralExpression(leftValue && rightValue);
                 case LogicalOperatorType.Or:
-                    return new LiteralExpression(lvalue || rvalue);
+                    return new LiteralExpression(leftValue || rightValue);
                 case LogicalOperatorType.Greater:
-                    return new LiteralExpression(lvalue > rvalue);
+                    return new LiteralExpression(leftValue > rightValue);
                 case LogicalOperatorType.GreaterOrEqual:
-                    return new LiteralExpression(lvalue >= rvalue);
+                    return new LiteralExpression(leftValue >= rightValue);
                 case LogicalOperatorType.Lesser:
-                    return new LiteralExpression(lvalue < rvalue);
+                    return new LiteralExpression(leftValue < rightValue);
                 case LogicalOperatorType.LesserOrEqual:
-                    return new LiteralExpression(lvalue <= rvalue);
+                    return new LiteralExpression(leftValue <= rightValue);
             }
-        } else {
-            switch (expression.operator) {
-                case LogicalOperatorType.And:
-                    if (lvalue === true) return expression.right;
-                    if (rvalue === true) return expression.left;
+        } 
 
-                    break;
-            }
+        switch (expression.operator) {
+            case LogicalOperatorType.And:
+                if (expression.left.type == ExpressionType.Literal && (<LiteralExpression>expression.left).value === true) return right;
+                if (expression.right.type == ExpressionType.Literal && (<LiteralExpression>expression.right).value === true) return left;
+
+            default:
+                return new LogicalExpression(expression.operator, left, right);
         }
-
-        return expression;
     }
 
-    public evaluate(expression: IExpression): any {
+    protected evaluate(expression: IExpression): any {
         var value: any = null;
 
         switch (expression.type) {
             case ExpressionType.Literal:
                 var literal = (<ILiteralExpression>expression);
 
-                // check for number
                 if (typeof (value = literal.value) == 'string') {
                     if (/^[+-]?[0-9]*(\.[0-9]+)?$/i.test(literal.value) == true)
                         value = parseFloat(literal.value);
@@ -229,6 +229,7 @@ export class ReducerVisitor extends ExpressionVisitor {
                 }
 
                 break;
+                
         }
 
         return value;

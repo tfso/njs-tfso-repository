@@ -1,6 +1,7 @@
 ﻿import * as assert from 'assert';
 import Enumerable, { IEnumerable, OperatorType } from './../linq/enumerable';
 import { SkipOperator } from './../linq/operators/skipoperator';
+import { WhereOperator } from './../linq/operators/whereoperator';
 
 interface ICar {
 
@@ -24,6 +25,38 @@ describe("When using Enumerable", () => {
             <ICar>{ id: 7, location: 'HEISTAD', registrationYear: 2013 },
             <ICar>{ id: 8, location: 'LARVIK', registrationYear: 2009 }
         ];        
+    })
+
+    describe("with Javascript query", () => {
+
+        it("should be able to do a simple query", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>();
+
+            query.where(it => it.location == 'BREVIK');
+            query.skip(1);
+            query.take(3);
+
+            let result = query.toArray(list);
+
+            assert.equal(result.length, 1);
+        })
+
+    })
+
+    describe("with OData query", () => {
+
+        it("should be able to do a simple query", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>();
+
+            query.where("location eq 'BREVIK'");
+            query.skip(1);
+            query.take(3);
+
+            let result = query.toArray(list);
+
+            assert.equal(result.length, 1);
+        })
+
     })
 
     it("should take top 1", () => {

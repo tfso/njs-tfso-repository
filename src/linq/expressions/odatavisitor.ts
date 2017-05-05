@@ -23,13 +23,6 @@ export class ODataVisitor extends ReducerVisitor {
         return super.visitOData(filter);
     }
 
-    public static evaluate(expression: IExpression, it: Object): any {
-        let reducer = new ODataVisitor(it),
-            result = reducer.evaluate(expression);
-
-        return result;
-    }
-
     public visitMethod(expression: IMethodExpression): IExpression {
         expression.parameters = expression.parameters.map((arg) => arg.accept(this));
 
@@ -144,7 +137,15 @@ export class ODataVisitor extends ReducerVisitor {
         return expression;
     }
 
-    public evaluate(expression: IExpression): any {
+    public static evaluate(expression: IExpression, it: Object): any {
+        let reducer = new ODataVisitor(it),
+            resultExpression = reducer.visit(expression),
+            result = reducer.evaluate(resultExpression);
+
+        return result;
+    }
+
+    protected evaluate(expression: IExpression): any {
         var value: any = null;
 
         switch (expression.type) {

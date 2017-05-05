@@ -58,34 +58,28 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
      * @param parameters
      */
     protected getFilters(query: IEnumerable<TEntity>): IFilters {
-        let predicate: (it: TEntity, ...params: any[]) => boolean = (entity) => true,
-            parameters: any[] = [];
+        let expression: any;
 
         for (let operator of query.operations.values())
             if (operator instanceof WhereOperator) {
-                predicate = (<WhereOperator<TEntity>>operator).predicate;
-                parameters = (<WhereOperator<TEntity>>operator).parameters;
+                expression = operator.expression;
 
                 break;
             }
 
-        return new Filters<TEntity>(predicate, ...parameters);
+        return new Filters<TEntity>(expression);
     }
 
     public getPredicateFn(query: IEnumerable<TEntity>): (element: TEntity) => boolean {
-        let predicate: (it: TEntity, ...params: any[]) => boolean = (entity) => true,
-            parameters: any[] = [];
+        let expression: any;
 
         for (let operator of query.operations.values())
             if (operator instanceof WhereOperator) {
-                predicate = (<WhereOperator<TEntity>>operator).predicate;
-                parameters = (<WhereOperator<TEntity>>operator).parameters;
-
-                break;
+                return operator.predicate;
             }
 
         return (entity: TEntity) => {
-            return (predicate == null) ? true : predicate.apply({}, [entity].concat(parameters));
+            return true;
         };
     }
 }
