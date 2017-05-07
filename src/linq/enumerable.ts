@@ -31,6 +31,8 @@ import { SkipOperator } from './operators/skipoperator';
 import { TakeOperator } from './operators/takeoperator';
 import { WhereOperator } from './operators/whereoperator';
 
+import { RenameVisitor } from './expressions/renamevisitor';
+
 export { OperatorType };
 
 export class Operation<TEntity> {
@@ -86,8 +88,27 @@ export class Operation<TEntity> {
 export default class Enumerable<TEntity> implements IEnumerable<TEntity>
 {
     private _operations: Operation<TEntity>;
+    private _renames: Map<string, string> = new Map();
+
     constructor(private items?: Array<TEntity>) {
         this._operations = new Operation<TEntity>();
+    }
+
+    public rename(...values: Array<{ from: string, to: string }>): this {
+        if (this._operations.values.length > 0) {
+            // remap existing Identifiers/Members
+            let renameVisitor = new RenameVisitor(...values);
+
+            for (let item of this._operations.values()) {
+                switch (item.type) {
+                    case OperatorType.Where:
+                        (<WhereOperator<TEntity>>item).expression = renameVisitor.visit((<WhereOperator<TEntity>>item).expression);
+                        break; 
+                }
+            }
+        }
+
+        return this;
     }
 
     /**

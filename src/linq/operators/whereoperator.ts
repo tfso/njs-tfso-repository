@@ -14,7 +14,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
     private _footprint: string
 
     constructor(predicateType: 'OData', predicate: string)
-    constructor(predicateType: 'Javascript', predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: any[])
+    constructor(predicateType: 'Javascript', predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: Array<any>)
     constructor(predicateType: PredicateType, predicate: any, ...parameters: any[]) {
         super(OperatorType.Where);
 
@@ -32,7 +32,6 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
 
                 if (visitor.isSolvable == false)
                     throw new Error('Predicate is not solvable');
-
 
                 break;
 
@@ -57,6 +56,10 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
 
     public get expression(): IExpression {
         return this._expression;
+    }
+
+    public set expression(value: IExpression) {
+        this._expression = value;
     }
 
     public evaluate(items: TEntity[]): TEntity[] {

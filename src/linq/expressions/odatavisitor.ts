@@ -14,7 +14,6 @@ import { LambdaExpression } from './lambdaexpression';
 import { ReducerVisitor } from './reducervisitor';
 
 export class ODataVisitor extends ReducerVisitor {
-    
     constructor(private it?: Object) {
         super();
     }
