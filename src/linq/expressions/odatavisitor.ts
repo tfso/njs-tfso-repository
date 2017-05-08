@@ -23,11 +23,12 @@ export class ODataVisitor extends ReducerVisitor {
     }
 
     public visitMethod(expression: IMethodExpression): IExpression {
-        expression.parameters = expression.parameters.map((arg) => arg.accept(this));
+        let parameters = expression.parameters.map((arg) => arg.accept(this)),
+            caller = null;
 
-        if (expression.parameters.every(expression => expression.type == ExpressionType.Literal) == true) {
+        if (parameters.every(expression => expression.type == ExpressionType.Literal) == true) {
             // all parameters is a literal, eg; solvable
-            let params: Array<any> = expression.parameters.map(expr => (<LiteralExpression>expr).value);
+            let params: Array<any> = parameters.map(expr => (<LiteralExpression>expr).value);
 
             switch (expression.name) {
                 // String Functions
@@ -133,7 +134,7 @@ export class ODataVisitor extends ReducerVisitor {
             }
         }
 
-        return expression;
+        return new MethodExpression(expression.name, parameters, caller);
     }
 
     public static evaluate(expression: IExpression, it: Object): any {
