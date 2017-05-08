@@ -94,20 +94,18 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
         this._operations = new Operation<TEntity>();
     }
 
-    public rename(...values: Array<{ from: string, to: string }>): this {
-        if (this._operations.values.length > 0) {
-            // remap existing Identifiers/Members
-            let renameVisitor = new RenameVisitor(...values);
+    public rename(...values: Array<{ from: string, to: string }>): this { 
+        // remap existing Identifiers/Members
+        let renameVisitor = new RenameVisitor(...values);
 
-            for (let item of this._operations.values()) {
-                switch (item.type) {
-                    case OperatorType.Where:
-                        (<WhereOperator<TEntity>>item).expression = renameVisitor.visit((<WhereOperator<TEntity>>item).expression);
-                        break; 
-                }
+        for (let item of this._operations.values()) {
+            switch (item.type) {
+                case OperatorType.Where:
+                    (<WhereOperator<TEntity>>item).expression = renameVisitor.visit((<WhereOperator<TEntity>>item).expression);
+                    break; 
             }
         }
-
+       
         return this;
     }
 

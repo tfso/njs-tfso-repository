@@ -57,6 +57,17 @@ describe("When using Enumerable", () => {
             assert.equal(result.length, 1);
         })
 
+        it("should be able to rename where properties", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>();
+
+            query.where("tolower(Place) eq 'brevik'");
+            query.rename({ from: 'Place', to: 'location' })
+
+            let result = query.toArray(list);
+            assert.equal(result.length, 2);
+
+            let where = query.operations.first(WhereOperator);
+        })
     })
 
     it("should take top 1", () => {
