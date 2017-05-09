@@ -9,6 +9,11 @@ interface ICar {
     location: string
 
     registrationYear: number
+
+    type: {
+        make: string
+        model: string
+    }
 }
 
 describe("When using Enumerable", () => {
@@ -16,14 +21,14 @@ describe("When using Enumerable", () => {
 
     beforeEach(() => {
         list = [
-            <ICar>{ id: 1, location: 'SKIEN', registrationYear: 2016 },
-            <ICar>{ id: 2, location: 'PORSGRUNN', registrationYear: 2010 },
-            <ICar>{ id: 3, location: 'PORSGRUNN', registrationYear: 2005 },
-            <ICar>{ id: 4, location: 'LANGESUND', registrationYear: 2004 },
-            <ICar>{ id: 5, location: 'BREVIK', registrationYear: 2009 },
-            <ICar>{ id: 6, location: 'BREVIK', registrationYear: 2014 },
-            <ICar>{ id: 7, location: 'HEISTAD', registrationYear: 2013 },
-            <ICar>{ id: 8, location: 'LARVIK', registrationYear: 2009 }
+            <ICar>{ id: 1, location: 'SKIEN', registrationYear: 2016, type: { make: 'SAAB', model: '9-3' } },
+            <ICar>{ id: 2, location: 'PORSGRUNN', registrationYear: 2010, type: { make: 'NISSAN', model: 'QASHQAI' } },
+            <ICar>{ id: 3, location: 'PORSGRUNN', registrationYear: 2005, type: { make: 'SAAB', model: '9-3' } },
+            <ICar>{ id: 4, location: 'LANGESUND', registrationYear: 2004, type: { make: 'NISSAN', model: 'LEAF' } },
+            <ICar>{ id: 5, location: 'BREVIK', registrationYear: 2009, type: { make: 'TOYOTA', model: 'COROLLA' } },
+            <ICar>{ id: 6, location: 'BREVIK', registrationYear: 2014, type: { make: 'HONDA', model: 'HRV' } },
+            <ICar>{ id: 7, location: 'HEISTAD', registrationYear: 2013, type: { make: 'TOYOTA', model: 'YARIS' } },
+            <ICar>{ id: 8, location: 'LARVIK', registrationYear: 2009, type: { make: 'HONDA', model: 'CIVIC' } }
         ];        
     })
 
@@ -41,6 +46,14 @@ describe("When using Enumerable", () => {
             assert.equal(result.length, 1);
         })
 
+        it("should be able to do a simple query with a nested model", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>();
+
+            query.where(it => it.type.make == 'TOYOTA');
+
+            let result = query.toArray(list);
+            assert.equal(result.length, 2);
+        })
     })
 
     describe("with OData query", () => {
@@ -57,11 +70,35 @@ describe("When using Enumerable", () => {
             assert.equal(result.length, 1);
         })
 
-        it("should be able to rename where properties", () => {
+        it("should be able to do a simple query with a nested model", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>();
+
+            query.where("type/make eq 'TOYOTA'");
+
+            let result = query.toArray(list);
+            assert.equal(result.length, 2);
+        })
+
+        it("should be able to rename a flat model", () => {
             let query: Enumerable<ICar> = new Enumerable<ICar>();
 
             query.where("tolower(Place) eq 'brevik'");
             query.rename({ from: 'Place', to: 'location' })
+
+            let result = query.toArray(list);
+            assert.equal(result.length, 2);
+
+            let where = query.operations.first(WhereOperator);
+        })
+
+        it("should be able to rename a nested model", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>();
+
+            query.where("tolower(car/make) eq 'toyota'");
+
+            //query.rename(<any>{ car: { make: 'type.make',  } });
+
+            query.rename({ from: 'car.make', to: 'type.make' })
 
             let result = query.toArray(list);
             assert.equal(result.length, 2);
