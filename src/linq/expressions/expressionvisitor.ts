@@ -15,11 +15,51 @@ import { IArrayExpression, ArrayExpression } from './arrayexpression';
 
 import { LambdaExpression } from './lambdaexpression';
 
-export class ExpressionVisitor {
-    protected _lambdaExpression: LambdaExpression;
+
+export class ExpressionStack {
+    private items: Array<IExpression>;
+    private count: number;
 
     constructor() {
+        this.items = [];
+        this.count = 0;
+    }
 
+    public length() {
+        return this.count;
+    }
+
+    public push(item: IExpression) {
+        this.items.push(item);
+        this.count = this.count + 1;
+    }
+
+    public pop(): IExpression {
+        if (this.count > 0) {
+            this.count = this.count - 1;
+        }
+
+        return this.items.pop();
+    }
+
+    public peek(): IExpression {
+        if (this.count <= 1)
+            return null;
+
+        return this.items[this.count - 2]; // current object is always last
+    }
+}
+
+export class ExpressionVisitor {
+    protected _lambdaExpression: LambdaExpression;
+    private _expressionStack: ExpressionStack;
+
+    constructor() {
+        this._expressionStack = new ExpressionStack();
+    }
+
+    public get stack(): ExpressionStack {
+        return this._expressionStack;
     }
 
     public visitOData(filter: string): IExpression {
@@ -149,7 +189,18 @@ export class ExpressionVisitor {
 
         switch (expression.type) {
             case 'property':
-                return new IdentifierExpression(expression.name)
+                let identifiers = new String(expression.name).split('/');
+
+                let getProperty = (identifiers, idx): IExpression => {
+                    if (idx + 1 >= identifiers.length)
+                        return new IdentifierExpression(identifiers[idx]);
+
+                    return new MemberExpression(new IdentifierExpression(identifiers[idx]), getProperty(identifiers, idx + 1));
+                }
+
+                let ret = getProperty(identifiers, 0);
+
+                return ret;
 
             case 'functioncall':
                 let methodName = '',

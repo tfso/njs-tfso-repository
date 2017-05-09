@@ -17,6 +17,8 @@ export class ReducerVisitor extends ExpressionVisitor {
     private _params: Array<any>
     private _isSolvable: boolean;
 
+    private _parentExpressionStack: Array<IExpression> = [];
+
     constructor(...param: Array<any>) {
         super();
 
@@ -97,9 +99,13 @@ export class ReducerVisitor extends ExpressionVisitor {
             }
         }
         else {
-            if (object.type == ExpressionType.Identifier)
-                if ((<IIdentifierExpression>object).name != this._lambdaExpression.parameters[0])
-                    this._isSolvable = false;
+            // no point to find out it's solvable if this MemberExpression is a nested MemberExpression of Parent.
+            if (this._lambdaExpression != null && this.stack.peek().type != ExpressionType.Member) {
+                if (object.type == ExpressionType.Identifier) {
+                    if ((<IIdentifierExpression>object).name != this._lambdaExpression.parameters[0])
+                        this._isSolvable = false;
+                }
+            }
         }
 
         return new MemberExpression(object, property);

@@ -9,6 +9,8 @@ import { ILogicalExpression } from './logicalexpression';
 import { IConditionalExpression } from './conditionalexpression';
 import { IArrayExpression } from './arrayexpression';
 
+import { ExpressionVisitor } from './expressionvisitor';
+
 export enum ExpressionType {
     Compound,
 
@@ -26,7 +28,7 @@ export enum ExpressionType {
 export interface IExpression {
     type: ExpressionType
 
-    accept(visitor: any): IExpression
+    accept<T extends ExpressionVisitor>(visitor: T): IExpression
 }
 
 export class Expression implements IExpression {
@@ -44,38 +46,49 @@ export class Expression implements IExpression {
         this._type = value;
     }
 
-    public accept(visitor: any) {
+    public accept<T extends ExpressionVisitor>(visitor: T) {
+        let expression: IExpression;
+
+        // add this as parent to stack for next acceptance/visit
+        visitor.stack.push(this);
+
         switch (this.type) {
             case ExpressionType.Literal:
-                return visitor.visitLiteral(<ILiteralExpression><Object>this);
+                expression = visitor.visitLiteral(<ILiteralExpression><Object>this); break;
 
             case ExpressionType.Compound:
-                return visitor.visitCompound(<ICompoundExpression><Object>this);
+                expression = visitor.visitCompound(<ICompoundExpression><Object>this); break;
 
             case ExpressionType.Identifier:
-                return visitor.visitIdentifier(<IIdentifierExpression><Object>this);
+                expression = visitor.visitIdentifier(<IIdentifierExpression><Object>this); break;
 
             case ExpressionType.Member:
-                return visitor.visitMember(<IMemberExpression><Object>this);
+                expression = visitor.visitMember(<IMemberExpression><Object>this); break;
 
             case ExpressionType.Method:
-                return visitor.visitMethod(<IMethodExpression><Object>this);
+                expression = visitor.visitMethod(<IMethodExpression><Object>this); break;
 
             case ExpressionType.Unary:
-                return visitor.visitUnary(<IUnaryExpression><Object>this);
+                expression = visitor.visitUnary(<IUnaryExpression><Object>this); break;
 
             case ExpressionType.Binary:
-                return visitor.visitBinary(<IBinaryExpression><Object>this);
+                expression = visitor.visitBinary(<IBinaryExpression><Object>this); break;
 
             case ExpressionType.Logical:
-                return visitor.visitLogical(<ILogicalExpression><Object>this);
+                expression = visitor.visitLogical(<ILogicalExpression><Object>this); break;
 
             case ExpressionType.Conditional:
-                return visitor.visitConditional(<IConditionalExpression><Object>this);
+                expression = visitor.visitConditional(<IConditionalExpression><Object>this); break;
 
             case ExpressionType.Array:
-                return visitor.visitArray(<IArrayExpression><Object>this);
+                expression = visitor.visitArray(<IArrayExpression><Object>this); break;
         }
+
+        // remove it from stack
+        visitor.stack.pop();
+
+        // return the newly visited expression
+        return expression;
     }
 }
 
