@@ -124,8 +124,8 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
         let predicate: any = arguments[0],
             parameters: Array<any> = [];
 
-        if (arguments.length == 2 && Array.isArray(arguments[1]))
-            parameters = arguments[1];
+        if (arguments.length >= 2)
+            parameters = Array.from(arguments).slice(1)
 
         switch (typeof predicate) {
             case 'string':

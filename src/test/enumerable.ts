@@ -32,7 +32,7 @@ describe("When using Enumerable", () => {
         ];        
     })
 
-    describe("with Javascript query", () => {
+    describe("with Lambda query", () => {
 
         it("should be able to do a simple query", () => {
             let query: Enumerable<ICar> = new Enumerable<ICar>();
@@ -46,12 +46,35 @@ describe("When using Enumerable", () => {
             assert.equal(result.length, 1);
         })
 
+        it("should be able to do a simple query using one named parameters", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>();
+
+            query.where((it, loc) => it.location == loc, 'BREVIK');
+            query.skip(1);
+            query.take(3);
+
+            let result = query.toArray(list);
+
+            assert.equal(result.length, 1);
+        })
+
+        it("should be able to do a simple query using two named parameters", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>();
+
+            query.where((it, loc, year) => it.location == loc && it.registrationYear >= year, 'BREVIK', 2010);
+
+            let result = query.toArray(list);
+
+            assert.equal(result.length, 1);
+        })
+
         it("should be able to do a simple query with a nested model", () => {
             let query: Enumerable<ICar> = new Enumerable<ICar>();
 
             query.where(it => it.type.make == 'TOYOTA');
 
             let result = query.toArray(list);
+
             assert.equal(result.length, 2);
         })
     })
