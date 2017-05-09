@@ -6,9 +6,12 @@
 
 Enumerable has support for where,take,skip,orderBy,first, and it's exposing operators stack as well. Each operator can be extracted and removed if you want to do your own operator handling. Whether where-expression is Javascript or OData you can analyze the query part by part by its expression as AST (Abstract Syntax Tree).
 
-Evaluating the result of the boolean predicate is done by a ODataVisitor (running special methods as tolower, substring etc) and a ReducerVisitor (to compact the AST tree, eg reducing binary expression 5 + 3 to literal 8).
+Take a look at test for Enumerable at https://github.com/tfso/njs-tfso-repository/tree/master/src/test/enumerable.ts to see some examples.
 
-Take a look at test for Enumerable at https://github.com/tfso/njs-tfso-repository/tree/master/src/test/enumerable.ts and all the other tests for expressions at https://github.com/tfso/njs-tfso-repository/tree/master/src/test to understand how it actually work.
+## AST
+Evaluating the result of the boolean predicate is done by a ODataVisitor (running special methods as tolower, substring etc) for OData and  native Javascript function (for performance) for Javascript. There is also a RenameVisitor and a ReducerVisitor (to compact the AST tree, eg reducing binary expression 5 + 3 to literal 8).
+
+For example of visitors and other tests for expressions take a look at the tests at https://github.com/tfso/njs-tfso-repository/tree/master/src/test to understand how it actually work.
 
 ## Repository
 Abstract class for CRUD operations, where readAll is using Enumerable to make flexible read operations. You can extract and analyze the where operator to narrow down you database query, and rerun the predicate at the result to return exact what the user wants.
