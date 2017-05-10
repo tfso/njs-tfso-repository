@@ -7,7 +7,7 @@ describe("When using OData for ExpressionVisitor", () => {
         expr: Expr.IExpression;
 
     beforeEach(() => {
-        reducer = new ODataVisitor({ number: 5, string: 'abc', decimal: 5.50 });
+        reducer = new ODataVisitor({ number: 5, string: 'abc', decimal: 5.50, date: new Date("2017-05-10T06:48:00Z") });
     })
 
     it("should evaluate a simple expression with binary operation", () => {
@@ -51,4 +51,46 @@ describe("When using OData for ExpressionVisitor", () => {
         assert.equal(expr.type, Expr.ExpressionType.Literal);
         assert.equal((<Expr.LiteralExpression>expr).value, 8);
     })
+
+    it("should evaluate a expression with date as type (v4)", () => {
+        expr = reducer.visitOData("date ge 2017-05-01Z");
+
+        assert.equal(expr.type, Expr.ExpressionType.Literal);
+        assert.equal((<Expr.LiteralExpression>expr).value, true);
+    })
+
+    it("should evaluate a expression with datetime as type (v4)", () => {
+        expr = reducer.visitOData("date ge 2017-05-01T12:00:00Z");
+
+        assert.equal(expr.type, Expr.ExpressionType.Literal);
+        assert.equal((<Expr.LiteralExpression>expr).value, true);
+    })
+
+    it("should evaluate a expression with date as string", () => {
+        expr = reducer.visitOData("date ge '2017-05-01Z'");
+
+        assert.equal(expr.type, Expr.ExpressionType.Literal);
+        assert.equal((<Expr.LiteralExpression>expr).value, true);
+    })
+
+    it("should evaluate a expression with datetime as string", () => {
+        expr = reducer.visitOData("date ge '2017-05-01T12:00:00Z'");
+
+        assert.equal(expr.type, Expr.ExpressionType.Literal);
+        assert.equal((<Expr.LiteralExpression>expr).value, true);
+    })
+
+    it("should evaluate a expression with binary operation and method 'year' with a Date type", () => {
+        expr = reducer.visitOData("year(date) sub year(2016-05-01)");
+
+        assert.equal(expr.type, Expr.ExpressionType.Literal);
+        assert.equal((<Expr.LiteralExpression>expr).value, 1);
+    })
+
+    //it("should evaluate a complex expression with binary operation and method 'year' with a Date type", () => {
+    //    expr = reducer.visitOData("(year(date) add 10) sub year(2016-05-01)");
+
+    //    assert.equal(expr.type, Expr.ExpressionType.Literal);
+    //    assert.equal((<Expr.LiteralExpression>expr).value, 11);
+    //})
 })

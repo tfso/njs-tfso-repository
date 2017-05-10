@@ -100,12 +100,40 @@ export class ODataVisitor extends ReducerVisitor {
 
                 // Date Functions
                 case 'day': // int day(DateTime p0)
+                    if ((params.length == 1 && typeof params[0] == 'object' && params[0].getTime() > 0) == false)
+                        throw new Error('Method "year" requires parameter of (Date), but got "' + typeof params[0] + '"');
+
+                    return new LiteralExpression((<Date>params[0]).getDate());
+                        
                 case 'hour': // int hour(DateTime p0)
+                    if ((params.length == 1 && typeof params[0] == 'object' && params[0].getTime() > 0) == false)
+                        throw new Error('Method "year" requires parameter of (Date), but got "' + typeof params[0] + '"');
+
+                    return new LiteralExpression((<Date>params[0]).getUTCHours());
+
                 case 'minute': // int minute(DateTime p0)
+                    if ((params.length == 1 && typeof params[0] == 'object' && params[0].getTime() > 0) == false)
+                        throw new Error('Method "year" requires parameter of (Date), but got "' + typeof params[0] + '"');
+
+                    return new LiteralExpression((<Date>params[0]).getUTCMinutes());
+
                 case 'month': // int month(DateTime p0)
+                    if ((params.length == 1 && typeof params[0] == 'object' && params[0].getTime() > 0) == false)
+                        throw new Error('Method "year" requires parameter of (Date), but got "' + typeof params[0] + '"');
+
+                    return new LiteralExpression((<Date>params[0]).getMonth() + 1);
+
                 case 'second': // int second(DateTime p0)
+                    if ((params.length == 1 && typeof params[0] == 'object' && params[0].getTime() > 0) == false)
+                        throw new Error('Method "year" requires parameter of (Date), but got "' + typeof params[0] + '"');
+
+                    return new LiteralExpression((<Date>params[0]).getSeconds());
+
                 case 'year': // int year(DateTime p0)
-                    throw new Error('OData visitor does not support Date Functions at this time');
+                    if ((params.length == 1 && typeof params[0] == 'object' && params[0].getTime() > 0) == false)
+                        throw new Error('Method "year" requires parameter of (Date), but got "' + typeof params[0] + '"');
+
+                    return new LiteralExpression((<Date>params[0]).getFullYear());
 
                 // Math Functions
                 case 'round': // number round(number p0)

@@ -63,7 +63,10 @@ export class ExpressionVisitor {
     }
 
     public visitOData(filter: string): IExpression {
-        let ast = OData.parse((filter.indexOf('$filter=') == -1 ? '$filter=' : '') + filter);
+        filter = (filter.indexOf('$filter=') == -1 ? '$filter=' : '') + filter;
+        filter = filter.replace(/["']?(\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?)?(?:Z|[+-]\d{2}:\d{2})?)["']?/gi, (value, date) => ["'", date, "'"].join('')); // odata-parser doesn't support date as type, converting it to string
+
+        let ast = OData.parse(filter);
 
         if (ast.error)
             throw new Error(ast.error);
