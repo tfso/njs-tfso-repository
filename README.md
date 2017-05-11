@@ -2,7 +2,7 @@
  Initially it was a CRUD repository using JavaScript as a boolean predicate for filtering data, but has gotten more work for Linq/Enumerable.
  
  ## Linq
- class Enumerable is supposed to do what Linq is doing for .NET, but it is an early state. It supports Javascript and OData filters, so you may write ```query.where(it => it.name.toLowerCase() == "donald").take(5)``` as well as ```query.where('tolower(name) eq "donald"').take(5)```
+ class Enumerable is supposed to do what Linq is doing for .NET, but it is an early state. It supports Javascript and OData filters, so you may write ```query.where(it => it.name.toLowerCase() == "donald").take(5)``` as well as ```query.where("tolower(name) eq 'donald'").take(5)```
 
 Enumerable has support for where,take,skip,orderBy,first, and it's exposing operators stack as well. Each operator can be extracted and removed if you want to do your own operator handling. Whether where-expression is Javascript or OData you can analyze the query part by part by its expression as AST (Abstract Syntax Tree).
 
