@@ -87,10 +87,10 @@ describe("When using OData for ExpressionVisitor", () => {
         assert.equal((<Expr.LiteralExpression>expr).value, 1);
     })
 
-    //it("should evaluate a complex expression with binary operation and method 'year' with a Date type", () => {
-    //    expr = reducer.visitOData("(year(date) add 10) sub year(2016-05-01)");
+    it("should evaluate a complex expression with binary operation and method 'year' with a Date type", () => {
+        expr = reducer.visitOData("(number add 2012) sub year(2016-05-01)");
 
-    //    assert.equal(expr.type, Expr.ExpressionType.Literal);
-    //    assert.equal((<Expr.LiteralExpression>expr).value, 11);
-    //})
+        assert.equal(expr.type, Expr.ExpressionType.Literal);
+        assert.equal((<Expr.LiteralExpression>expr).value, 1);
+    })
 })

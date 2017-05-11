@@ -30,12 +30,16 @@
     <Content Include="appveyor.yml" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <Content Include="src\lib\odata-parser.pegjs">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="tsconfig.json" />
     <Content Include="typings.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\linq\" />
     <Folder Include="src\linq\operators\" />
+    <Folder Include="src\lib\" />
     <Folder Include="src\repository\filters\" />
     <Folder Include="src\repository\db\" />
     <Folder Include="src\test\" />
@@ -44,6 +48,9 @@
     <Folder Include="src\repository\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\lib\odata-parser.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\linq\expressions\arrayexpression.ts" />
     <TypeScriptCompile Include="src\linq\expressions\binaryexpression.ts" />
     <TypeScriptCompile Include="src\linq\expressions\compoundexpression.ts" />

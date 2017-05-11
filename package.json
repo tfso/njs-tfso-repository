@@ -17,8 +17,7 @@
     "cover": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- --reporter spec --recursive lib/test/*.js"
   },
   "dependencies": {
-    "jsep": "^0.3.0",
-    "odata-parser": "^1.4.1"
+    "jsep": "^0.3.0"
   },
   "devDependencies": {
     "istanbul": "^0.4.4",
