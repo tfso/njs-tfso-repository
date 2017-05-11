@@ -9,7 +9,7 @@ Enumerable has support for where,take,skip,orderBy,first, and it's exposing oper
 Take a look at test for Enumerable at https://github.com/tfso/njs-tfso-repository/tree/master/src/test/enumerable.ts to see some examples.
 
 ## AST
-Evaluating the result of the boolean predicate is done by a ODataVisitor (running special methods as tolower, substring etc) for OData and  native Javascript function (for performance) for Javascript. There is also a RenameVisitor and a ReducerVisitor (to compact the AST tree, eg reducing binary expression 5 + 3 to literal 8).
+Evaluating the result of the boolean predicate is done by a ODataVisitor (running special methods as tolower, substring etc) for OData and native Javascript function (for performance) for Javascript. There is also a RenameVisitor and a ReducerVisitor (to compact the AST tree, eg reducing binary expression 5 + 3 to literal 8).
 
 For example of visitors and other tests for expressions take a look at the tests at https://github.com/tfso/njs-tfso-repository/tree/master/src/test to understand how it actually work.
 
@@ -21,3 +21,4 @@ This respository is work in progress and there will be added more to it
 - More operators for IEnumerable
 - IEnumerable parsing OData ($skip,$take,$filter etc) instead of only having IEnumerable.where() supporting OData.
 - Better handling of IEnumerable for Repository such as analyzing and maybe transforming it to sql queries.
+- Seperating repository/db to its own module

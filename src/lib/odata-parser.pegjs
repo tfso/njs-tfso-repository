@@ -60,7 +60,7 @@ ConditionalOrExpression
       return buildTree(first, rest, function(result, element) {
         return {
           type: 'ConditionalExpression',
-          operator: element[0][0],
+          operator: element[0][0].toLowerCase(),
           left:  result,
           right: element[1]
         };
@@ -73,7 +73,7 @@ ConditionalAndExpression
       return buildTree(first, rest, function(result, element) {
         return {
           type: 'ConditionalExpression',
-          operator: element[0][0],
+          operator: element[0][0].toLowerCase(),
           left:  result,
           right: element[1]
         };
@@ -99,7 +99,7 @@ RelationalExpression
       return buildTree(first, rest, function(result, element) {
         return {
           type: 'LogicalExpression',
-          operator: element[0][0],
+          operator: element[0][0].toLowerCase(),
           left:  result,
           right: element[1]
         };
@@ -112,7 +112,7 @@ AdditiveExpression
       return buildTree(first, rest, function(result, element) {
         return {
           type: 'BinaryExpression',
-          operator: element[0][0],
+          operator: element[0][0].toLowerCase(),
           left:  result,
           right: element[1]
         };
@@ -125,7 +125,7 @@ MultiplicativeExpression
       return buildTree(first, rest, function(result, element) {
         return {
           type: 'BinaryExpression',
-          operator: element[0][0],
+          operator: element[0][0].toLowerCase(),
           left:  result,
           right: element[1]
         };
@@ -193,7 +193,7 @@ PrefixOp
       NOT
     / PLUS
     / MINUS
-    ) { return op[0]; }
+    ) { return op[0].toLowerCase(); }
 
 Arguments
     = LPAR args:(first:Expression rest:(COMMA Expression)* { return buildList(first, rest, 1); })? RPAR
@@ -310,28 +310,28 @@ UnicodeEscape
 /* ---- Separators, Operators ----- */
 
 AT              =   "@"       Spacing
-ADD             =   "add"     Spacing
-ANDAND          =   "and"     Spacing
+ADD             =   "add"i    Spacing
+ANDAND          =   "and"i    Spacing
 COLON           =   ":"       Spacing
 COMMA           =   ","       Spacing
-DIV             =   "div"     Spacing
+DIV             =   "div"i    Spacing
 DOT             =   "/"       Spacing
-EQUAL           =   "eq"      Spacing
-GE              =   "ge"      Spacing
-GT              =   "gt"      Spacing
+EQUAL           =   "eq"i     Spacing
+GE              =   "ge"i     Spacing
+GT              =   "gt"i     Spacing
 HYPHEN          =   "-"       Spacing
 LBRK            =   "["       Spacing
-LE              =   "le"      Spacing
+LE              =   "le"i     Spacing
 LPAR            =   "("       Spacing
-LT              =   "lt"      Spacing
+LT              =   "lt"i     Spacing
 MINUS           =   "-"       Spacing
-MOD             =   "mod"     Spacing
-NOTEQUAL        =   "ne"      Spacing
-NOT             =   "not"     Spacing
-OROR            =   "or"      Spacing
+MOD             =   "mod"i    Spacing
+NOTEQUAL        =   "ne"i     Spacing
+NOT             =   "not"i    Spacing
+OROR            =   "or"i     Spacing
 PLUS            =   "+"       Spacing
 RBRK            =   "]"       Spacing
 RPAR            =   ")"       Spacing
-RPOINT          =   "gt"      Spacing
-SUB             =   "sub"     Spacing
-MUL             =   "mul"     Spacing
+RPOINT          =   "gt"i     Spacing
+SUB             =   "sub"i    Spacing
+MUL             =   "mul"i    Spacing

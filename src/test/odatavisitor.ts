@@ -93,4 +93,11 @@ describe("When using OData for ExpressionVisitor", () => {
         assert.equal(expr.type, Expr.ExpressionType.Literal);
         assert.equal((<Expr.LiteralExpression>expr).value, 1);
     })
+
+    it("should evaluate a complex expression that is using casing", () => {
+        expr = reducer.visitOData("(number Add 2012) SUB year(2016-05-01)");
+
+        assert.equal(expr.type, Expr.ExpressionType.Literal);
+        assert.equal((<Expr.LiteralExpression>expr).value, 1);
+    })
 })
