@@ -29,9 +29,10 @@ export interface IExpression {
     type: ExpressionType
 
     accept<T extends ExpressionVisitor>(visitor: T): IExpression
+    equal(expression: IExpression): boolean;
 }
 
-export class Expression implements IExpression {
+export abstract class Expression implements IExpression {
     private _type: ExpressionType;
 
     constructor(type: ExpressionType) { //(predicate: (it: Object) => boolean, parameters?: any) {
@@ -90,6 +91,8 @@ export class Expression implements IExpression {
         // return the newly visited expression
         return expression;
     }
+
+    public abstract equal(expression: IExpression): boolean
 }
 
 export { ILiteralExpression, ICompoundExpression, IIdentifierExpression, IMemberExpression, IMethodExpression, IUnaryExpression, IBinaryExpression, ILogicalExpression, IConditionalExpression, IArrayExpression }

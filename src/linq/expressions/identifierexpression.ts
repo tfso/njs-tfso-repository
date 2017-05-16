@@ -8,4 +8,8 @@ export class IdentifierExpression extends Expression implements IIdentifierExpre
     constructor(public name: string) {
         super(ExpressionType.Identifier);
     }
+
+    public equal(expression: IIdentifierExpression): boolean {
+        return this.type == expression.type && this.name == expression.name;
+    }
 }
