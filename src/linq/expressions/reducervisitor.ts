@@ -25,6 +25,10 @@ export class ReducerVisitor extends ExpressionVisitor {
         this._params = param || null;
     }
 
+    public get it(): string {
+        return this._lambdaExpression != null ? this._lambdaExpression.parameters[0] : null;
+    }
+
     public get isSolvable(): boolean {
         return this._isSolvable;
     }
@@ -45,10 +49,14 @@ export class ReducerVisitor extends ExpressionVisitor {
     }
 
     public visitIdentifier(expression: IIdentifierExpression): IExpression {
-        var obj = this.evaluate(expression);
+        let parent = this.stack.peek();
 
-        if (obj != null) {
-            return new LiteralExpression(obj);
+        if (parent.type == ExpressionType.Member)
+            return expression;
+        
+        let value = this.evaluate(expression);
+        if (value != null) {
+            return new LiteralExpression(value);
         } else {
             this._isSolvable = false;
         }
@@ -57,13 +65,17 @@ export class ReducerVisitor extends ExpressionVisitor {
     }
 
     public visitMember(expression: IMemberExpression): IExpression {
-        let object, property;
+        let object: IExpression,
+            property: IExpression,
+            expr: IMemberExpression;
 
         if ((object = expression.object).type != ExpressionType.Identifier)
             object = expression.object.accept(this);
 
         if ((property = expression.property).type != ExpressionType.Identifier)
             property = expression.property.accept(this);
+
+        
 
         let obj = this.evaluate(object);
 
@@ -102,7 +114,7 @@ export class ReducerVisitor extends ExpressionVisitor {
             // no point to find out it's solvable if this MemberExpression is a nested MemberExpression of Parent.
             if (this._lambdaExpression != null && this.stack.peek().type != ExpressionType.Member) {
                 if (object.type == ExpressionType.Identifier) {
-                    if ((<IIdentifierExpression>object).name != this._lambdaExpression.parameters[0])
+                    if ((<IIdentifierExpression>object).name != this.it)
                         this._isSolvable = false;
                 }
             }

@@ -1,6 +1,6 @@
 ﻿import { Operator, OperatorType } from './operator';
 
-import { IExpression } from './../expressions/expression';
+import { IExpression, ExpressionType } from './../expressions/expression';
 import { LogicalExpression, LogicalOperatorType } from './../expressions/logicalexpression';
 
 import { ReducerVisitor } from './../expressions/reducervisitor';
@@ -102,7 +102,19 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                         break;
 
                     default:
-                        yield child;
+                        switch (child.type) {
+                            case ExpressionType.Member:
+
+                          
+                               
+
+                            case ExpressionType.Method:
+
+                                
+
+                            default:
+                                yield child;
+                        }
                 }
             }
 

@@ -14,7 +14,7 @@ import { LambdaExpression } from './lambdaexpression';
 import { ReducerVisitor } from './reducervisitor';
 
 export class ODataVisitor extends ReducerVisitor {
-    constructor(private it?: Object) {
+    constructor(private _it?: Object) {
         super();
     }
     
@@ -180,8 +180,8 @@ export class ODataVisitor extends ReducerVisitor {
             case ExpressionType.Identifier:
                 let identifier = (<IIdentifierExpression>expression);
 
-                if (this.it != null && this.it.hasOwnProperty(identifier.name) == true)
-                    return this.it[identifier.name];
+                if (this._it != null && this._it.hasOwnProperty(identifier.name) == true)
+                    return this._it[identifier.name];
 
                 break;
 
