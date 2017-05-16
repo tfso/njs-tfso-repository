@@ -1,6 +1,7 @@
 ﻿import { Operator, OperatorType } from './operator';
 
 import { IExpression } from './../expressions/expression';
+import { LogicalExpression, LogicalOperatorType } from './../expressions/logicalexpression';
 
 import { ReducerVisitor } from './../expressions/reducervisitor';
 import { ODataVisitor } from './../expressions/odatavisitor';
@@ -66,7 +67,62 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
         return items.filter(entity => this._predicate(entity));
     }
 
+    public getExpressionIntersection(): IExpression[] {
+        let intersection: Array<IExpression>;
+
+        intersection = Array.from(this.getExpressionGroups()).reduce((acc, curr, idx) => {
+            return Array.from(curr).filter((expr) => {
+                return !acc || acc.some(intersect => expr.equal(intersect));
+            });
+        }, intersection);
+
+        return intersection;
+    }
+
+    public getExpressionUnion(): IExpression[] {
+        let union: Array<IExpression>;
+
+        union = Array.from(this.getExpressionGroups()).reduce((acc, curr, idx) => {
+            return (acc || []).concat(Array.from(curr));
+        }, union);
+
+        return union;
+    }
+
+    private getExpressionGroups(): Iterable<IterableIterator<IExpression>> {
+        let visit = function* (expression: IExpression): Iterable<IterableIterator<IExpression>> {
+            let visitGroup = function* (child: LogicalExpression): IterableIterator<IExpression> {
+                switch (child.operator) {
+                    case LogicalOperatorType.Or:
+                        break;
+
+                    case LogicalOperatorType.And:
+                        if (child.left instanceof LogicalExpression) yield* visitGroup(child.left);
+                        if (child.right instanceof LogicalExpression) yield* visitGroup(child.right);
+                        break;
+
+                    default:
+                        yield child;
+                }
+            }
+
+            if (expression instanceof LogicalExpression) {
+                if (expression.operator == LogicalOperatorType.Or) {
+                    yield* visit(expression.left);
+                    yield* visit(expression.right);
+                }
+                else {
+                    yield visitGroup(expression);
+                }
+            }
+        };
+
+        return visit(this.expression);
+    }
+
     public toString(): string {
         return this._footprint; // should be this._expression.toString() sooner or later
     }
+
+    
 }

@@ -100,4 +100,12 @@ describe("When using OData for ExpressionVisitor", () => {
         assert.equal(expr.type, Expr.ExpressionType.Literal);
         assert.equal((<Expr.LiteralExpression>expr).value, 1);
     })
+
+    it("should evaluate a complex expression with binary operation", () => {
+
+        expr = reducer.visitOData("number ge 5 and number lt 10");
+
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value true");
+    })
 })
