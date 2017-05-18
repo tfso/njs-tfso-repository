@@ -22,6 +22,10 @@ export class ODataVisitor extends ReducerVisitor {
         return super.visitOData(filter);
     }
 
+    public get it(): string {
+        return "";
+    }
+
     public visitMethod(expression: IMethodExpression): IExpression {
         let parameters = expression.parameters.map((arg) => arg.accept(this)),
             caller = null;
@@ -173,15 +177,29 @@ export class ODataVisitor extends ReducerVisitor {
         return result;
     }
 
-    protected evaluate(expression: IExpression): any {
+    protected evaluate(expression: IExpression, it: Object = null): any {
         var value: any = null;
+
+        if (it == null)
+            it = this._it;
 
         switch (expression.type) {
             case ExpressionType.Identifier:
                 let identifier = (<IIdentifierExpression>expression);
 
-                if (this._it != null && this._it.hasOwnProperty(identifier.name) == true)
-                    return this._it[identifier.name];
+                if (it != null && it.hasOwnProperty(identifier.name) == true) {
+                    value = it[identifier.name];
+                }
+                break;
+
+            case ExpressionType.Member:
+                let member = <IMemberExpression>expression,
+                    name: string;
+
+                if (it != null) {
+                    if (member.object.type == ExpressionType.Identifier && it.hasOwnProperty(name = (<IIdentifierExpression>member.object).name) && typeof it[name] == 'object')
+                        value = this.evaluate(member.property, it[name]);
+                }
 
                 break;
 

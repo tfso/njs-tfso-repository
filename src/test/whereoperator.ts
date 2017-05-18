@@ -32,7 +32,7 @@ describe("When using WhereOperator", () => {
         assert.equal(intersection.length, 1, "Expected one expression from intersection");
         assert.equal(intersection[0].type, ExpressionType.Logical);
         assert.equal((<ILogicalExpression>intersection[0]).operator, LogicalOperatorType.Equal);
-        assert.equal((<ILogicalExpression>intersection[0]).left.type, ExpressionType.Member);
+        assert.equal((<ILogicalExpression>intersection[0]).left.type, ExpressionType.Identifier);
         assert.equal((<ILogicalExpression>intersection[0]).right.type, ExpressionType.Literal);
     })
 
@@ -43,7 +43,7 @@ describe("When using WhereOperator", () => {
         assert.equal(intersection.length, 1, "Expected one expression from intersection");
         assert.equal(intersection[0].type, ExpressionType.Logical);
         assert.equal((<ILogicalExpression>intersection[0]).operator, LogicalOperatorType.GreaterOrEqual);
-        assert.equal((<ILogicalExpression>intersection[0]).left.type, ExpressionType.Member);
+        assert.equal((<ILogicalExpression>intersection[0]).left.type, ExpressionType.Identifier);
         assert.equal((<ILogicalExpression>intersection[0]).right.type, ExpressionType.Literal);
     })
 
@@ -100,7 +100,7 @@ describe("When using WhereOperator", () => {
     });
 
     it("should intersect inverted OData expression properties and simplify them", () => {
-        let where = new WhereOperator<ICar>('OData', "2015 le car.registrationYear"),
+        let where = new WhereOperator<ICar>('OData', "2015 le registrationYear"),
             intersection = where.getExpressionIntersection();
 
         assert.equal(intersection.length, 1, "Expected one expression from intersection");

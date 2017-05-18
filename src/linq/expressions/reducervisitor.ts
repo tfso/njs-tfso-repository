@@ -51,76 +51,30 @@ export class ReducerVisitor extends ExpressionVisitor {
     public visitIdentifier(expression: IIdentifierExpression): IExpression {
         let parent = this.stack.peek();
 
-        if (parent.type == ExpressionType.Member)
-            return expression;
-        
-        let value = this.evaluate(expression);
-        if (value != null) {
-            return new LiteralExpression(value);
-        } else {
-            this._isSolvable = false;
+        if (parent.type != ExpressionType.Member) {
+            let value = this.evaluate(expression);
+
+            if (value != null) {
+                return new LiteralExpression(value);
+            }
         }
 
-        return expression;
+        return new IdentifierExpression(expression.name);
     }
 
     public visitMember(expression: IMemberExpression): IExpression {
-        let object: IExpression,
-            property: IExpression,
-            expr: IMemberExpression;
+        let expr: IMemberExpression;
 
-        if ((object = expression.object).type != ExpressionType.Identifier)
-            object = expression.object.accept(this);
+        expr = new MemberExpression(expression.object.accept(this), expression.property.accept(this));
 
-        if ((property = expression.property).type != ExpressionType.Identifier)
-            property = expression.property.accept(this);
+        if (this.stack.peek().type != ExpressionType.Member) {
+            let value = this.evaluate(expr);
 
-        
-
-        let obj = this.evaluate(object);
-
-        if (obj != null && typeof obj == 'object') {
-            var idx;
-            switch (property.type) {
-                case ExpressionType.Identifier:
-                    idx = (<IIdentifierExpression>property).name;
-
-                    break;
-
-                case ExpressionType.Array:
-                    if ((<IArrayExpression>property).elements.length == 1)
-                        idx = this.evaluate((<IArrayExpression>property).elements[0]);
-
-                    break;
-            }
-
-            if (idx != null) {
-                switch (typeof obj[idx]) {
-                    case 'string':
-                    case 'number':
-                        return new LiteralExpression(obj[idx]);
-
-                    case 'object':
-                    // check for date
-
-                    default:
-                        this._isSolvable = false;
-                }
-            } else {
-                this._isSolvable = false;
-            }
-        }
-        else {
-            // no point to find out it's solvable if this MemberExpression is a nested MemberExpression of Parent.
-            if (this._lambdaExpression != null && this.stack.peek().type != ExpressionType.Member) {
-                if (object.type == ExpressionType.Identifier) {
-                    if ((<IIdentifierExpression>object).name != this.it)
-                        this._isSolvable = false;
-                }
-            }
+            if (value != null)
+                return new LiteralExpression(value);
         }
 
-        return new MemberExpression(object, property);
+        return expr;
     }
 
     public visitBinary(expression: IBinaryExpression): IExpression {
@@ -206,7 +160,7 @@ export class ReducerVisitor extends ExpressionVisitor {
         }
     }
 
-    protected evaluate(expression: IExpression): any {
+    protected evaluate(expression: IExpression, it: Object = null): any {
         var value: any = null;
 
         switch (expression.type) {
@@ -231,20 +185,55 @@ export class ReducerVisitor extends ExpressionVisitor {
 
                 var idx: number = -1;
 
-                if (this._params.length > 0) {
+                if (it != null) {
+                    // this object
+                    if (it.hasOwnProperty(identifier.name) && (value = it[identifier.name]) != null) {
+                        switch (typeof value) {
+                            case 'string':
+                            case 'number':
+                                break;
 
-                    if (identifier.name == "this") {
-                        if (this._lambdaExpression.parameters.length == 1)
-                            return this._params[0];
-                    }
-                    else {
+                            case 'object':
+                                if (value.getTime && value.getTime() >= 0)
+                                    break;
 
-                        if ((idx = this._lambdaExpression.parameters.indexOf(identifier.name) - 1) >= 0) {
-                            if (this._params.length >= 0 && this._params.length > idx)
-                                value = this._params[idx];
+                            // fall through
+
+                            default:
+                                value = null;
                         }
                     }
                 }
+                else if (this._lambdaExpression != null && (idx = this._lambdaExpression.parameters.indexOf(identifier.name) - 1) >= 0) {
+                    if (this._params.length >= 0 && this._params.length > idx)
+                        value = this._params[idx];
+                }
+
+                if (value == null)
+                    this._isSolvable = false;
+
+                break;
+
+            case ExpressionType.Member:
+                let object = (<IMemberExpression>expression).object,
+                    property = (<IMemberExpression>expression).property;
+
+                if (this._lambdaExpression != null) {
+                    if (object.type == ExpressionType.Identifier && (<IIdentifierExpression>object).name == "this") {
+                        it = (this._lambdaExpression.parameters.length == 1 && this._params.length == 1) ? this._params[0] : {};
+
+                        if ((value = this.evaluate(property, it)) == null)
+                            this._isSolvable = false;
+                    }
+                    else
+                    {
+                        if (object.type == ExpressionType.Identifier) {
+                            if ((<IIdentifierExpression>object).name != this.it)
+                                this._isSolvable = false;
+                        }
+                    }
+                }
+        
 
                 break;
                 
