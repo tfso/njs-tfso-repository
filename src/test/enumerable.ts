@@ -106,7 +106,23 @@ describe("When using Enumerable", () => {
             let query: Enumerable<ICar> = new Enumerable<ICar>();
 
             query.where("tolower(Place) eq 'brevik'");
-            query.rename({ from: 'Place', to: 'location' })
+            query.remap((name) => {
+                if (name == 'Place') return 'location';
+            })
+
+            let result = query.toArray(list);
+            assert.equal(result.length, 2);
+
+            let where = query.operations.first(WhereOperator);
+        })
+
+        it("should be able to rename a value in a flat model", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>();
+
+            query.where("tolower(location) eq 'BREVIK'");
+            query.remap((name, value) => {
+                if (name == 'location') return value.toLowerCase();
+            })
 
             let result = query.toArray(list);
             assert.equal(result.length, 2);
@@ -118,10 +134,9 @@ describe("When using Enumerable", () => {
             let query: Enumerable<ICar> = new Enumerable<ICar>();
 
             query.where("tolower(car/make) eq 'toyota'");
-
-            //query.rename(<any>{ car: { make: 'type.make',  } });
-
-            query.rename({ from: 'car.make', to: 'type.make' })
+            query.remap((name) => {
+                if (name == 'car.make') return 'type.make';
+            });
 
             let result = query.toArray(list);
             assert.equal(result.length, 2);

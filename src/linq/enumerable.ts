@@ -32,6 +32,7 @@ import { TakeOperator } from './operators/takeoperator';
 import { WhereOperator } from './operators/whereoperator';
 
 import { RenameVisitor } from './expressions/renamevisitor';
+import { RemapVisitor } from './expressions/remapvisitor';
 
 export { OperatorType };
 
@@ -108,6 +109,31 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
        
         return this;
     }
+
+    /**
+     * A remapper of identifier names, members is seperated with dot.
+     * @param remapper Function that returns the new name of the identifier
+     */
+    public remap(remapper: (name: string) => string)
+    /**
+     * A remapper of values that corresponds to a identifier name
+     * @param remapper Function that returns the new value
+     */
+    public remap(remapper: (name: string, value: any) => any) 
+    public remap(remapper: () => any) {
+        let visitor = remapper.length == 2 ? new RemapVisitor(null, remapper) : new RemapVisitor(remapper, null);
+    
+        for (let item of this._operations.values()) {
+            switch (item.type) {
+                case OperatorType.Where:
+                    (<WhereOperator<TEntity>>item).expression = visitor.visit((<WhereOperator<TEntity>>item).expression);
+                    break;
+            }
+        }
+
+        return this;
+    }
+
 
     /**
      * Where clause using OData $filter expression returning either true or false. Any parameters used is properties of TEntity

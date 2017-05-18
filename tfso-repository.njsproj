@@ -65,6 +65,7 @@
     <TypeScriptCompile Include="src\linq\expressions\methodexpression.ts" />
     <TypeScriptCompile Include="src\linq\expressions\odatavisitor.ts" />
     <TypeScriptCompile Include="src\linq\expressions\reducervisitor.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\remapvisitor.ts" />
     <TypeScriptCompile Include="src\linq\expressions\renamevisitor.ts" />
     <TypeScriptCompile Include="src\linq\expressions\unaryexpression.ts" />
     <TypeScriptCompile Include="src\linq\enumerable.ts" />
