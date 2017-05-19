@@ -28,142 +28,171 @@ export class ODataVisitor extends ReducerVisitor {
 
     public visitMethod(expression: IMethodExpression): IExpression {
         let parameters = expression.parameters.map((arg) => arg.accept(this)),
-            caller = null;
+            caller: IExpression = undefined,
+            name: string = undefined
 
-        if (parameters.every(expression => expression.type == ExpressionType.Literal) == true) {
-            // all parameters is a literal, eg; solvable
-            let params: Array<any> = parameters.map(expr => (<LiteralExpression>expr).value);
+        
+        let params: Array<any>;
 
-            switch (expression.name) {
-                // String Functions
-                case 'substringof': // bool substringof(string po, string p1)
-                    if ((params.length == 2 && params.every(p => typeof p == 'string')) == false)
-                        throw new Error('Method "substringof" requires parameters of (string, string), but got "' + params.map(p => typeof p).join(', ') + '"');
+        // routine to get all parameters that is a literal, eg; solvable
+        let getParams = (expression: IMethodExpression, ...typeofs: Array<string>) => {
+            let params: Array<any> = null,
+                getType = (t) => {
+                    if (typeof t == 'object') {
+                        if (t.getTime && t.getTime() >= 0)
+                            return 'date';
+                    }
 
+                    return typeof t;
+                };
+
+            try {
+                if (parameters.every(expression => expression.type == ExpressionType.Literal) == true) {
+                    params = parameters.map(expr => (<LiteralExpression>expr).value);
+
+                    if (new RegExp('^' + typeofs.map(t => t.endsWith('?') ? '(' + t.slice(0, -1) + ')?' : t).join(';') + ';?$').test(params.map(p => getType(p)).join(';') + ';') == false)
+                        throw new TypeError(params.map(p => getType(p)).join(', '));
+                }
+                else if ((parameters.length == typeofs.length) == false) {
+                    throw new Error();
+                }
+            }
+            catch (ex) {
+                throw new Error('Method "' + expression.name + '" requires parameters of (' + typeofs.join(', ') + ')' + (ex.name == 'TypeError' ? ', but got "' + ex.message + '"' : ''));
+            }
+
+            return params;
+        }
+
+        switch (expression.name) {
+            // String Functions
+            case 'substringof': // bool substringof(string po, string p1)
+                if ((params = getParams(expression, 'string', 'string')) != null)
                     return new LiteralExpression(String(params[0]).indexOf(String(params[1])) >= 0);
 
-                case 'endswith': // bool endswith(string p0, string p1)
-                    if ((params.length == 2 && params.every(p => typeof p == 'string')) == false)
-                        throw new Error('Method "endswith" requires parameters of (string, string), but got "' + params.map(p => typeof p).join(', ') + '"');
+                break;
 
+            case 'endswith': // bool endswith(string p0, string p1)
+                if ((params = getParams(expression, 'string', 'string')) != null)
                     return new LiteralExpression(String(params[0]).endsWith(String(params[1])));
 
-                case 'startswith': // bool startswith(string p0, string p1)
-                    if ((params.length == 2 && params.every(p => typeof p == 'string')) == false)
-                        throw new Error('Method "startswith" requires parameters of (string, string), but got "' + params.map(p => typeof p).join(', ') + '"');
+                break;
 
+            case 'startswith': // bool startswith(string p0, string p1)
+                if ((params = getParams(expression, 'string', 'string')) != null)
                     return new LiteralExpression(String(params[0]).startsWith(String(params[1])));
 
-                case 'length': // int length(string p0)
-                    if ((params.length == 1 && params.every(p => typeof p == 'string')) == false)
-                        throw new Error('Method "length" requires parameters of (string), but got "' + params.map(p => typeof p).join(', ') + '"');
+                break;
 
+            case 'length': // int length(string p0)
+                if ((params = getParams(expression, 'string')) != null)
                     return new LiteralExpression(String(params[0]).length);
+                
+                break;
 
-                case 'indexof': // int indexof(string p0, string p1)
-                    if ((params.length == 2 && params.every(p => typeof p == 'string')) == false)
-                        throw new Error('Method "indexof" requires parameters of (string, string), but got "' + params.map(p => typeof p).join(', ') + '"');
-
+            case 'indexof': // int indexof(string p0, string p1)
+                if ((params = getParams(expression, 'string', 'string')) != null)
                     return new LiteralExpression(String(params[0]).indexOf(String(params[1])));
 
-                case 'replace': // string replace(string p0, string find, string replace)
-                    if ((params.length == 3 && params.every(p => typeof p == 'string')) == false)
-                        throw new Error('Method "replace" requires parameters of (string, string, string), but got "' + params.map(p => typeof p).join(', ') + '"');
+                break;
 
+            case 'replace': // string replace(string p0, string find, string replace)
+                if ((params = getParams(expression, 'string', 'string', 'string')) != null)
                     return new LiteralExpression(String(params[0]).replace(String(params[1]), String(params[2])));
 
-                case 'substring': // string substring(string p0, int pos, int? length)
-                    if ((params.length >= 2 && typeof params[0] == "string" && typeof params[1] == 'number' && (params.length == 3 ? typeof params[3] == 'number' : true)) == false)
-                        throw new Error('Method "replace" requires parameters of (string, int, int?), but got "' + params.map(p => typeof p).join(', ') + '"');
+                break;
 
+            case 'substring': // string substring(string p0, int pos, int? length)
+                if ((params = getParams(expression, 'string', 'number', 'number?')) != null)
                     return new LiteralExpression(String(params[0]).replace(String(params[1]), String(params[2])));
+
+                break;
                     
-                case 'tolower': // string tolower(string p0)
-                    if ((params.length == 1 && params.every(p => typeof p == 'string')) == false)
-                        throw new Error('Method "tolower" requires parameters of (string), but got "' + params.map(p => typeof p).join(', ') + '"');
-
+            case 'tolower': // string tolower(string p0)
+                if ((params = getParams(expression, 'string')) != null)
                     return new LiteralExpression(String(params[0]).toLowerCase());
 
-                case 'toupper': // string toupper(string p0)
-                    if ((params.length == 1 && params.every(p => typeof p == 'string')) == false)
-                        throw new Error('Method "toupper" requires parameters of (string), but got "' + params.map(p => typeof p).join(', ') + '"');
+                break;
 
+            case 'toupper': // string toupper(string p0)
+                if ((params = getParams(expression, 'string')) != null)
                     return new LiteralExpression(String(params[0]).toUpperCase());
 
-                case 'trim': // string trim(string p0)
-                    if ((params.length == 1 && params.every(p => typeof p == 'string')) == false)
-                        throw new Error('Method "trim" requires parameters of (string), but got "' + params.map(p => typeof p).join(', ') + '"');
+                break;
 
+            case 'trim': // string trim(string p0)
+                if ((params = getParams(expression, 'string')) != null)
                     return new LiteralExpression(String(params[0]).trim());
 
-                case 'concat': // string concat(string p0, string p1)
-                    if ((params.length == 2 && params.every(p => typeof p == 'string')) == false)
-                        throw new Error('Method "concat" requires parameters of (string, string), but got "' + params.map(p => typeof p).join(', ') + '"');
+                break;
 
+            case 'concat': // string concat(string p0, string p1)
+                if ((params = getParams(expression, 'string', 'string')) != null)
                     return new LiteralExpression(String(params[0]) + String(params[1]));
 
-                // Date Functions
-                case 'day': // int day(DateTime p0)
-                    if ((params.length == 1 && typeof params[0] == 'object' && params[0].getTime() > 0) == false)
-                        throw new Error('Method "year" requires parameter of (Date), but got "' + typeof params[0] + '"');
+                break;
 
+            // Date Functions
+            case 'day': // int day(DateTime p0)
+                if ((params = getParams(expression, 'date')) != null)
                     return new LiteralExpression((<Date>params[0]).getDate());
-                        
-                case 'hour': // int hour(DateTime p0)
-                    if ((params.length == 1 && typeof params[0] == 'object' && params[0].getTime() > 0) == false)
-                        throw new Error('Method "year" requires parameter of (Date), but got "' + typeof params[0] + '"');
 
+                break;
+                        
+            case 'hour': // int hour(DateTime p0)
+                if ((params = getParams(expression, 'date')) != null)
                     return new LiteralExpression((<Date>params[0]).getUTCHours());
 
-                case 'minute': // int minute(DateTime p0)
-                    if ((params.length == 1 && typeof params[0] == 'object' && params[0].getTime() > 0) == false)
-                        throw new Error('Method "year" requires parameter of (Date), but got "' + typeof params[0] + '"');
+                break;
 
+            case 'minute': // int minute(DateTime p0)
+                if ((params = getParams(expression, 'date')) != null)
                     return new LiteralExpression((<Date>params[0]).getUTCMinutes());
 
-                case 'month': // int month(DateTime p0)
-                    if ((params.length == 1 && typeof params[0] == 'object' && params[0].getTime() > 0) == false)
-                        throw new Error('Method "year" requires parameter of (Date), but got "' + typeof params[0] + '"');
+                break;
 
+            case 'month': // int month(DateTime p0)
+                if ((params = getParams(expression, 'date')) != null)
                     return new LiteralExpression((<Date>params[0]).getMonth() + 1);
 
-                case 'second': // int second(DateTime p0)
-                    if ((params.length == 1 && typeof params[0] == 'object' && params[0].getTime() > 0) == false)
-                        throw new Error('Method "year" requires parameter of (Date), but got "' + typeof params[0] + '"');
+                break;
 
+            case 'second': // int second(DateTime p0)
+                if ((params = getParams(expression, 'date')) != null)
                     return new LiteralExpression((<Date>params[0]).getSeconds());
 
-                case 'year': // int year(DateTime p0)
-                    if ((params.length == 1 && typeof params[0] == 'object' && params[0].getTime() > 0) == false)
-                        throw new Error('Method "year" requires parameter of (Date), but got "' + typeof params[0] + '"');
+                break;
 
+            case 'year': // int year(DateTime p0)
+                if ((params = getParams(expression, 'date')) != null)
                     return new LiteralExpression((<Date>params[0]).getFullYear());
 
-                // Math Functions
-                case 'round': // number round(number p0)
-                    if ( (params.length == 1 && params.every(p => typeof p == 'number')) == false)
-                        throw new Error('Method "round" requires parameters of (number), but got "' + params.map(p => typeof p).join(', ') + '"');
+                break;
 
-                    return new LiteralExpression( Math.round( Number(params[0]) ));
+            // Math Functions
+            case 'round': // number round(number p0)
+                if ((params = getParams(expression, 'number')) != null)
+                    return new LiteralExpression(Math.round(Number(params[0])));
 
-                case 'floor': // number floor(number p0)
-                    if ((params.length == 1 && params.every(p => typeof p == 'number')) == false)
-                        throw new Error('Method "floor" requires parameters of (number), but got "' + params.map(p => typeof p).join(', ') + '"');
+                break;
 
+            case 'floor': // number floor(number p0)
+                if ((params = getParams(expression, 'number')) != null)
                     return new LiteralExpression(Math.floor(Number(params[0])));
 
-                case 'ceiling': // number ceiling(number p0)
-                    if ((params.length == 1 && params.every(p => typeof p == 'number')) == false)
-                        throw new Error('Method "ceiling" requires parameters of (number), but got "' + params.map(p => typeof p).join(', ') + '"');
+                break;
 
+            case 'ceiling': // number ceiling(number p0)
+                if ((params = getParams(expression, 'number')) != null)
                     return new LiteralExpression(Math.ceil(Number(params[0])));
 
-                // Type Functions
-                case 'isof': // bool IsOf(type p0) | bool IsOf(expression p0, type p1)
+                break;
 
-                default:
-                    throw new Error('OData visitor does not support function "' + expression.name + '"');
-            }
+            // Type Functions
+            //case 'isof': // bool IsOf(type p0) | bool IsOf(expression p0, type p1)
+
+            default:
+                throw new Error('OData visitor does not support function "' + expression.name + '"');
         }
 
         return new MethodExpression(expression.name, parameters, caller);
@@ -202,7 +231,7 @@ export class ODataVisitor extends ReducerVisitor {
                 }
 
                 break;
-
+            
             default:
                 value = super.evaluate(expression);
                 break;

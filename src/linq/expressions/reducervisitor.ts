@@ -77,6 +77,15 @@ export class ReducerVisitor extends ExpressionVisitor {
         return expr;
     }
 
+    public visitMethod(expression: IMethodExpression): IExpression {
+        let expr: IMethodExpression,
+            value: any;
+
+        expr = new MethodExpression(expression.name, expression.parameters.map((arg) => arg.accept(this)), expression.caller);
+
+        return expr;
+    }
+
     public visitBinary(expression: IBinaryExpression): IExpression {
         let left = expression.left.accept(this),
             right = expression.right.accept(this);
@@ -235,8 +244,7 @@ export class ReducerVisitor extends ExpressionVisitor {
                 }
         
 
-                break;
-                
+                break;                
         }
 
         return value;

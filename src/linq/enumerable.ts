@@ -58,7 +58,6 @@ export class Operation<TEntity> {
 
         return false;
     }
-
     
     public first<T extends Operator<TEntity>>(operator: { new (...args: any[]): T }): T
     public first(operator: { new (...args: any[]): Operator<TEntity> }): Operator<TEntity>
@@ -239,6 +238,40 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
     public static fromArray<TEntity>(items?: Array<TEntity>): Enumerable<TEntity> {
         return new Enumerable(items);
     }
+
+    //public toString(type: any): string {
+    //    let out: string = '';
+
+    //    switch (type) {
+    //        case 'OData':
+    //            for (let item of this._operations.values()) {
+    //                switch (item.type) {
+    //                    case OperatorType.Skip:
+    //                        out += "$skip=" + (<SkipOperator<TEntity>>item).count;
+    //                        break;
+
+    //                    case OperatorType.Take:
+    //                        out += "$top=" + (<TakeOperator<TEntity>>item).count;
+    //                        break;
+
+    //                    case OperatorType.Where:
+    //                        out += "$filter=";
+
+
+
+    //                        break;
+    //                }
+    //            }
+
+    //        default:
+    //            for (let item of this._operations.values())
+    //                out += (out.length == 0 ? '' : '.') + OperatorType[item.type] + '(' + item.toString() + ')'
+
+    //            break;
+    //    }
+
+    //    return out;
+    //}
 
     [Symbol.iterator] = function* (): Iterator<TEntity> {
         let counter = 0;
