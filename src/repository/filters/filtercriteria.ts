@@ -21,12 +21,18 @@ export class FilterCriteria implements IFilterCriteria {
 
     public get property() {
         switch (this._expression.left.type) {
+            case ExpressionType.Identifier:
+                return (<IIdentifierExpression>this._expression.left).name;
+
             case ExpressionType.Member:
                 return (<IIdentifierExpression>(<IMemberExpression>this._expression.left).property).name;
 
             case ExpressionType.Literal:
 
                 switch (this._expression.right.type) {
+                    case ExpressionType.Identifier:
+                        return (<IIdentifierExpression>this._expression.right).name;
+
                     case ExpressionType.Member:
                         return (<IIdentifierExpression>(<IMemberExpression>this._expression.right).property).name;
 
@@ -42,6 +48,7 @@ export class FilterCriteria implements IFilterCriteria {
 
     public get operator() {
         switch (this._expression.left.type) {
+            case ExpressionType.Identifier:
             case ExpressionType.Member:
                 switch (this._expression.operator) {
                     case LogicalOperatorType.Equal:
@@ -98,8 +105,8 @@ export class FilterCriteria implements IFilterCriteria {
             case ExpressionType.Literal:
                 return (<ILiteralExpression>this._expression.left).value;
 
+            case ExpressionType.Identifier:
             case ExpressionType.Member:
-
                 switch (this._expression.right.type) {
                     case ExpressionType.Literal:
                         return (<ILiteralExpression>this._expression.right).value;
@@ -117,6 +124,15 @@ export class FilterCriteria implements IFilterCriteria {
         // requires "member.property [comparison operator] literal" for now
 
         switch (this._expression.left.type) {
+            case ExpressionType.Identifier:
+                switch (this._expression.right.type) {
+                    case ExpressionType.Literal:
+                        return true;
+
+                    default:
+                        return false;
+                }
+
             case ExpressionType.Member:
 
                 if ((<IMemberExpression>this._expression.left).object.type == ExpressionType.Identifier && (<IMemberExpression>this._expression.left).property.type == ExpressionType.Identifier) {
