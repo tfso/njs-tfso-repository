@@ -10,7 +10,7 @@ export class OrderByOperator<TEntity> extends Operator<TEntity> {
         this._expression = new ExpressionVisitor().visitLambda(property);
     }
 
-    public evaluate(items: TEntity[]): TEntity[] {
+    public evaluate(items: Iterable<TEntity>): Iterable<TEntity> {
         if (this._expression.type != ExpressionType.Member)
             throw new TypeError('Order by is expecting a member property as sorting property');
 
@@ -22,10 +22,11 @@ export class OrderByOperator<TEntity> extends Operator<TEntity> {
 
         property = <IIdentifierExpression>memberProperty;
 
-        items.sort((a, b) => {
+        let ar = Array.from(items);
+        ar.sort((a, b) => {
             return a[property.name] == b[property.name] ? 0 : a[property.name] < b[property.name] ? -1 : 1;
         })
 
-        return items;
+        return ar;   
     }
 }

@@ -10,5 +10,5 @@ export abstract class Operator<TEntity> {
 
     }
 
-    public abstract evaluate(items: TEntity[]): TEntity[];
+    public abstract evaluate(items: Iterable<TEntity>): Iterable<TEntity>;
 }

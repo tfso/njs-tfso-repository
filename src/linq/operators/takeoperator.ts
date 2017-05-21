@@ -5,7 +5,14 @@ export class TakeOperator<TEntity> extends Operator<TEntity> {
         super(OperatorType.Take);
     }
 
-    public evaluate(items: TEntity[]): TEntity[] {
-        return items.slice(0, this.count);
+    public * evaluate(items: Iterable<TEntity>): IterableIterator<TEntity> {
+        let idx = 0;
+
+        for (let item of items) {
+            if (idx++ == this.count)
+                break;
+
+            yield item;
+        }
     }
 }

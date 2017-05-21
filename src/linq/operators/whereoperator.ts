@@ -71,8 +71,9 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
         this._expression = value;
     }
 
-    public evaluate(items: TEntity[]): TEntity[] {
-        return items.filter(entity => this._predicate(entity));
+    public* evaluate(items: Iterable<TEntity>): IterableIterator<TEntity> {
+        for (let item of items)
+            if (this._predicate(item)) yield item;
     }
 
     public getExpressionIntersection(): IExpression[] {

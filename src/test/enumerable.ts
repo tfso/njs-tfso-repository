@@ -32,6 +32,16 @@ describe("When using Enumerable", () => {
         ];        
     })
 
+    describe("with joins", () => {
+
+        it("should be able to do it", () => {
+            
+
+
+        })
+
+    })
+
     describe("with Lambda query", () => {
 
         it("should be able to do a simple query", () => {
@@ -170,10 +180,17 @@ describe("When using Enumerable", () => {
         assert.deepEqual(ar.map(item => item.location), ["BREVIK", "BREVIK", "HEISTAD", "LANGESUND", "LARVIK", "PORSGRUNN", "PORSGRUNN", "SKIEN"]);
     })
 
-    it("should be able to iterate", () => {
-        var ar = new Enumerable(list).take(3);
+    it("should be able to get first element", () => {
+        var el = new Enumerable(list).orderBy(it => it.location).first();
 
-        assert.equal(Array.from(ar).length, 3);
+        assert.equal(el.id, 5);
+    })
+
+    it("should be able to iterate", () => {
+        var enumerable = new Enumerable(list).take(3),
+            ar = Array.from(enumerable);
+
+        assert.equal(ar.length, 3);
     })
 
     it("should just work", () => {
@@ -186,12 +203,6 @@ describe("When using Enumerable", () => {
 
         assert.ok(ar.length == 3);
         assert.ok(ar[0].id == 6);
-    })
-
-    it("should be able to get first element", () => {
-        var el = new Enumerable(list).orderBy(it => it.location).first();
-
-        assert.equal(el.id, 5);
     })
 
     it("should iterate through operations", () => {

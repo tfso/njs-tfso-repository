@@ -88,25 +88,9 @@ export class Operation<TEntity> {
 export default class Enumerable<TEntity> implements IEnumerable<TEntity>
 {
     private _operations: Operation<TEntity>;
-    private _renames: Map<string, string> = new Map();
 
-    constructor(private items?: Array<TEntity>) {
+    constructor(private items?: Iterable<TEntity>) {
         this._operations = new Operation<TEntity>();
-    }
-
-    public rename(...values: Array<{ from: string, to: string }>): this { 
-        // remap existing Identifiers/Members
-        let renameVisitor = new RenameVisitor(...values);
-
-        for (let item of this._operations.values()) {
-            switch (item.type) {
-                case OperatorType.Where:
-                    (<WhereOperator<TEntity>>item).expression = renameVisitor.visit((<WhereOperator<TEntity>>item).expression);
-                    break; 
-            }
-        }
-       
-        return this;
     }
 
     /**
@@ -187,18 +171,19 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
     }
 
     public first(items?: Array<TEntity>): TEntity {
-        let result = this.toArray(items);
+        let iteratorResult = this.iterator().next();
 
-        return result.length > 0 ? result[0] : null;
+        if (iteratorResult.done == false)
+            return iteratorResult.value;
+
+        return null;
     }
 
-    public toArray(items?: Array<TEntity>): Array<TEntity> {
-        let ar = items || this.items;
+    public toArray(items?: Iterable<TEntity>): Array<TEntity> {
+        if (items)
+            this.items = items;
 
-        for (let item of this._operations.values())
-            ar = item.evaluate(ar);
-
-        return ar;
+        return Array.from(this.iterator());
     }
 
     //public validateSequence(...operators: OperatorType[]): boolean {
@@ -273,20 +258,39 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
     //    return out;
     //}
 
-    [Symbol.iterator] = function* (): Iterator<TEntity> {
-        let counter = 0;
-        let result: Array<TEntity> = this.toArray();
+    private* iterator(): IterableIterator<TEntity> {
+        let result = this.items;
 
-        while (true) {
-            for (let item of result) {
-                var reset = yield item;
+        // optimize this, no point do all where predicates when we want to take first 10 
+        for (let item of this._operations.values())
+            result = item.evaluate(result);
 
-                if (reset === true)
-                    break;
-            }
+        for (let item of result) {
+            let reset = yield item;
 
-            if (reset !== true) // continue while loop if it's resetted
+            if (reset === true)
                 break;
         }
     }
+
+    [Symbol.iterator] = () => {
+        return this.iterator();
+    }
+
+    //[Symbol.iterator] = function* (): Iterator<TEntity> {
+    //    let counter = 0,
+    //        iterator = this.iterator();
+
+    //    while (true) {
+    //        for (let item of iterator) {
+    //            var reset = yield item;
+
+    //            if (reset === true)
+    //                break;
+    //        }
+
+    //        if (reset !== true) // continue while loop if it's resetted
+    //            break;
+    //    }
+    //}
 }
