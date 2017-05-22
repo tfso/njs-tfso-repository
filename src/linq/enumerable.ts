@@ -30,6 +30,8 @@ import { OrderByOperator } from './operators/orderbyoperator';
 import { SkipOperator } from './operators/skipoperator';
 import { TakeOperator } from './operators/takeoperator';
 import { WhereOperator } from './operators/whereoperator';
+import { SelectOperator } from './operators/selectoperator';
+import { JoinOperator } from './operators/joinoperator';
 
 import { RenameVisitor } from './expressions/renamevisitor';
 import { RemapVisitor } from './expressions/remapvisitor';
@@ -88,9 +90,18 @@ export class Operation<TEntity> {
 export default class Enumerable<TEntity> implements IEnumerable<TEntity>
 {
     private _operations: Operation<TEntity>;
+    protected _child;
 
-    constructor(private items?: Iterable<TEntity>) {
+    constructor(private items?: Iterable<TEntity>, public readonly parent?: IEnumerable<any>) {
         this._operations = new Operation<TEntity>();
+    }
+
+    protected get child(): IEnumerable<any> {
+        return this._child;
+    }
+
+    public get operations(): Operation<TEntity> {
+        return this._operations;
     }
 
     /**
@@ -152,6 +163,23 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
         return this;
     }
 
+    /**
+     * returns a new IEnumerable of TResult
+     * @param selector
+     */
+    public select<TResult>(selector: (it: TEntity) => TResult): IEnumerable<TResult> {
+        return this._child = new Enumerable<TResult>(new SelectOperator<TEntity>(selector).evaluate(this), this);
+    }
+
+    /**
+     * returns a new IEnumerable of TResult (Inner Join)
+     * @param enumerable
+     * @param predicate
+     */
+    public join<TInner, TResult>(inner: IEnumerable<TInner>, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, selector: (outer: TEntity, inner: Iterator<TInner>) => TResult): IEnumerable<TResult> {
+        return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(outerKey, innerKey, selector).evaluate(this, inner), this);
+    }
+
     public take(count: number): this {
         this._operations.add(new TakeOperator<TEntity>(count));
 
@@ -186,43 +214,10 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
         return Array.from(this.iterator());
     }
 
-    //public validateSequence(...operators: OperatorType[]): boolean {
-    //    let idx = -1;
-       
-    //    return operators.every(operator => {
-    //        let newIdx = 0;
-
-    //        newIdx = this._stack.findIndex(item => (item.type & operator) > 0)
-
-    //        if (newIdx == -1) {
-    //            return true;
-    //        } else if (newIdx > idx) {
-    //            idx = newIdx; return true;
-    //        } else {
-    //            return false;
-    //        }
-    //    });
-    //}
-
-    //public getFirstOperator(type: OperatorType): Operator<TEntity> {
-    //    for (let i = 0; i < this._stack.length; i++)
-    //        if (this._stack[i].type == type)
-    //            return this._stack[i];
-    //}
-
-    //public removeFirstOperator(type: OperatorType): Operator<TEntity> {
-    //    for (let i = 0; i < this._stack.length; i++)
-    //        if (this._stack[i].type == type)
-    //            return this._stack.splice(i, 1)[0];
-    //}
-
-    public get operations(): Operation<TEntity> {
-        return this._operations;
-    }
-
     public static fromArray<TEntity>(items?: Array<TEntity>): Enumerable<TEntity> {
         return new Enumerable(items);
     }
+
 
     //public toString(type: any): string {
     //    let out: string = '';
@@ -276,21 +271,4 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
     [Symbol.iterator] = () => {
         return this.iterator();
     }
-
-    //[Symbol.iterator] = function* (): Iterator<TEntity> {
-    //    let counter = 0,
-    //        iterator = this.iterator();
-
-    //    while (true) {
-    //        for (let item of iterator) {
-    //            var reset = yield item;
-
-    //            if (reset === true)
-    //                break;
-    //        }
-
-    //        if (reset !== true) // continue while loop if it's resetted
-    //            break;
-    //    }
-    //}
 }

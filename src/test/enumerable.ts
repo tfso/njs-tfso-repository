@@ -16,11 +16,24 @@ interface ICar {
     }
 }
 
+interface ISimpleCar {
+    id: number
+    make: string
+    model: string
+}
+
+interface ILocation {
+    location: string
+    zipcode: number
+    ziparea: string
+}
+
 describe("When using Enumerable", () => {
-    var list: Array<ICar>;
+    var cars: Array<ICar>,
+        locations: Array<ILocation>;
 
     beforeEach(() => {
-        list = [
+        cars = [
             <ICar>{ id: 1, location: 'SKIEN', registrationYear: 2016, type: { make: 'SAAB', model: '9-3' } },
             <ICar>{ id: 2, location: 'PORSGRUNN', registrationYear: 2010, type: { make: 'NISSAN', model: 'QASHQAI' } },
             <ICar>{ id: 3, location: 'PORSGRUNN', registrationYear: 2005, type: { make: 'SAAB', model: '9-3' } },
@@ -29,17 +42,29 @@ describe("When using Enumerable", () => {
             <ICar>{ id: 6, location: 'BREVIK', registrationYear: 2014, type: { make: 'HONDA', model: 'HRV' } },
             <ICar>{ id: 7, location: 'HEISTAD', registrationYear: 2013, type: { make: 'TOYOTA', model: 'YARIS' } },
             <ICar>{ id: 8, location: 'LARVIK', registrationYear: 2009, type: { make: 'HONDA', model: 'CIVIC' } }
-        ];        
+        ];
+
+        locations = [
+            <ILocation>{ location: 'SKIEN', zipcode: 3955, ziparea: 'Skien' },
+            <ILocation>{ location: 'PORSGRUNN', zipcode: 3949, ziparea: 'Porsgrunn' },
+            <ILocation>{ location: 'LANGESUND', zipcode: 3970, ziparea: 'Langesund' },
+            <ILocation>{ location: 'HEISTAD', zipcode: 3943, ziparea: 'Porgsrunn' },
+            <ILocation>{ location: 'BREVIK', zipcode: 3940, ziparea: 'Porsgrunn' }
+        ]
     })
 
     describe("with joins", () => {
 
         it("should be able to do it", () => {
-            
+            let car = new Enumerable<ICar>(cars)
+                .where(it => it.id == 2)
+                .join<ILocation, any>(new Enumerable(locations).select(it => <any>{ location: it.location, city: it.ziparea }), a => a.location, b => b.location, (a, b) => Object.assign({}, a, b.next().value || {}))
+                .first();
 
-
+            assert.ok(car != null);
+            assert.equal(car.id, 2);
+            assert.equal(car.city, 'Porsgrunn');
         })
-
     })
 
     describe("with Lambda query", () => {
@@ -51,7 +76,7 @@ describe("When using Enumerable", () => {
             query.skip(1);
             query.take(3);
 
-            let result = query.toArray(list);
+            let result = query.toArray(cars);
 
             assert.equal(result.length, 1);
         })
@@ -63,7 +88,7 @@ describe("When using Enumerable", () => {
             query.skip(1);
             query.take(3);
 
-            let result = query.toArray(list);
+            let result = query.toArray(cars);
 
             assert.equal(result.length, 1);
         })
@@ -73,7 +98,7 @@ describe("When using Enumerable", () => {
 
             query.where((it, loc, year) => it.location == loc && it.registrationYear >= year, 'BREVIK', 2010);
 
-            let result = query.toArray(list);
+            let result = query.toArray(cars);
 
             assert.equal(result.length, 1);
         })
@@ -83,7 +108,7 @@ describe("When using Enumerable", () => {
 
             query.where(it => it.type.make == 'TOYOTA');
 
-            let result = query.toArray(list);
+            let result = query.toArray(cars);
 
             assert.equal(result.length, 2);
         })
@@ -98,7 +123,7 @@ describe("When using Enumerable", () => {
             query.skip(1);
             query.take(3);
 
-            let result = query.toArray(list);
+            let result = query.toArray(cars);
 
             assert.equal(result.length, 1);
         })
@@ -108,7 +133,7 @@ describe("When using Enumerable", () => {
 
             query.where("type/make eq 'TOYOTA'");
 
-            let result = query.toArray(list);
+            let result = query.toArray(cars);
             assert.equal(result.length, 2);
         })
 
@@ -120,7 +145,7 @@ describe("When using Enumerable", () => {
                 if (name == 'Place') return 'location';
             })
 
-            let result = query.toArray(list);
+            let result = query.toArray(cars);
             assert.equal(result.length, 2);
 
             let where = query.operations.first(WhereOperator);
@@ -134,7 +159,7 @@ describe("When using Enumerable", () => {
                 if (name == 'location') return value.toLowerCase();
             })
 
-            let result = query.toArray(list);
+            let result = query.toArray(cars);
             assert.equal(result.length, 2);
 
             let where = query.operations.first(WhereOperator);
@@ -148,7 +173,7 @@ describe("When using Enumerable", () => {
                 if (name == 'car.make') return 'type.make';
             });
 
-            let result = query.toArray(list);
+            let result = query.toArray(cars);
             assert.equal(result.length, 2);
 
             let where = query.operations.first(WhereOperator);
@@ -156,38 +181,38 @@ describe("When using Enumerable", () => {
     })
 
     it("should take top 1", () => {
-        var ar = new Enumerable(list).take(1).toArray();
+        var ar = new Enumerable(cars).take(1).toArray();
 
         assert.ok(ar.length == 1);
     });
 
     it("should skip 5", () => {
-        var ar = new Enumerable(list).skip(5).toArray();
+        var ar = new Enumerable(cars).skip(5).toArray();
 
         assert.ok(ar[0].id == 6);
     });
 
     it("should skip 5 and take 3", () => {
-        var ar = new Enumerable(list).skip(5).take(3).toArray();
+        var ar = new Enumerable(cars).skip(5).take(3).toArray();
 
         assert.ok(ar.length == 3);
         assert.ok(ar[0].id == 6);
     });
 
     it("should order by a property", () => {
-        var ar = new Enumerable(list).orderBy(it => it.location).toArray();
+        var ar = new Enumerable(cars).orderBy(it => it.location).toArray();
         
         assert.deepEqual(ar.map(item => item.location), ["BREVIK", "BREVIK", "HEISTAD", "LANGESUND", "LARVIK", "PORSGRUNN", "PORSGRUNN", "SKIEN"]);
     })
 
     it("should be able to get first element", () => {
-        var el = new Enumerable(list).orderBy(it => it.location).first();
+        var el = new Enumerable(cars).orderBy(it => it.location).first();
 
         assert.equal(el.id, 5);
     })
 
     it("should be able to iterate", () => {
-        var enumerable = new Enumerable(list).take(3),
+        var enumerable = new Enumerable(cars).take(3),
             ar = Array.from(enumerable);
 
         assert.equal(ar.length, 3);
@@ -199,7 +224,7 @@ describe("When using Enumerable", () => {
         query.skip(5)
         query.take(3);
         
-        var ar = query.toArray(list);
+        var ar = query.toArray(cars);
 
         assert.ok(ar.length == 3);
         assert.ok(ar[0].id == 6);
@@ -222,6 +247,17 @@ describe("When using Enumerable", () => {
         }
 
         assert.equal(count, 2);
+    })
+
+    it("should be able to convert list by using select", () => {
+        let car = new Enumerable(cars)
+            .where(it => it.id == 2)
+            .select<ISimpleCar>(it => <ISimpleCar>{ id: it.id, make: it.type.make, model: it.type.model })
+            .first();
+
+        assert.equal(car.id, 2);
+        assert.equal(car.make, 'NISSAN');
+        assert.equal(car.model, 'QASHQAI');
     })
 
     it("should be able to get first Operator by class", () => {

@@ -2,7 +2,9 @@
     Where = 1,
     Take = 2,
     Skip = 4,
-    OrderBy = 8
+    OrderBy = 8,
+    Select = 16,
+    Join = 32
 }
 
 export abstract class Operator<TEntity> {
@@ -10,5 +12,5 @@ export abstract class Operator<TEntity> {
 
     }
 
-    public abstract evaluate(items: Iterable<TEntity>): Iterable<TEntity>;
+    public abstract evaluate(...args: any[]): Iterable<TEntity>;
 }
