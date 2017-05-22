@@ -1,4 +1,7 @@
 ﻿export interface IEnumerable<TEntity> extends Iterable<TEntity> {
+    readonly operations: Operation<TEntity>
+    readonly parent: IEnumerable<any>
+    child: IEnumerable<any>
 
     /**
     * Where clause using OData $filter expression returning either true or false. Any parameters used is properties of TEntity
@@ -18,11 +21,12 @@
     take(count: number): this
     //reverse(): this
 
+    join<TInner, TResult>(inner: IEnumerable<TInner>, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, selector: (outer: TEntity, inner: Iterator<TInner>) => TResult): IEnumerable<TResult>
+    select<TResult>(selector: (it: TEntity) => TResult): IEnumerable<TResult>
+
     first(items?: Array<TEntity>): TEntity
     toArray(items: Array<TEntity>): Array<TEntity>
     toArray(): Array<TEntity>
-
-    readonly operations: Operation<TEntity>
 }
 
 import { Operator, OperatorType } from './operators/operator';
@@ -90,13 +94,19 @@ export class Operation<TEntity> {
 export default class Enumerable<TEntity> implements IEnumerable<TEntity>
 {
     private _operations: Operation<TEntity>;
-    protected _child;
+    private _parent;
+    private _child;
 
-    constructor(private items?: Iterable<TEntity>, public readonly parent?: IEnumerable<any>) {
+    constructor(private items?: Iterable<TEntity>, parent?: IEnumerable<any>) {
         this._operations = new Operation<TEntity>();
+        this._parent = parent;
     }
 
-    protected get child(): IEnumerable<any> {
+    public get parent(): IEnumerable<any> {
+        return this._parent;
+    }
+
+    public get child(): IEnumerable<any> {
         return this._child;
     }
 
