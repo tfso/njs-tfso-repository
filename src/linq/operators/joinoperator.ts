@@ -1,13 +1,13 @@
-﻿import { Operator, OperatorType } from './operator';
+﻿import Enumerable, { IEnumerable } from './../enumerable';
+import { Operator, OperatorType } from './operator';
 import { ExpressionVisitor, IExpression, ExpressionType, IMemberExpression, IIdentifierExpression } from './../expressions/expressionvisitor';
 
 export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
     private outerProperty: IExpression;
     private innerProperty: IExpression;
 
-    constructor(outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, public selector: (a: TEntity, b: Iterator<TInner>) => TResult) {
+    constructor(outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, public selector: (a: TEntity, b: IEnumerable<TInner>) => TResult) {
         super(OperatorType.Join);
-
 
         this.outerProperty = new ExpressionVisitor().visitLambda(outerKey);
         this.innerProperty = new ExpressionVisitor().visitLambda(innerKey);
@@ -18,7 +18,7 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
             let property: IIdentifierExpression = <IIdentifierExpression>(<IMemberExpression>this.outerProperty).property;
 
             return outerItem[property.name];
-        }        
+        }
 
         return null;
     }
@@ -43,9 +43,11 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
                 if (this.getOuterKey(a) == this.getInnerKey(b)) list.push(b);
             }
 
-            let tmp = this.selector(a, list[Symbol.iterator]());
+            if (list.length > 0) {
+                let tmp = this.selector(a, new Enumerable<TInner>(list));
 
-            yield tmp;
+                yield tmp;
+            }
         }
     }
 }

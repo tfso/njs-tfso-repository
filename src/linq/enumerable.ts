@@ -21,7 +21,7 @@
     take(count: number): this
     //reverse(): this
 
-    join<TInner, TResult>(inner: IEnumerable<TInner>, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, selector: (outer: TEntity, inner: Iterator<TInner>) => TResult): IEnumerable<TResult>
+    join<TInner, TResult>(inner: IEnumerable<TInner>, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult>
     select<TResult>(selector: (it: TEntity) => TResult): IEnumerable<TResult>
 
     first(items?: Array<TEntity>): TEntity
@@ -91,11 +91,13 @@ export class Operation<TEntity> {
     }
 }
 
+
+
 export default class Enumerable<TEntity> implements IEnumerable<TEntity>
 {
     private _operations: Operation<TEntity>;
-    private _parent;
-    private _child;
+    protected _parent;
+    protected _child;
 
     constructor(private items?: Iterable<TEntity>, parent?: IEnumerable<any>) {
         this._operations = new Operation<TEntity>();
@@ -186,7 +188,7 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
      * @param enumerable
      * @param predicate
      */
-    public join<TInner, TResult>(inner: IEnumerable<TInner>, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, selector: (outer: TEntity, inner: Iterator<TInner>) => TResult): IEnumerable<TResult> {
+    public join<TInner, TResult>(inner: IEnumerable<TInner>, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult> {
         return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(outerKey, innerKey, selector).evaluate(this, inner), this);
     }
 
@@ -280,5 +282,18 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
 
     [Symbol.iterator] = () => {
         return this.iterator();
+    }
+}
+
+export class EnumerableParent<TEntity, TParent> extends Enumerable<TEntity> implements IEnumerable<TEntity>
+{
+    constructor(items?: Iterable<TEntity>, parent?: Enumerable<TParent>) {
+        super(items);
+
+        this._parent = parent;
+    }
+
+    public get parent(): IEnumerable<TParent> {
+        return this._parent;
     }
 }

@@ -48,22 +48,34 @@ describe("When using Enumerable", () => {
             <ILocation>{ location: 'SKIEN', zipcode: 3955, ziparea: 'Skien' },
             <ILocation>{ location: 'PORSGRUNN', zipcode: 3949, ziparea: 'Porsgrunn' },
             <ILocation>{ location: 'LANGESUND', zipcode: 3970, ziparea: 'Langesund' },
-            <ILocation>{ location: 'HEISTAD', zipcode: 3943, ziparea: 'Porgsrunn' },
+            <ILocation>{ location: 'HEISTAD', zipcode: 3943, ziparea: 'Porsgrunn' },
             <ILocation>{ location: 'BREVIK', zipcode: 3940, ziparea: 'Porsgrunn' }
         ]
     })
 
     describe("with joins", () => {
 
-        it("should be able to do it", () => {
+        it("should be able to do inner join", () => {
             let car = new Enumerable<ICar>(cars)
                 .where(it => it.id == 2)
-                .join<ILocation, any>(new Enumerable(locations).select(it => <any>{ location: it.location, city: it.ziparea }), a => a.location, b => b.location, (a, b) => Object.assign({}, a, b.next().value || {}))
+                .join<ILocation, any>(new Enumerable(locations).select(it => <any>{ location: it.location, city: it.ziparea }), a => a.location, b => b.location, (a, b) => Object.assign({}, a, b.first()))
                 .first();
 
             assert.ok(car != null);
             assert.equal(car.id, 2);
             assert.equal(car.city, 'Porsgrunn');
+        })
+
+        it("should be able to get all cars from city 'Porsgrunn'", () => {
+
+            let cities = new Enumerable<ILocation>(locations)
+                .where(it => it.ziparea == 'Porsgrunn');
+
+            let list = new Enumerable<ICar>(cars)
+                .join<ILocation, any>(cities, outer => outer.location, inner => inner.location, (outer, inner) => outer)
+                .toArray();
+                
+            assert.equal(list.length, 5);
         })
     })
 
