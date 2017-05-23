@@ -8,6 +8,8 @@ interface ICar {
     id: number
     location: string
 
+    optional?: string
+
     registrationYear: number
 
     type: {
@@ -35,11 +37,11 @@ describe("When using Enumerable", () => {
     beforeEach(() => {
         cars = [
             <ICar>{ id: 1, location: 'SKIEN', registrationYear: 2016, type: { make: 'SAAB', model: '9-3' } },
-            <ICar>{ id: 2, location: 'PORSGRUNN', registrationYear: 2010, type: { make: 'NISSAN', model: 'QASHQAI' } },
+            <ICar>{ id: 2, location: 'PORSGRUNN', registrationYear: 2010, optional: 'yes', type: { make: 'NISSAN', model: 'QASHQAI' } },
             <ICar>{ id: 3, location: 'PORSGRUNN', registrationYear: 2005, type: { make: 'SAAB', model: '9-3' } },
-            <ICar>{ id: 4, location: 'LANGESUND', registrationYear: 2004, type: { make: 'NISSAN', model: 'LEAF' } },
-            <ICar>{ id: 5, location: 'BREVIK', registrationYear: 2009, type: { make: 'TOYOTA', model: 'COROLLA' } },
-            <ICar>{ id: 6, location: 'BREVIK', registrationYear: 2014, type: { make: 'HONDA', model: 'HRV' } },
+            <ICar>{ id: 4, location: 'LANGESUND', registrationYear: 2004, optional: 'yes', type: { make: 'NISSAN', model: 'LEAF' } },
+            <ICar>{ id: 5, location: 'BREVIK', registrationYear: 2009, optional: 'yes', type: { make: 'TOYOTA', model: 'COROLLA' } },
+            <ICar>{ id: 6, location: 'BREVIK', registrationYear: 2014, optional: 'yes', type: { make: 'HONDA', model: 'HRV' } },
             <ICar>{ id: 7, location: 'HEISTAD', registrationYear: 2013, type: { make: 'TOYOTA', model: 'YARIS' } },
             <ICar>{ id: 8, location: 'LARVIK', registrationYear: 2009, type: { make: 'HONDA', model: 'CIVIC' } }
         ];
@@ -138,6 +140,23 @@ describe("When using Enumerable", () => {
             let result = query.toArray(cars);
 
             assert.equal(result.length, 1);
+        })
+
+        it("should be able to do a complex query", () => {
+
+            let result = new Enumerable<ICar>(cars)
+                .where("((id eq 7) or (location eq 'PORSGRUNN')) and registrationYear ge 2000")
+                .toArray();
+
+            assert.equal(result.length, 3);
+        })
+
+        it("should be able to do a complex query with with optional property", () => {
+            let result = new Enumerable<ICar>(cars)
+                .where("((type/make eq 'TOYOTA') or (optional eq 'yes')) and registrationYear ge 2000")
+                .toArray();
+
+            assert.equal(result.length, 5);
         })
 
         it("should be able to do a simple query with a nested model", () => {

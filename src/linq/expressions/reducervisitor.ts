@@ -157,16 +157,23 @@ export class ReducerVisitor extends ExpressionVisitor {
                 case LogicalOperatorType.LesserOrEqual:
                     return new LiteralExpression(leftValue <= rightValue);
             }
-        } 
+        }
 
         switch (expression.operator) {
             case LogicalOperatorType.And:
-                if (expression.left.type == ExpressionType.Literal && (<LiteralExpression>expression.left).value === true) return right;
-                if (expression.right.type == ExpressionType.Literal && (<LiteralExpression>expression.right).value === true) return left;
+                if (left.type == ExpressionType.Literal && (<LiteralExpression>left).value === true) return right;
+                if (right.type == ExpressionType.Literal && (<LiteralExpression>right).value === true) return left;
 
-            default:
-                return new LogicalExpression(expression.operator, left, right);
+                break;
+
+            case LogicalOperatorType.Or:
+                if (left.type == ExpressionType.Literal && (<LiteralExpression>left).value === true) return left;
+                if (right.type == ExpressionType.Literal && (<LiteralExpression>right).value === true) return right;
+
+                break;
         }
+
+        return new LogicalExpression(expression.operator, left, right);
     }
 
     protected evaluate(expression: IExpression, it: Object = null): any {
