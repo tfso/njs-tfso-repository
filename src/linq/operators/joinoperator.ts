@@ -50,4 +50,22 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
             }
         }
     }
+
+    public async * evaluateAsync(outer: AsyncIterable<TEntity>, inner: AsyncIterable<TInner>): AsyncIterableIterator<TResult> {
+        let idx = 0;
+
+        for await (let a of outer) {
+            let list: Array<TInner> = [];
+
+            for await (let b of inner) {
+                if (this.getOuterKey(a) == this.getInnerKey(b)) list.push(b);
+            }
+
+            if (list.length > 0) {
+                let tmp = this.selector(a, new Enumerable<TInner>(list));
+
+                yield tmp;
+            }
+        }
+    }
 }

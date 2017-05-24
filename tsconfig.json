@@ -1,7 +1,10 @@
 ﻿{
   "compileOnSave": true,
   "compilerOptions": {
-    "target": "ES6",
+    "target": "es6",
+    "lib": [ "es2015", "esnext.asynciterable" ],
+    "downlevelIteration": true,
+    //"types": ["node", "mocha"],
     "module": "commonjs",
     "declaration": true,
     "newLine": "LF",

@@ -12,4 +12,12 @@ export class SelectOperator<TEntity> extends Operator<TEntity> {
             yield this.selector(item)
         }
     }
+
+    public async * evaluateAsync(items: AsyncIterable<TEntity>): AsyncIterableIterator<any> {
+        let idx = 0;
+
+        for await (let item of items) {
+            yield this.selector(item)
+        }
+    }
 }

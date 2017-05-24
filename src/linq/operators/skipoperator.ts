@@ -15,5 +15,13 @@ export class SkipOperator<TEntity> extends Operator<TEntity> {
         }
     }
 
-    
+    public async * evaluateAsync(items: AsyncIterable<TEntity>): AsyncIterableIterator<TEntity> {
+        let idx = 0;
+
+        for await (let item of items) {
+            if (idx++ < this.count) continue;
+
+            yield item;
+        }
+    }
 }

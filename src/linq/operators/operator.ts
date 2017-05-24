@@ -13,4 +13,5 @@ export abstract class Operator<TEntity> {
     }
 
     public abstract evaluate(...args: any[]): Iterable<TEntity>;
+    public abstract evaluateAsync(...args: any[]): AsyncIterable<TEntity>;
 }

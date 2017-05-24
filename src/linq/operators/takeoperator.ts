@@ -15,4 +15,15 @@ export class TakeOperator<TEntity> extends Operator<TEntity> {
             yield item;
         }
     }
+
+    public async * evaluateAsync(items: AsyncIterable<TEntity>): AsyncIterableIterator<TEntity> {
+        let idx = 0;
+
+        for await (let item of items) {
+            if (idx++ == this.count)
+                break;
+
+            yield item;
+        }
+    }
 }

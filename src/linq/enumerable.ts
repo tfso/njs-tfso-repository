@@ -1,5 +1,22 @@
-﻿export interface IEnumerable<TEntity> extends Iterable<TEntity> {
-    readonly operations: Operation<TEntity>
+﻿import { Operator, OperatorType } from './operators/operator';
+import { OrderByOperator } from './operators/orderbyoperator';
+import { SkipOperator } from './operators/skipoperator';
+import { TakeOperator } from './operators/takeoperator';
+import { WhereOperator } from './operators/whereoperator';
+import { SelectOperator } from './operators/selectoperator';
+import { JoinOperator } from './operators/joinoperator';
+
+import { RenameVisitor } from './expressions/renamevisitor';
+import { RemapVisitor } from './expressions/remapvisitor';
+
+import { Operations } from './operations';
+
+export { OperatorType };
+
+(Symbol as any).asyncIterator = Symbol.asyncIterator || "__@@asyncIterator__";
+
+export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<TEntity> {
+    readonly operations: Operations<TEntity>
     readonly parent: IEnumerable<any>
     child: IEnumerable<any>
 
@@ -29,78 +46,14 @@
     toArray(): Array<TEntity>
 }
 
-import { Operator, OperatorType } from './operators/operator';
-import { OrderByOperator } from './operators/orderbyoperator';
-import { SkipOperator } from './operators/skipoperator';
-import { TakeOperator } from './operators/takeoperator';
-import { WhereOperator } from './operators/whereoperator';
-import { SelectOperator } from './operators/selectoperator';
-import { JoinOperator } from './operators/joinoperator';
-
-import { RenameVisitor } from './expressions/renamevisitor';
-import { RemapVisitor } from './expressions/remapvisitor';
-
-export { OperatorType };
-
-export class Operation<TEntity> {
-    private _stack: Array<Operator<TEntity>>;
-
-    constructor() {
-        this._stack = [];
-    }
-
-    public add(operator: Operator<TEntity>): void {
-        this._stack.push(operator);
-    }
-
-    public remove(operator: Operator<TEntity>): boolean {
-        var idx = this._stack.indexOf(operator);
-
-        if (idx != -1) {
-            this._stack.splice(idx, 1);
-
-            return true;
-        }
-
-        return false;
-    }
-    
-    public first<T extends Operator<TEntity>>(operator: { new (...args: any[]): T }): T
-    public first(operator: { new (...args: any[]): Operator<TEntity> }): Operator<TEntity>
-    public first(operatorType: OperatorType): Operator<TEntity> 
-    public first(o: any): Operator<TEntity> {
-        for (let item of this.values())
-            if (item.type === o || (typeof o == 'function' && item instanceof o))
-                return item;
-
-        return null;
-    }
-
-    public* values(): IterableIterator<Operator<TEntity>> {
-        while (true) {
-            for (let item of this._stack) {
-                var reset = yield item;
-
-                if (reset === true)
-                    break;
-            }
-
-            if (reset !== true) // continue while loop if it's resetted
-                break;
-        }
-    }
-}
-
-
-
-export default class Enumerable<TEntity> implements IEnumerable<TEntity>
+export class Enumerable<TEntity> implements IEnumerable<TEntity>
 {
-    private _operations: Operation<TEntity>;
+    protected _operations: Operations<TEntity>;
     protected _parent;
     protected _child;
-
-    constructor(private items?: Iterable<TEntity>, parent?: IEnumerable<any>) {
-        this._operations = new Operation<TEntity>();
+   
+    constructor(private items?: Iterable<TEntity> | AsyncIterable<TEntity>, parent?: IEnumerable<any>) {
+        this._operations = new Operations<TEntity>();
         this._parent = parent;
     }
 
@@ -112,7 +65,7 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
         return this._child;
     }
 
-    public get operations(): Operation<TEntity> {
+    public get operations(): Operations<TEntity> {
         return this._operations;
     }
 
@@ -139,7 +92,6 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
 
         return this;
     }
-
 
     /**
      * Where clause using OData $filter expression returning either true or false. Any parameters used is properties of TEntity
@@ -174,11 +126,13 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
 
         return this;
     }
+   
+
 
     /**
-     * returns a new IEnumerable of TResult
-     * @param selector
-     */
+    * returns a new IEnumerable of TResult
+    * @param selector
+    */
     public select<TResult>(selector: (it: TEntity) => TResult): IEnumerable<TResult> {
         return this._child = new Enumerable<TResult>(new SelectOperator<TEntity>(selector).evaluate(this), this);
     }
@@ -230,54 +184,49 @@ export default class Enumerable<TEntity> implements IEnumerable<TEntity>
         return new Enumerable(items);
     }
 
+    protected * iterator(): IterableIterator<TEntity> {
+        let handleItems = function* (items: Iterable<TEntity>, operators: Array<Operator<TEntity>>, idx: number = null) { 
+            if(idx == null) idx = operators.length - 1;
+            
+            switch(idx) {
+                case -1:
+                    yield* items; break;
 
-    //public toString(type: any): string {
-    //    let out: string = '';
-
-    //    switch (type) {
-    //        case 'OData':
-    //            for (let item of this._operations.values()) {
-    //                switch (item.type) {
-    //                    case OperatorType.Skip:
-    //                        out += "$skip=" + (<SkipOperator<TEntity>>item).count;
-    //                        break;
-
-    //                    case OperatorType.Take:
-    //                        out += "$top=" + (<TakeOperator<TEntity>>item).count;
-    //                        break;
-
-    //                    case OperatorType.Where:
-    //                        out += "$filter=";
-
-
-
-    //                        break;
-    //                }
-    //            }
-
-    //        default:
-    //            for (let item of this._operations.values())
-    //                out += (out.length == 0 ? '' : '.') + OperatorType[item.type] + '(' + item.toString() + ')'
-
-    //            break;
-    //    }
-
-    //    return out;
-    //}
-
-    private* iterator(): IterableIterator<TEntity> {
-        let result = this.items;
-
-        // optimize this, no point do all where predicates when we want to take first 10 
-        for (let item of this._operations.values())
-            result = item.evaluate(result);
-
-        for (let item of result) {
-            let reset = yield item;
-
-            if (reset === true)
-                break;
+                case 0:
+                    yield* operators[idx].evaluate( items ); break;
+                
+                default:
+                    yield* operators[idx].evaluate( handleItems(items, operators, idx - 1) ); break;
+            }
         }
+
+        yield* handleItems(<Iterable<TEntity>>this.items, Array.from(this.operations.values()));
+    }
+
+    protected async * asyncIterator(): AsyncIterableIterator<TEntity> {
+        let handleItems = async function* (items: AsyncIterable<TEntity>, operators: Array<Operator<TEntity>>, idx: number = null) { 
+            if(idx == null) idx = operators.length - 1;
+            
+            switch(idx) {
+                case -1:
+                    for await (let item of items)
+                        yield item;
+                    
+                    break;
+
+                case 0:
+                    yield* operators[idx].evaluateAsync( items ); break;
+                
+                default:
+                    yield* operators[idx].evaluateAsync( handleItems(items, operators, idx - 1) ); break;
+            }
+        }
+
+        yield* handleItems(<AsyncIterable<TEntity>>this.items, Array.from(this.operations.values()));        
+    }
+
+    [Symbol.asyncIterator] = () => {
+        return this.asyncIterator();
     }
 
     [Symbol.iterator] = () => {
@@ -297,3 +246,5 @@ export class EnumerableParent<TEntity, TParent> extends Enumerable<TEntity> impl
         return this._parent;
     }
 }
+
+export default Enumerable;

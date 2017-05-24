@@ -55,6 +55,51 @@ describe("When using Enumerable", () => {
         ]
     })
 
+    describe("with async iterable", () => {
+        let delay: (delay: number) => void, 
+            list: AsyncIterableIterator<ICar>;
+
+        beforeEach(() => {
+            
+            delay = (delay: number) => new Promise(resolve => setTimeout(resolve, delay));
+            list = async function* () {
+                yield <ICar>{ id: 1, location: 'SKIEN', registrationYear: 2016, type: { make: 'SAAB', model: '9-3' } }
+                yield <ICar>{ id: 2, location: 'PORSGRUNN', registrationYear: 2010, optional: 'yes', type: { make: 'NISSAN', model: 'QASHQAI' } }
+                
+                await delay(10)
+                    
+                yield <ICar>{ id: 3, location: 'PORSGRUNN', registrationYear: 2005, type: { make: 'SAAB', model: '9-3' } }
+                yield <ICar>{ id: 4, location: 'LANGESUND', registrationYear: 2004, optional: 'yes', type: { make: 'NISSAN', model: 'LEAF' } }
+                yield Promise.resolve(<ICar>{ id: 5, location: 'BREVIK', registrationYear: 2009, optional: 'yes', type: { make: 'TOYOTA', model: 'COROLLA' } })
+                yield <ICar>{ id: 6, location: 'BREVIK', registrationYear: 2014, optional: 'yes', type: { make: 'HONDA', model: 'HRV' } }
+                yield Promise.resolve(<ICar>{ id: 7, location: 'HEISTAD', registrationYear: 2013, type: { make: 'TOYOTA', model: 'YARIS' } })
+                yield <ICar>{ id: 8, location: 'LARVIK', registrationYear: 2009, type: { make: 'HONDA', model: 'CIVIC' } }
+            }()
+        })
+
+        it("should be able to handle list of items", async () => {
+            let hasItems = false;
+
+            for await(let item of new Enumerable<ICar>(list).where(it => it.id == 3)) {
+                hasItems = true;
+                assert.equal(item.id, 3);
+            }
+
+            assert.ok(hasItems);
+        })
+
+        it("should be able to handle list of promises", async () => {
+            let hasItems = false;
+
+            for await(let item of new Enumerable<ICar>(list).where(it => it.id == 5)) {
+                hasItems = true;
+                assert.equal(item.id, 5);
+            }
+
+            assert.ok(hasItems);
+        })
+    })
+
     describe("with joins", () => {
 
         it("should be able to do inner join", () => {

@@ -155,8 +155,6 @@ describe("When using ExpressionVisitor for binary", () => {
         it("should return a binary operation", () => {
             expr = visitor.visitOData("5 add 2");
 
-            console.log(expr.toString());
-
             assert.ok(expr.type == Expr.ExpressionType.Binary, "Expected a BinaryExpression");
             assert.ok((<Expr.IBinaryExpression>expr).operator == Expr.BinaryOperatorType.Addition, "Expected a binary operation of addition");
 
@@ -234,8 +232,6 @@ describe("When using ExpressionVisitor for binary", () => {
     describe("Lambda Expression", () => {
         it("should return a binary operation", () => {
             expr = visitor.visitLambda(() => 5 + 2);
-
-            console.log(expr.toString());
 
             assert.ok(expr.type == Expr.ExpressionType.Binary, "Expected a BinaryExpression");
             assert.ok((<Expr.IBinaryExpression>expr).left.type == Expr.ExpressionType.Literal, "Expected a literal at left side");

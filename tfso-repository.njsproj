@@ -13,8 +13,8 @@
     <ProjectGuid>bd95311d-cf3a-4b61-bfe8-6913f3f69020</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>src\main.ts</StartupFile>
-    <StartWebBrowser>True</StartWebBrowser>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -24,7 +24,13 @@
     <ProjectView>ProjectFiles</ProjectView>
     <NodejsPort>1337</NodejsPort>
     <EnableTypeScript>true</EnableTypeScript>
-    <StartWebBrowser>true</StartWebBrowser>
+    <StartWebBrowser>True</StartWebBrowser>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="appveyor.yml" />
@@ -48,9 +54,7 @@
     <Folder Include="src\repository\" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="src\lib\odata-parser.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\lib\odata-parser.ts" />
     <TypeScriptCompile Include="src\linq\expressions\arrayexpression.ts" />
     <TypeScriptCompile Include="src\linq\expressions\binaryexpression.ts" />
     <TypeScriptCompile Include="src\linq\expressions\compoundexpression.ts" />
@@ -69,12 +73,13 @@
     <TypeScriptCompile Include="src\linq\expressions\renamevisitor.ts" />
     <TypeScriptCompile Include="src\linq\expressions\unaryexpression.ts" />
     <TypeScriptCompile Include="src\linq\enumerable.ts" />
+    <TypeScriptCompile Include="src\linq\operations.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\linq\operators\operator.ts" />
     <TypeScriptCompile Include="src\linq\operators\orderbyoperator.ts" />
     <TypeScriptCompile Include="src\linq\operators\joinoperator.ts" />
-    <TypeScriptCompile Include="src\linq\operators\selectoperator.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\linq\operators\selectoperator.ts" />
     <TypeScriptCompile Include="src\linq\operators\skipoperator.ts" />
     <TypeScriptCompile Include="src\linq\operators\takeoperator.ts" />
     <TypeScriptCompile Include="src\linq\operators\whereoperator.ts" />
@@ -118,6 +123,10 @@
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\test\reducervisitor.ts">
+      <SubType>Code</SubType>
+      <TestFramework>Mocha</TestFramework>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\repository.ts">
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>

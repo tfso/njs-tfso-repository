@@ -180,6 +180,7 @@ export class ExpressionVisitor {
      * http://www.odata.org/documentation/odata-version-2-0/uri-conventions/
      *
      * @param filter odata filter, eg; Name eq 'John' and LastName lt 'Doe'
+     * @returns 
      */
     private transformOData(expression: any): IExpression {
         var child: IExpression;

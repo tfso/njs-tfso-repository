@@ -75,6 +75,11 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
         for (let item of items)
             if (this._predicate(item)) yield item;
     }
+    
+    public async * evaluateAsync(items: AsyncIterable<TEntity>): AsyncIterableIterator<TEntity> {    
+        for await (let item of items)
+            if (this._predicate(item)) yield item;
+    }
 
     public getExpressionIntersection(): IExpression[] {
         let intersection: Array<IExpression>;
