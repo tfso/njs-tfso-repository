@@ -25,7 +25,7 @@ This respository is work in progress and there will be added more to it
 - Seperating repository/db to its own module
 
 # Examples
-Enumerable takes iterable objects, either async iterable or iterable. If using async iterable you should use toArrayAsync(), firstAsync() etc (not implemented right now so use ```for await(let x of Enumerable(function* () { yield 1; yield 2; }())``` instead). 
+Enumerable takes iterable objects, either async iterable or iterable. If using async iterable you should use toArrayAsync(), firstAsync() etc (or just use ```for await(let x of Enumerable(function* () { yield 1; yield 2; }())``` instead). 
 
 ```typescript
 let parents = function* () {

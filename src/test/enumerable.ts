@@ -57,7 +57,7 @@ describe("When using Enumerable", () => {
 
     describe("with async iterable", () => {
         let delay: (delay: number) => void, 
-            list: AsyncIterableIterator<ICar>;
+            list: () => AsyncIterableIterator<ICar>;
 
         beforeEach(() => {
             
@@ -74,13 +74,13 @@ describe("When using Enumerable", () => {
                 yield <ICar>{ id: 6, location: 'BREVIK', registrationYear: 2014, optional: 'yes', type: { make: 'HONDA', model: 'HRV' } }
                 yield Promise.resolve(<ICar>{ id: 7, location: 'HEISTAD', registrationYear: 2013, type: { make: 'TOYOTA', model: 'YARIS' } })
                 yield <ICar>{ id: 8, location: 'LARVIK', registrationYear: 2009, type: { make: 'HONDA', model: 'CIVIC' } }
-            }()
+            }
         })
 
         it("should be able to handle list of items", async () => {
             let hasItems = false;
 
-            for await(let item of new Enumerable<ICar>(list).where(it => it.id == 3)) {
+            for await(let item of new Enumerable<ICar>(list()).where(it => it.id == 3)) {
                 hasItems = true;
                 assert.equal(item.id, 3);
             }
@@ -91,12 +91,40 @@ describe("When using Enumerable", () => {
         it("should be able to handle list of promises", async () => {
             let hasItems = false;
 
-            for await(let item of new Enumerable<ICar>(list).where(it => it.id == 5)) {
+            for await(let item of new Enumerable<ICar>(list()).where(it => it.id == 5)) {
                 hasItems = true;
                 assert.equal(item.id, 5);
             }
 
             assert.ok(hasItems);
+        })
+
+        it("test", () => {
+            let parents = function* () {
+                yield { id: 1, reg: 'Dolly Duck',  year: 1937 }
+                yield { id: 2, reg: 'Donald', year: 1934 }
+                yield { id: 3, reg: 'Skrue McDuck', year: 1947 }
+            }
+
+            let childs = function* () {
+                yield { parent: 2, name: 'Ole', year: 1940 }
+                yield { parent: 1, name: 'Hetti', year: 1953 }
+                yield { parent: 2, name: 'Dole', year: 1940 }
+                yield { parent: 2, name: 'Doffen', year: 1940 }
+                yield { parent: 1, name: 'Netti', year: 1953 }
+            }
+
+            let donald = new Enumerable<any>(parents())
+                .where(it => it.id == 2)
+                .join<any, any>(
+                    new Enumerable(childs()).select(it => <any>{ parent: it.parent, name: it.name }), 
+                    a => a.id, 
+                    b => b.parent, 
+                    (a, b) => Object.assign({}, a, { childs: b.toArray() } )
+                )
+                .first();
+
+            // "{"id":2,"reg":"Donald","year":1934,"childs":[{"parent":2,"name":"Ole"},{"parent":2,"name":"Dole"},{"parent":2,"name":"Doffen"}]}"
         })
     })
 

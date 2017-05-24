@@ -1,7 +1,7 @@
 ﻿import { Operator, OperatorType } from './operator';
 
 import { IExpression, ExpressionType } from './../expressions/expression';
-import { LogicalExpression, LogicalOperatorType } from './../expressions/logicalexpression';
+import { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './../expressions/logicalexpression';
 import { MemberExpression } from './../expressions/memberexpression';
 import { IdentifierExpression } from './../expressions/identifierexpression';
 
@@ -81,8 +81,8 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
             if (this._predicate(item)) yield item;
     }
 
-    public getExpressionIntersection(): IExpression[] {
-        let intersection: Array<IExpression>;
+    public getExpressionIntersection(): ILogicalExpression[] {
+        let intersection: Array<ILogicalExpression>;
 
         intersection = Array.from(this.getExpressionGroups()).reduce((acc, curr, idx) => {
             return Array.from(curr).filter((expr) => {
@@ -93,8 +93,8 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
         return intersection;
     }
 
-    public getExpressionUnion(): IExpression[] {
-        let union: Array<IExpression>;
+    public getExpressionUnion(): ILogicalExpression[] {
+        let union: Array<ILogicalExpression>;
 
         union = Array.from(this.getExpressionGroups()).reduce((acc, curr, idx) => {
             return (acc || []).concat(Array.from(curr));
@@ -103,10 +103,10 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
         return union;
     }
 
-    private getExpressionGroups(): Iterable<IterableIterator<IExpression>> {
+    private getExpressionGroups(): Iterable<IterableIterator<ILogicalExpression>> {
         let it = this._it,
-            visit = function* (expression: IExpression): Iterable<IterableIterator<IExpression>> {
-                let visitGroup = function* (child: LogicalExpression): IterableIterator<IExpression> {
+            visit = function* (expression: IExpression): Iterable<IterableIterator<ILogicalExpression>> {
+                let visitGroup = function* (child: LogicalExpression): IterableIterator<ILogicalExpression> {
                     switch (child.operator) {
                         case LogicalOperatorType.Or:
                             break;
@@ -158,7 +158,9 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                                 }
                             }
 
-                            yield reduceMemberToIdentifier(child);
+                            let reduced = reduceMemberToIdentifier(child);
+                            if(reduced.type == ExpressionType.Logical)
+                                yield <ILogicalExpression>reduced;
                     }
                 }
 

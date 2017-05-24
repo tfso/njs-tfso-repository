@@ -173,11 +173,31 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         return null;
     }
 
+    public async firstAsync(items?: Array<TEntity>): Promise<TEntity> {
+        let iteratorResult = await this.asyncIterator().next();
+
+        if (iteratorResult.done == false)
+            return iteratorResult.value;
+
+        return null;
+    }
+
     public toArray(items?: Iterable<TEntity>): Array<TEntity> {
         if (items)
             this.items = items;
 
         return Array.from(this.iterator());
+    }
+        
+    public async toArrayAsync(items?: Iterable<TEntity>): Promise<Array<TEntity>> {
+        if (items)
+            this.items = items;
+
+        let result: Array<TEntity> = [];
+        for await(let item of this.asyncIterator())
+            result.push(item);
+
+        return result;
     }
 
     public static fromArray<TEntity>(items?: Array<TEntity>): Enumerable<TEntity> {
@@ -204,7 +224,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
     }
 
     protected async * asyncIterator(): AsyncIterableIterator<TEntity> {
-        let handleItems = async function* (items: AsyncIterable<TEntity>, operators: Array<Operator<TEntity>>, idx: number = null) { 
+        let handleItems = async function* (scope: IEnumerable<TEntity>, items: AsyncIterable<TEntity>, operators: Array<Operator<TEntity>>, idx: number = null) { 
             if(idx == null) idx = operators.length - 1;
             
             switch(idx) {
@@ -218,11 +238,11 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
                     yield* operators[idx].evaluateAsync( items ); break;
                 
                 default:
-                    yield* operators[idx].evaluateAsync( handleItems(items, operators, idx - 1) ); break;
+                    yield* operators[idx].evaluateAsync( handleItems(scope, items, operators, idx - 1) ); break;
             }
         }
 
-        yield* handleItems(<AsyncIterable<TEntity>>this.items, Array.from(this.operations.values()));        
+        yield* handleItems(this, (typeof this.items == 'object' && typeof this.items[Symbol.asyncIterator] == 'function') ? (<Function>this.items[Symbol.asyncIterator])(this) : this.items, Array.from(this.operations.values()));        
     }
 
     [Symbol.asyncIterator] = () => {

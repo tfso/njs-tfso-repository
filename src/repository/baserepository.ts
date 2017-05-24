@@ -16,7 +16,7 @@ export interface IBaseRepository<TEntity, TEntityId> {
     delete(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
 }
 
-abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEntity, TEntityId>
+abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEntity, TEntityId>, AsyncIterable<TEntity>
 {
     constructor() {
 
@@ -38,7 +38,6 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
 
     abstract delete(entity: TEntity): Promise<boolean>
     abstract delete(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
-
 
     public beginTransaction(): Promise<void> {
         return Promise.resolve();
@@ -81,6 +80,14 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         return (entity: TEntity) => {
             return true;
         };
+    }
+
+    private async * asyncIterator(query?: IEnumerable<TEntity>): AsyncIterableIterator<TEntity> {    
+        yield* await this.readAll(query);
+    }
+
+    [Symbol.asyncIterator] = (query?: IEnumerable<TEntity>) => {
+        return this.asyncIterator(query);
     }
 }
 

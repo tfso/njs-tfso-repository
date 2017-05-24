@@ -23,10 +23,14 @@ export class Operations<TEntity> {
         return false;
     }
     
+    public first(): Operator<TEntity>
     public first<T extends Operator<TEntity>>(operator: { new (...args: any[]): T }): T
     public first(operator: { new (...args: any[]): Operator<TEntity> }): Operator<TEntity>
     public first(operatorType: OperatorType): Operator<TEntity> 
-    public first(o: any): Operator<TEntity> {
+    public first(o?: any): Operator<TEntity> {
+        if(o == null)
+            return this.values().next().value;
+
         for (let item of this.values())
             if (item.type === o || (typeof o == 'function' && item instanceof o))
                 return item;
