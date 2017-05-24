@@ -20,9 +20,11 @@
     "jsep": "^0.3.0"
   },
   "devDependencies": {
+    "@types/mocha": "^2.2.41",
+    "@types/node": "^7.0.22",
     "istanbul": "^0.4.4",
     "mocha": "^2.5.3",
     "ts-node": "^1.3.0",
-    "typescript": "^2.0.6"
+    "typescript": "^2.3.3"
   }
 }
