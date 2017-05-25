@@ -9,15 +9,31 @@ import { LogicalOperatorType } from './../linq/expressions/logicalexpression';
 
 interface ICar {
     id: number
+    location: string
+
+    optional?: string
+
+    registrationYear: number
+
+    type: {
+        make: string
+        model: string
+    }
 }
 
-class CarRepository extends Repository<ICar, number> implements AsyncIterable<ICar>
+interface ILocation {
+    location: string
+    zipcode: number
+    ziparea: string
+}
+
+class CarRepository extends Repository<ICar, number>
 {
     public read(id: number): Promise<ICar> {
         return new Enumerable(this).where( (it, id) => it.id == id, id).firstAsync();
     }
 
-    public readAll(query: IEnumerable<ICar>): Promise<ICar[]> {
+    public readAll(query: IEnumerable<ICar>, items?: any): Promise<ICar[]> {
          let specialcar: ICar,
              cars = [
                 <ICar>{ id: 1, location: 'SKIEN', registrationYear: 2016, type: { make: 'SAAB', model: '9-3' } },
@@ -65,9 +81,49 @@ class CarRepository extends Repository<ICar, number> implements AsyncIterable<IC
     }
 }
 
+class LocationRepository extends Repository<ILocation, string>
+{
+    public read(id: string): Promise<ILocation> {
+        return new Enumerable(this).where((it, id) => it.location == id, id).firstAsync();
+    }
+
+    public readAll(query: IEnumerable<ILocation>, items?: any) {
+        let locations = [
+            <ILocation>{ location: 'SKIEN', zipcode: 3955, ziparea: 'Skien' },
+            <ILocation>{ location: 'PORSGRUNN', zipcode: 3949, ziparea: 'Porsgrunn' },
+            <ILocation>{ location: 'LANGESUND', zipcode: 3970, ziparea: 'Langesund' },
+            <ILocation>{ location: 'HEISTAD', zipcode: 3943, ziparea: 'Porsgrunn' },
+            <ILocation>{ location: 'BREVIK', zipcode: 3940, ziparea: 'Porsgrunn' }
+        ]
+
+        return Promise.resolve(locations);
+    }
+
+    public async create(car: ILocation): Promise<ILocation> {
+        throw new Error('Not implemented');
+    }
+
+    public async update(car: ILocation): Promise<boolean> {
+        throw new Error('Not implemented');
+    }
+
+    public async delete(car: ILocation): Promise<boolean> {
+        throw new Error('Not implemented');
+    }
+}
+
 describe("When using Repository", () => {
     beforeEach(() => {
 
+    })
+
+    it("should work with joins", async () => {
+
+        let ar = await new Enumerable(new CarRepository())
+            .where(it => it.id > 5)
+            .join<ILocation, any>(new LocationRepository(), a => a.location, b => b.location, (a, b) => Object.assign({}, a))
+            .toArrayAsync();
+        
     })
 
     it("should work with optimized query", async () => {

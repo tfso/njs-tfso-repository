@@ -82,12 +82,16 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         };
     }
 
-    private async * asyncIterator(query?: IEnumerable<TEntity>): AsyncIterableIterator<TEntity> {    
+    private async * asyncIterator(query?: IEnumerable<TEntity>, parent?: IEnumerable<any>): AsyncIterableIterator<TEntity> {    
+        if (parent) {
+            let ops = Array.from(parent.operations.values());
+        }
+
         yield* await this.readAll(query);
     }
 
-    [Symbol.asyncIterator] = (query?: IEnumerable<TEntity>) => {
-        return this.asyncIterator(query);
+    [Symbol.asyncIterator] = (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>) => {
+        return this.asyncIterator(query, parent);
     }
 }
 

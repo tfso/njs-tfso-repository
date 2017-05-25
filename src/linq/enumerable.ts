@@ -17,8 +17,6 @@ export { OperatorType };
 
 export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<TEntity> {
     readonly operations: Operations<TEntity>
-    readonly parent: IEnumerable<any>
-    child: IEnumerable<any>
 
     /**
     * Where clause using OData $filter expression returning either true or false. Any parameters used is properties of TEntity
@@ -42,27 +40,40 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<T
     select<TResult>(selector: (it: TEntity) => TResult): IEnumerable<TResult>
 
     first(items?: Array<TEntity>): TEntity
+    firstAsync(items?: Array<TEntity>): Promise<TEntity>
+
     toArray(items: Array<TEntity>): Array<TEntity>
     toArray(): Array<TEntity>
+
+    toArrayAsync(items: Array<TEntity>): Promise<Array<TEntity>>
+    toArrayAsync(): Promise<Array<TEntity>>
 }
 
 export class Enumerable<TEntity> implements IEnumerable<TEntity>
 {
+    private items: Iterable<TEntity> | AsyncIterable<TEntity>;
+
     protected _operations: Operations<TEntity>;
-    protected _parent;
-    protected _child;
+    private _child;
    
-    constructor(private items?: Iterable<TEntity> | AsyncIterable<TEntity>, parent?: IEnumerable<any>) {
+    constructor(items?: Iterable<TEntity> | AsyncIterable<TEntity>) {
         this._operations = new Operations<TEntity>();
-        this._parent = parent;
-    }
+        
+        if (typeof items == 'object' && typeof items[Symbol.asyncIterator] == 'function') {
+            this.items = async function* (scope) {
+                yield* (<Function>items[Symbol.asyncIterator])(scope);
+            }(this);
 
-    public get parent(): IEnumerable<any> {
-        return this._parent;
-    }
+            this[Symbol.iterator] = undefined; // this isn't an sync iterator, unmark it from IEnumerable
+        }
+        else
+        {
+            this.items = function* (scope) {
+                yield* (<Function>items[Symbol.iterator])(scope);
+            }(this);
 
-    public get child(): IEnumerable<any> {
-        return this._child;
+            this[Symbol.asyncIterator] = undefined; // this isn't an async iterator, unmark it from IEnumerable
+        }
     }
 
     public get operations(): Operations<TEntity> {
@@ -134,7 +145,11 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
     * @param selector
     */
     public select<TResult>(selector: (it: TEntity) => TResult): IEnumerable<TResult> {
-        return this._child = new Enumerable<TResult>(new SelectOperator<TEntity>(selector).evaluate(this), this);
+        if (typeof this.items == 'object' && typeof this.items[Symbol.asyncIterator] == 'function') {
+            return this._child = new Enumerable<TResult>(new SelectOperator<TEntity>(selector).evaluateAsync(this));
+        } else {
+            return this._child = new Enumerable<TResult>(new SelectOperator<TEntity>(selector).evaluate(this));
+        }
     }
 
     /**
@@ -142,9 +157,27 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * @param enumerable
      * @param predicate
      */
-    public join<TInner, TResult>(inner: IEnumerable<TInner>, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult> {
-        return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(outerKey, innerKey, selector).evaluate(this, inner), this);
+    public join<TInner, TResult>(inner: Iterable<TInner> | AsyncIterable<TInner>, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult> {
+        let iterable: Iterable<TInner> | AsyncIterable<TInner>;
+
+        if (typeof inner == 'object' && typeof inner[Symbol.asyncIterator] == 'function') {
+            iterable = async function* (scope) {
+                yield* (<Function>inner[Symbol.asyncIterator])(undefined, scope);
+            }(this);
+
+            return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(outerKey, innerKey, selector).evaluateAsync(this, <AsyncIterable<TInner>>iterable));
+        } else {
+            iterable = function* (scope) {
+                yield* (<Function>inner[Symbol.iterator])(undefined, scope);
+            }(this);
+
+            return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(outerKey, innerKey, selector).evaluate(this, <Iterable<TInner>>iterable));
+        }
     }
+
+    //public joinAsync<TInner, TResult>(inner: AsyncIterable<TInner>, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult> {
+    //    return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(outerKey, innerKey, selector).evaluateAsync(this, inner), this);
+    //}
 
     public take(count: number): this {
         this._operations.add(new TakeOperator<TEntity>(count));
@@ -238,11 +271,11 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
                     yield* operators[idx].evaluateAsync( items ); break;
                 
                 default:
-                    yield* operators[idx].evaluateAsync( handleItems(scope, items, operators, idx - 1) ); break;
+                    yield* operators[idx].evaluateAsync(handleItems(scope, items, operators, idx - 1)); break;
             }
         }
 
-        yield* handleItems(this, (typeof this.items == 'object' && typeof this.items[Symbol.asyncIterator] == 'function') ? (<Function>this.items[Symbol.asyncIterator])(this) : this.items, Array.from(this.operations.values()));        
+        yield* handleItems(this, <AsyncIterable<TEntity>>this.items, Array.from(this.operations.values()));        
     }
 
     [Symbol.asyncIterator] = () => {
@@ -251,19 +284,6 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
 
     [Symbol.iterator] = () => {
         return this.iterator();
-    }
-}
-
-export class EnumerableParent<TEntity, TParent> extends Enumerable<TEntity> implements IEnumerable<TEntity>
-{
-    constructor(items?: Iterable<TEntity>, parent?: Enumerable<TParent>) {
-        super(items);
-
-        this._parent = parent;
-    }
-
-    public get parent(): IEnumerable<TParent> {
-        return this._parent;
     }
 }
 

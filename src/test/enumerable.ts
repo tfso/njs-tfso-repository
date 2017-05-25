@@ -144,8 +144,8 @@ describe("When using Enumerable", () => {
         it("should be able to get all cars from city 'Porsgrunn'", () => {
 
             let cities = new Enumerable<ILocation>(locations)
-                .where(it => it.ziparea == 'Porsgrunn');
-
+                .where(it => it.ziparea == 'Porsgrunn')
+                
             let list = new Enumerable<ICar>(cars)
                 .join<ILocation, any>(cities, outer => outer.location, inner => inner.location, (outer, inner) => outer)
                 .toArray();

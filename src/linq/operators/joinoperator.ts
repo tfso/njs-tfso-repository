@@ -34,37 +34,46 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
     }
 
     public * evaluate(outer: Iterable<TEntity>, inner: Iterable<TInner>): IterableIterator<TResult> {
-        let idx = 0;
+        let keyvalues = new Map<any, Array<TInner>>();
+
+        // only able to iterate through once, but build up a Map of <innerKey, TInner[]> to make join match fast 
+        for (let b of inner) {
+            let key: any,
+                values: TInner[];
+
+            if ((values = keyvalues.get(key = this.getInnerKey(b))) == null)
+                keyvalues.set(key, values = []);
+
+            values.push(b);
+        }
 
         for (let a of outer) {
-            let list: Array<TInner> = [];
+            let values: TInner[];
 
-            for (let b of inner) {
-                if (this.getOuterKey(a) == this.getInnerKey(b)) list.push(b);
-            }
-
-            if (list.length > 0) {
-                let tmp = this.selector(a, new Enumerable<TInner>(list));
-
-                yield tmp;
+            if (values = keyvalues.get(this.getOuterKey(a))) {
+                yield this.selector(a, new Enumerable<TInner>(values))
             }
         }
     }
 
     public async * evaluateAsync(outer: AsyncIterable<TEntity>, inner: AsyncIterable<TInner>): AsyncIterableIterator<TResult> {
-        let idx = 0;
+        let keyvalues = new Map<any, Array<TInner>>();
+
+        for await (let b of inner) {
+            let key: any,
+                values: TInner[];
+
+            if ((values = keyvalues.get(key = this.getInnerKey(b))) == null)
+                keyvalues.set(key, values = []);
+
+            values.push(b);
+        }
 
         for await (let a of outer) {
-            let list: Array<TInner> = [];
+            let values: TInner[];
 
-            for await (let b of inner) {
-                if (this.getOuterKey(a) == this.getInnerKey(b)) list.push(b);
-            }
-
-            if (list.length > 0) {
-                let tmp = this.selector(a, new Enumerable<TInner>(list));
-
-                yield tmp;
+            if (values = keyvalues.get(this.getOuterKey(a))) {
+                yield this.selector(a, new Enumerable<TInner>(values))
             }
         }
     }
