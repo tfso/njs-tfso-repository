@@ -51,28 +51,26 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<T
 
 export class Enumerable<TEntity> implements IEnumerable<TEntity>
 {
-    private items: Iterable<TEntity> | AsyncIterable<TEntity>;
+    //private items: Iterable<TEntity> | AsyncIterable<TEntity>;
 
     protected _operations: Operations<TEntity>;
     private _child;
    
-    constructor(items?: Iterable<TEntity> | AsyncIterable<TEntity>) {
+    constructor(private items?: Iterable<TEntity> | AsyncIterable<TEntity>) {
         this._operations = new Operations<TEntity>();
         
-        if (typeof items == 'object' && typeof items[Symbol.asyncIterator] == 'function') {
-            this.items = async function* (scope) {
-                yield* (<Function>items[Symbol.asyncIterator])(scope);
-            }(this);
+        if (items) {
+            if (typeof items == 'object' && typeof items[Symbol.asyncIterator] == 'function') {
+                this[Symbol.iterator] = undefined; // this isn't an sync iterator, unmark it from IEnumerable
+                return;
+            }
 
-            this[Symbol.iterator] = undefined; // this isn't an sync iterator, unmark it from IEnumerable
-        }
-        else
-        {
-            this.items = function* (scope) {
-                yield* (<Function>items[Symbol.iterator])(scope);
-            }(this);
+            if (typeof items == 'object' && typeof items[Symbol.iterator] == 'function') {
+                this[Symbol.asyncIterator] = undefined; // this isn't an async iterator, unmark it from IEnumerable
+                return;
+            }
 
-            this[Symbol.asyncIterator] = undefined; // this isn't an async iterator, unmark it from IEnumerable
+            throw TypeError('Enumerable is instanced with a non-iterable object');
         }
     }
 
@@ -163,21 +161,17 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         if (typeof inner == 'object' && typeof inner[Symbol.asyncIterator] == 'function') {
             iterable = async function* (scope) {
                 yield* (<Function>inner[Symbol.asyncIterator])(undefined, scope);
-            }(this);
+            }(this); // pass in parent
 
             return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(outerKey, innerKey, selector).evaluateAsync(this, <AsyncIterable<TInner>>iterable));
         } else {
             iterable = function* (scope) {
                 yield* (<Function>inner[Symbol.iterator])(undefined, scope);
-            }(this);
+            }(this); // pass in parent
 
             return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(outerKey, innerKey, selector).evaluate(this, <Iterable<TInner>>iterable));
         }
     }
-
-    //public joinAsync<TInner, TResult>(inner: AsyncIterable<TInner>, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult> {
-    //    return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(outerKey, innerKey, selector).evaluateAsync(this, inner), this);
-    //}
 
     public take(count: number): this {
         this._operations.add(new TakeOperator<TEntity>(count));
@@ -198,7 +192,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
     }
 
     public first(items?: Array<TEntity>): TEntity {
-        let iteratorResult = this.iterator().next();
+        let iteratorResult = this[Symbol.iterator]().next();
 
         if (iteratorResult.done == false)
             return iteratorResult.value;
@@ -207,7 +201,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
     }
 
     public async firstAsync(items?: Array<TEntity>): Promise<TEntity> {
-        let iteratorResult = await this.asyncIterator().next();
+        let iteratorResult = await this[Symbol.asyncIterator]().next();
 
         if (iteratorResult.done == false)
             return iteratorResult.value;
@@ -219,7 +213,11 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         if (items)
             this.items = items;
 
-        return Array.from(this.iterator());
+        let result: Array<TEntity> = [];
+        for (let item of this[Symbol.iterator]())
+            result.push(item);
+
+        return result;
     }
         
     public async toArrayAsync(items?: Iterable<TEntity>): Promise<Array<TEntity>> {
@@ -227,7 +225,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
             this.items = items;
 
         let result: Array<TEntity> = [];
-        for await(let item of this.asyncIterator())
+        for await(let item of this[Symbol.asyncIterator]()) //.asyncIterator())
             result.push(item);
 
         return result;
@@ -237,7 +235,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         return new Enumerable(items);
     }
 
-    protected * iterator(): IterableIterator<TEntity> {
+    protected * iterator(query?: IEnumerable<TEntity>, parent?: IEnumerable<any>): IterableIterator<TEntity> {
         let handleItems = function* (items: Iterable<TEntity>, operators: Array<Operator<TEntity>>, idx: number = null) { 
             if(idx == null) idx = operators.length - 1;
             
@@ -253,11 +251,11 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
             }
         }
 
-        yield* handleItems(<Iterable<TEntity>>this.items, Array.from(this.operations.values()));
+        yield* handleItems(this.items[Symbol.iterator](query, parent), Array.from(this.operations.values()));
     }
 
-    protected async * asyncIterator(): AsyncIterableIterator<TEntity> {
-        let handleItems = async function* (scope: IEnumerable<TEntity>, items: AsyncIterable<TEntity>, operators: Array<Operator<TEntity>>, idx: number = null) { 
+    protected async * asyncIterator(query?: IEnumerable<TEntity>, parent?: IEnumerable<any>): AsyncIterableIterator<TEntity> {
+        let handleItems = async function* (items: AsyncIterable<TEntity>, operators: Array<Operator<TEntity>>, idx: number = null) { 
             if(idx == null) idx = operators.length - 1;
             
             switch(idx) {
@@ -268,22 +266,22 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
                     break;
 
                 case 0:
-                    yield* operators[idx].evaluateAsync( items ); break;
+                    yield* operators[idx].evaluateAsync(items); break;
                 
                 default:
-                    yield* operators[idx].evaluateAsync(handleItems(scope, items, operators, idx - 1)); break;
+                    yield* operators[idx].evaluateAsync(handleItems(items, operators, idx - 1)); break;
             }
         }
 
-        yield* handleItems(this, <AsyncIterable<TEntity>>this.items, Array.from(this.operations.values()));        
+        yield* handleItems(this.items[Symbol.asyncIterator](query, parent), Array.from(this.operations.values()));        
     }
 
-    [Symbol.asyncIterator] = () => {
-        return this.asyncIterator();
+    [Symbol.asyncIterator] = (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>) => {
+        return this.asyncIterator(query || this, parent);
     }
 
-    [Symbol.iterator] = () => {
-        return this.iterator();
+    [Symbol.iterator] = (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>) => {
+        return this.iterator(query || this, parent);
     }
 }
 

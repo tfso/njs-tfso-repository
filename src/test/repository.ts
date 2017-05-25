@@ -119,11 +119,15 @@ describe("When using Repository", () => {
 
     it("should work with joins", async () => {
 
-        let ar = await new Enumerable(new CarRepository())
+        let ar = new Enumerable(new CarRepository())
             .where(it => it.id > 5)
-            .join<ILocation, any>(new LocationRepository(), a => a.location, b => b.location, (a, b) => Object.assign({}, a))
-            .toArrayAsync();
-        
+            .join<ILocation, any>(new Enumerable(new LocationRepository()).where(it => true), a => a.location, b => b.location, (a, b) => Object.assign({}, a))
+            .take(5)
+            //.toArrayAsync();
+
+        let t = await ar.toArrayAsync();
+
+        assert.ok(t.length > 0);
     })
 
     it("should work with optimized query", async () => {
