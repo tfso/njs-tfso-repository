@@ -286,11 +286,11 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         yield* handleItems(this.items[Symbol.asyncIterator](query, parent), Array.from(this.operations.values()));        
     }
 
-    [Symbol.asyncIterator] = (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>) => {
+    [Symbol.asyncIterator] = (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>): AsyncIterableIterator<TEntity> => {
         return this.asyncIterator(query || this, parent);
     }
 
-    [Symbol.iterator] = (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>) => {
+    [Symbol.iterator] = (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>): IterableIterator<TEntity> => {
         return this.iterator(query || this, parent);
     }
 }

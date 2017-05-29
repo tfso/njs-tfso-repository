@@ -6,7 +6,6 @@ import { IRecordSetMeta } from './db/recordset';
 
 import { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './../linq/expressions/logicalexpression';
 
-
 export { IEnumerable, IRecordSetMeta }
 
 export interface IBaseRepository<TEntity, TEntityId> {

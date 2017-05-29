@@ -80,7 +80,7 @@ describe("When using Enumerable", () => {
         it("should be able to handle list of items", async () => {
             let hasItems = false;
 
-            for await(let item of new Enumerable<ICar>(list()).where(it => it.id == 3)) {
+            for await(let item of new Enumerable(list()).where(it => it.id == 3)) {
                 hasItems = true;
                 assert.equal(item.id, 3);
             }
@@ -91,7 +91,7 @@ describe("When using Enumerable", () => {
         it("should be able to handle list of promises", async () => {
             let hasItems = false;
 
-            for await(let item of new Enumerable<ICar>(list()).where(it => it.id == 5)) {
+            for await(let item of new Enumerable(list()).where(it => it.id == 5)) {
                 hasItems = true;
                 assert.equal(item.id, 5);
             }
