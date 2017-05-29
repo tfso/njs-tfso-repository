@@ -55,8 +55,11 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
 
     protected _operations: Operations<TEntity>;
     private _child;
-   
-    constructor(private items?: Iterable<TEntity> | AsyncIterable<TEntity>) {
+
+    constructor(items?: Array<TEntity>) 
+    constructor(items?: Iterable<TEntity>) 
+    constructor(items?: AsyncIterable<TEntity>)
+    constructor(private items?: Array<TEntity> | Iterable<TEntity> | AsyncIterable<TEntity>) {
         this._operations = new Operations<TEntity>();
         
         if (items) {
