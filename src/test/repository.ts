@@ -1,6 +1,6 @@
 ﻿import * as assert from 'assert';
 
-import Repository from './../repository/baserepository';
+import Repository, { IRecordSetMeta } from './../repository/baserepository';
 import Enumerable, { IEnumerable, OperatorType } from './../linq/enumerable';
 import { WhereOperator } from './../linq/operators/whereoperator';
 
@@ -33,7 +33,7 @@ class CarRepository extends Repository<ICar, number>
         return new Enumerable(this).where( (it, id) => it.id == id, id).firstAsync();
     }
 
-    public readAll(query: IEnumerable<ICar>, items?: any): Promise<ICar[]> {
+    public readAll(query: IEnumerable<ICar>, meta?: IRecordSetMeta): Promise<ICar[]> {
          let specialcar: ICar,
              cars = [
                 <ICar>{ id: 1, location: 'SKIEN', registrationYear: 2016, type: { make: 'SAAB', model: '9-3' } },
@@ -46,25 +46,21 @@ class CarRepository extends Repository<ICar, number>
                 <ICar>{ id: 8, location: 'LARVIK', registrationYear: 2009, type: { make: 'HONDA', model: 'CIVIC' } }
             ];
 
-        let op = query.operations.first();
-        if(op.type == OperatorType.Where) {
-            let where = <WhereOperator<ICar>>op;
+        for (let criteria of this.getCriteria(query)) {
+             switch (criteria.property) {
+                 case 'id':
+                     if (criteria.operator == '==' && criteria.value == 7) {
+                         if (meta) {
+                             meta.totalLength = 1;
+                         }
 
-            for(let exp of where.getExpressionIntersection())
-            {
-                if(exp.left.type != ExpressionType.Identifier)
-                    break;
+                         return Promise.resolve([specialcar]); // optimized
+                     }
 
-                switch( (<IIdentifierExpression>exp.left).name) {
-                    case 'id':
-                        if(exp.operator == LogicalOperatorType.Equal && exp.right.type == ExpressionType.Literal && (<ILiteralExpression>(exp.right)).value == 7)
-                            return Promise.resolve([specialcar]); // optimized
-
-                        break;
-                }
-            }
+                     break;
+             }
         }
-       
+
         return Promise.resolve(cars); // unoptimized
     }
 
@@ -87,7 +83,7 @@ class LocationRepository extends Repository<ILocation, string>
         return new Enumerable(this).where((it, id) => it.location == id, id).firstAsync();
     }
 
-    public readAll(query: IEnumerable<ILocation>, items?: any) {
+    public readAll(query: IEnumerable<ILocation>, meta?: IRecordSetMeta, parent?: IEnumerable<any>) {
         let locations = [
             <ILocation>{ location: 'SKIEN', zipcode: 3955, ziparea: 'Skien' },
             <ILocation>{ location: 'PORSGRUNN', zipcode: 3949, ziparea: 'Porsgrunn' },
@@ -118,31 +114,35 @@ describe("When using Repository", () => {
     })
 
     it("should work with joins", async () => {
-
-        let ar = new Enumerable(new CarRepository())
-            .where(it => it.id > 5)
-            .join<ILocation, any>(new Enumerable(new LocationRepository()).where(it => true), a => a.location, b => b.location, (a, b) => Object.assign({}, a))
-            .take(5)
-            //.toArrayAsync();
+        let meta: IRecordSetMeta = <IRecordSetMeta>{},
+            ar = new Enumerable(new CarRepository().getIterable(meta))
+                .where(it => it.id == 7)
+                .take(5)
+                .join<ILocation, any>(new LocationRepository(), a => a.location, b => b.location, (a, b) => Object.assign({}, a))
 
         let t = await ar.toArrayAsync();
 
-        assert.ok(t.length > 0);
+        assert.equal(t.length, 1);
+        assert.equal(meta.totalLength, 1);
     })
 
     it("should work with optimized query", async () => {
 
-        let repo = new CarRepository();
+        let repo = new CarRepository(),
+            cars = await new Enumerable<ICar>(repo).where(it => it.id == 7).toArrayAsync();
 
         assert.ok(repo instanceof Repository);
-        assert.equal((await new Enumerable<ICar>(repo).where(it => it.id == 7).firstAsync()).id, 7);
+        assert.equal(cars.length, 1)
+        assert.equal(cars[0].id, 7);
     })
 
     it("should work with random query", async () => {
 
-        let repo = new CarRepository();
+        let repo = new CarRepository(),
+            cars = await new Enumerable<ICar>(repo).where(it => it.id == 6).toArrayAsync();
 
         assert.ok(repo instanceof Repository);
-        assert.equal((await new Enumerable<ICar>(repo).where(it => it.id == 6).firstAsync()).id, 6);
+        assert.equal(cars.length, 1)
+        assert.equal(cars[0].id, 6);
     })
 })

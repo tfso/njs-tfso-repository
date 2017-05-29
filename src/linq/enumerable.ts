@@ -4,7 +4,7 @@ import { SkipOperator } from './operators/skipoperator';
 import { TakeOperator } from './operators/takeoperator';
 import { WhereOperator } from './operators/whereoperator';
 import { SelectOperator } from './operators/selectoperator';
-import { JoinOperator } from './operators/joinoperator';
+import { JoinOperator, JoinType } from './operators/joinoperator';
 
 import { RenameVisitor } from './expressions/renamevisitor';
 import { RemapVisitor } from './expressions/remapvisitor';
@@ -72,6 +72,13 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
 
             throw TypeError('Enumerable is instanced with a non-iterable object');
         }
+    }
+
+    public get name(): string {
+        if(this.items) 
+            return this.items.constructor.name;
+
+        return undefined;
     }
 
     public get operations(): Operations<TEntity> {
@@ -155,7 +162,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * @param enumerable
      * @param predicate
      */
-    public join<TInner, TResult>(inner: Iterable<TInner> | AsyncIterable<TInner>, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult> {
+    public join<TInner, TResult>(inner: Iterable<TInner> | AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult> {
         let iterable: Iterable<TInner> | AsyncIterable<TInner>;
 
         if (typeof inner == 'object' && typeof inner[Symbol.asyncIterator] == 'function') {
@@ -163,13 +170,13 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
                 yield* (<Function>inner[Symbol.asyncIterator])(undefined, scope);
             }(this); // pass in parent
 
-            return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(outerKey, innerKey, selector).evaluateAsync(this, <AsyncIterable<TInner>>iterable));
+            return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(JoinType.Inner, outerKey, innerKey, selector).evaluateAsync(this, <AsyncIterable<TInner>>iterable));
         } else {
             iterable = function* (scope) {
                 yield* (<Function>inner[Symbol.iterator])(undefined, scope);
             }(this); // pass in parent
 
-            return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(outerKey, innerKey, selector).evaluate(this, <Iterable<TInner>>iterable));
+            return this._child = new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(JoinType.Inner, outerKey, innerKey, selector).evaluate(this, <Iterable<TInner>>iterable));
         }
     }
 

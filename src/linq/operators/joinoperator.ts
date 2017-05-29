@@ -2,11 +2,17 @@
 import { Operator, OperatorType } from './operator';
 import { ExpressionVisitor, IExpression, ExpressionType, IMemberExpression, IIdentifierExpression } from './../expressions/expressionvisitor';
 
+export enum JoinType {
+    Inner, 
+    Left
+}
+
+
 export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
     private outerProperty: IExpression;
     private innerProperty: IExpression;
 
-    constructor(outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, public selector: (a: TEntity, b: IEnumerable<TInner>) => TResult) {
+    constructor(private joinType: JoinType, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, public selector: (a: TEntity, b: IEnumerable<TInner>) => TResult) {
         super(OperatorType.Join);
 
         this.outerProperty = new ExpressionVisitor().visitLambda(outerKey);
@@ -54,10 +60,14 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
                 yield this.selector(a, new Enumerable<TInner>(values))
             }
         }
+
+        keyvalues.clear();
     }
 
     public async * evaluateAsync(outer: AsyncIterable<TEntity>, inner: AsyncIterable<TInner>): AsyncIterableIterator<TResult> {
         let keyvalues = new Map<any, Array<TInner>>();
+
+
 
         for await (let b of inner) {
             let key: any,
@@ -72,9 +82,22 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
         for await (let a of outer) {
             let values: TInner[];
 
-            if (values = keyvalues.get(this.getOuterKey(a))) {
-                yield this.selector(a, new Enumerable<TInner>(values))
+            switch(this.joinType) {
+                case JoinType.Inner:
+                    if (values = keyvalues.get(this.getOuterKey(a)))
+                        yield this.selector(a, new Enumerable<TInner>(values))
+
+                    break;
+
+                case JoinType.Left:
+                    if((values = keyvalues.get(this.getOuterKey(a))) == null)
+                        values = [];
+
+                    yield this.selector(a, new Enumerable<TInner>(values));
+                    break;
             }
         }
+
+        keyvalues.clear();
     }
 }

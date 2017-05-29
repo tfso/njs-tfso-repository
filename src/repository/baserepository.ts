@@ -1,8 +1,11 @@
-﻿import { IFilters, Filters } from './filters/filters';
+﻿import { IFilterCriteria, FilterCriteria } from './filters/filtercriteria';
 import Enumerable, { IEnumerable } from './../linq/enumerable';
 import { WhereOperator } from './../linq/operators/whereoperator';
 
 import { IRecordSetMeta } from './db/recordset';
+
+import { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './../linq/expressions/logicalexpression';
+
 
 export { IEnumerable, IRecordSetMeta }
 
@@ -29,6 +32,7 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
     // ((t) => t.gender == 'female' && t.age >= 16).toString()                       => (t) => t.gender == \'female\' && t.age >= 16
     abstract readAll(query: IEnumerable<TEntity>): Promise<TEntity[]>
     abstract readAll(query: IEnumerable<TEntity>, meta?: IRecordSetMeta): Promise<TEntity[]>
+    abstract readAll(query: IEnumerable<TEntity>, meta?: IRecordSetMeta, parent?: IEnumerable<any>): Promise<TEntity[]>
 
     abstract create(entity: TEntity): Promise<TEntity>
     abstract create(entity: TEntity, meta?: IRecordSetMeta): Promise<TEntity>
@@ -51,43 +55,36 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         return Promise.resolve();
     }
 
-    /**
-     * returns a IFilters if the predicate is solvable, otherwise it throws an error
-     * @param predicate
-     * @param parameters
-     */
-    protected getFilters(query: IEnumerable<TEntity>): IFilters {
-        let expression: any;
+    protected getCriteria(query: IEnumerable<TEntity>): FilterCriteria[] 
+    protected getCriteria(expressions: ILogicalExpression[]): FilterCriteria[]
+    protected getCriteria() {
+        if(arguments[0] instanceof Enumerable) 
+        {
+            for (let operator of arguments[0].operations.values())
+                if (operator instanceof WhereOperator) 
+                    return (<WhereOperator<TEntity>>operator).getExpressionIntersection().map(expr => new FilterCriteria(expr));
+        }
 
-        for (let operator of query.operations.values())
-            if (operator instanceof WhereOperator) {
-                expression = operator.expression;
+        if(Array.isArray(arguments[0]))
+            return arguments[0].map(expr => new FilterCriteria(expr))
 
-                break;
-            }
-
-        return new Filters<TEntity>(expression);
+        return [];
     }
 
-    public getPredicateFn(query: IEnumerable<TEntity>): (element: TEntity) => boolean {
-        let expression: any;
-
-        for (let operator of query.operations.values())
-            if (operator instanceof WhereOperator) {
-                return operator.predicate;
-            }
-
-        return (entity: TEntity) => {
-            return true;
-        };
+    private async * asyncIterator(query?: IEnumerable<TEntity>, meta?: IRecordSetMeta, parent?: IEnumerable<any>): AsyncIterableIterator<TEntity> {
+        yield* await this.readAll(query, meta, parent);
     }
 
-    private async * asyncIterator(query?: IEnumerable<TEntity>, parent?: IEnumerable<any>): AsyncIterableIterator<TEntity> {
-        yield* await this.readAll(query);
+    public getIterable(meta?: IRecordSetMeta): AsyncIterable<TEntity> {
+        return {
+            [Symbol.asyncIterator]: (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>) => {
+                return this.asyncIterator(query, meta, parent);
+            }
+        }
     }
 
     [Symbol.asyncIterator] = (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>) => {
-        return this.asyncIterator(query, parent);
+        return this.asyncIterator(query, null, parent);
     }
 }
 
