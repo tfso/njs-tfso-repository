@@ -59,22 +59,10 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
     constructor(items?: Array<TEntity>) 
     constructor(items?: Iterable<TEntity>) 
     constructor(items?: AsyncIterable<TEntity>)
-    constructor(private items?: Array<TEntity> | Iterable<TEntity> | AsyncIterable<TEntity>) {
+    constructor(private items?: any) {
         this._operations = new Operations<TEntity>();
-        
-        if (items) {
-            if (typeof items == 'object' && typeof items[Symbol.asyncIterator] == 'function') {
-                this[Symbol.iterator] = undefined; // this isn't an sync iterator, unmark it from IEnumerable
-                return;
-            }
 
-            if (typeof items == 'object' && typeof items[Symbol.iterator] == 'function') {
-                this[Symbol.asyncIterator] = undefined; // this isn't an async iterator, unmark it from IEnumerable
-                return;
-            }
-
-            throw TypeError('Enumerable is instanced with a non-iterable object');
-        }
+        this.from(items);
     }
 
     public get name(): string {
@@ -201,9 +189,34 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         return this;
     }
 
-    public first(items?: Array<TEntity>): TEntity {
-        let iteratorResult = this[Symbol.iterator]().next();
+    public from(items: Array<TEntity>) 
+    public from(items: Iterable<TEntity>) 
+    public from(items: AsyncIterable<TEntity>)
+    public from(items: Array<TEntity> | Iterable<TEntity> | AsyncIterable<TEntity>) {
+        if (items) {
+            this.items = items;
 
+            if (typeof items == 'object' && typeof items[Symbol.asyncIterator] == 'function') {
+                this[Symbol.iterator] = undefined; // this isn't an sync iterator, unmark it from IEnumerable
+                this[Symbol.asyncIterator] = this.asyncIterator;
+            }
+            else if (typeof items == 'object' && typeof items[Symbol.iterator] == 'function') {
+                this[Symbol.asyncIterator] = undefined; // this isn't an async iterator, unmark it from IEnumerable
+                this[Symbol.iterator] = this.iterator;
+            }
+            else {
+                throw new TypeError('Enumerable is instanced with a non-iterable object');
+            }
+        }
+
+        return this;
+    }
+
+    public first(items?: Array<TEntity>): TEntity {
+        if (items)
+            this.from(items);
+
+        let iteratorResult = this[Symbol.iterator]().next();
         if (iteratorResult.done == false)
             return iteratorResult.value;
 
@@ -211,8 +224,10 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
     }
 
     public async firstAsync(items?: Array<TEntity>): Promise<TEntity> {
-        let iteratorResult = await this[Symbol.asyncIterator]().next();
+        if (items)
+            this.from(items);
 
+        let iteratorResult = await this[Symbol.asyncIterator]().next();
         if (iteratorResult.done == false)
             return iteratorResult.value;
 
@@ -221,7 +236,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
 
     public toArray(items?: Iterable<TEntity>): Array<TEntity> {
         if (items)
-            this.items = items;
+            this.from(items);
 
         let result: Array<TEntity> = [];
         for (let item of this[Symbol.iterator]())
@@ -232,7 +247,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         
     public async toArrayAsync(items?: Iterable<TEntity>): Promise<Array<TEntity>> {
         if (items)
-            this.items = items;
+            this.from(items);
 
         let result: Array<TEntity> = [];
         for await(let item of this[Symbol.asyncIterator]()) //.asyncIterator())
@@ -261,7 +276,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
             }
         }
 
-        yield* handleItems(this.items[Symbol.iterator](query, parent), Array.from(this.operations.values()));
+        yield* handleItems(this.items[Symbol.iterator](query || this, parent), Array.from(this.operations.values()));
     }
 
     protected async * asyncIterator(query?: IEnumerable<TEntity>, parent?: IEnumerable<any>): AsyncIterableIterator<TEntity> {
@@ -283,16 +298,12 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
             }
         }
 
-        yield* handleItems(this.items[Symbol.asyncIterator](query, parent), Array.from(this.operations.values()));        
+        yield* handleItems(this.items[Symbol.asyncIterator](query || this, parent), Array.from(this.operations.values()));        
     }
 
-    [Symbol.asyncIterator] = (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>): AsyncIterableIterator<TEntity> => {
-        return this.asyncIterator(query || this, parent);
-    }
+    [Symbol.asyncIterator] = (): AsyncIterableIterator<TEntity> => this.asyncIterator();
+    [Symbol.iterator] = (): IterableIterator<TEntity> => this.iterator();
 
-    [Symbol.iterator] = (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>): IterableIterator<TEntity> => {
-        return this.iterator(query || this, parent);
-    }
 }
 
 export default Enumerable;
