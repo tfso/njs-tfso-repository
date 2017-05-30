@@ -75,11 +75,15 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
     }
 
     public getIterable(meta?: IRecordSetMeta): AsyncIterable<TEntity> {
-        return {
+        let iterable = {
             [Symbol.asyncIterator]: (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>) => {
                 return this.asyncIterator(query, meta, parent);
             }
         }
+
+        iterable.constructor = this.constructor;
+
+        return iterable;
     }
 
     [Symbol.asyncIterator] = (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>) => {
