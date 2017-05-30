@@ -18,6 +18,10 @@ export { OperatorType };
 export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<TEntity> {
     readonly operations: Operations<TEntity>
 
+    from(items: Array<TEntity>)
+    from(items: Iterable<TEntity>)
+    from(items: AsyncIterable<TEntity>)
+
     /**
     * Where clause using OData $filter expression returning either true or false. Any parameters used is properties of TEntity
     * @param predicate OData expression
@@ -189,10 +193,10 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         return this;
     }
 
-    public from(items: Array<TEntity>) 
-    public from(items: Iterable<TEntity>) 
-    public from(items: AsyncIterable<TEntity>)
-    public from(items: Array<TEntity> | Iterable<TEntity> | AsyncIterable<TEntity>) {
+    public from(items: Array<TEntity>) : this
+    public from(items: Iterable<TEntity>) : this
+    public from(items: AsyncIterable<TEntity>) : this
+    public from(items: Array<TEntity> | Iterable<TEntity> | AsyncIterable<TEntity>): this {
         if (items) {
             this.items = items;
 
