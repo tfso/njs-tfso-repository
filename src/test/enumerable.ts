@@ -55,6 +55,20 @@ describe("When using Enumerable", () => {
         ]
     })
 
+    describe("with iterable", () => {
+
+        it("should be able to iterate", async () => {
+            let count = 0;
+
+            for (let item of new Enumerable(cars).where(it => it.id > 0)) {
+                count++;
+            }
+
+            assert.equal(count, 8);
+        })
+
+    })
+
     describe("with async iterable", () => {
         let delay: (delay: number) => void, 
             list: () => AsyncIterableIterator<ICar>;
@@ -75,6 +89,16 @@ describe("When using Enumerable", () => {
                 yield Promise.resolve(<ICar>{ id: 7, location: 'HEISTAD', registrationYear: 2013, type: { make: 'TOYOTA', model: 'YARIS' } })
                 yield <ICar>{ id: 8, location: 'LARVIK', registrationYear: 2009, type: { make: 'HONDA', model: 'CIVIC' } }
             }
+        })
+
+        it("should be able to iterate", async () => {
+            let count = 0;
+
+            for await (let item of new Enumerable(list()).where(it => it.id > 0)) {
+                count++;
+            }
+
+            assert.equal(count, 8);
         })
 
         it("should be able to handle list of items", async () => {

@@ -67,8 +67,6 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
     public async * evaluateAsync(outer: AsyncIterable<TEntity>, inner: AsyncIterable<TInner>): AsyncIterableIterator<TResult> {
         let keyvalues = new Map<any, Array<TInner>>();
 
-
-
         for await (let b of inner) {
             let key: any,
                 values: TInner[];
