@@ -122,8 +122,6 @@ describe("When using Repository", () => {
 
         let t = await ar.toArrayAsync();
 
-        let b = ar.from(t).toArray();
-
         assert.equal(t.length, 1);
         assert.equal(meta.totalLength, 1);
     })

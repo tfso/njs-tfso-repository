@@ -8,6 +8,9 @@ export class SkipOperator<TEntity> extends Operator<TEntity> {
     public * evaluate(items: Iterable<TEntity>): IterableIterator<TEntity> {
         let idx = 0;
 
+        if (super.removed)
+            yield* items;
+
         for (let item of items) {
             if (idx++ < this.count) continue;
 
@@ -18,8 +21,11 @@ export class SkipOperator<TEntity> extends Operator<TEntity> {
     public async * evaluateAsync(items: AsyncIterable<TEntity>): AsyncIterableIterator<TEntity> {
         let idx = 0;
 
+        if (super.removed)
+            yield* items;
+
         for await (let item of items) {
-            if (idx++ < this.count) continue;
+            if (super.removed == false && idx++ < this.count) continue;
 
             yield item;
         }

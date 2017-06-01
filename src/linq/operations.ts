@@ -2,9 +2,11 @@
 
 export class Operations<TEntity> {
     private _stack: Array<Operator<TEntity>>;
+    private _removed: Array<Operator<TEntity>>;
 
     constructor() {
         this._stack = [];
+        this._removed = [];
     }
 
     public add(operator: Operator<TEntity>): void {
@@ -15,7 +17,8 @@ export class Operations<TEntity> {
         var idx = this._stack.indexOf(operator);
 
         if (idx != -1) {
-            this._stack.splice(idx, 1);
+            this._removed.push(operator);
+            operator.remove();
 
             return true;
         }
@@ -32,7 +35,7 @@ export class Operations<TEntity> {
             return this.values().next().value;
 
         for (let item of this.values())
-            if (item.type === o || (typeof o == 'function' && item instanceof o))
+            if (this._removed.indexOf(item) == -1 && item.type === o || (typeof o == 'function' && item instanceof o))
                 return item;
 
         return null;

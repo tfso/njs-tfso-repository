@@ -314,6 +314,20 @@ describe("When using Enumerable", () => {
         assert.ok(ar.length == 1);
     });
 
+    it("should skip 0", () => {
+        var ar = new Enumerable(cars).skip(0).toArray();
+
+        assert.equal(ar[0].id, 1);
+        assert.equal(ar.length, 8);
+    });
+
+    it("should take MAX", () => {
+        var ar = new Enumerable(cars).skip(0).take(Number.MAX_VALUE).toArray();
+
+        assert.equal(ar[0].id, 1);
+        assert.equal(ar.length, 8);
+    });
+
     it("should skip 5", () => {
         var ar = new Enumerable(cars).skip(5).toArray();
 
@@ -421,7 +435,7 @@ describe("When using Enumerable", () => {
     })
 
     it("should be able to get first Operator by class and remove it for manual operator handling", () => {
-        let query: Enumerable<ICar> = new Enumerable<ICar>(),
+        let query: Enumerable<ICar> = new Enumerable<ICar>(cars),
             skip: SkipOperator<ICar>,
             skipCount: number;
 
@@ -429,11 +443,9 @@ describe("When using Enumerable", () => {
         query.skip(5);
         query.take(3);
         query.skip(1);
-        query.take(1);
 
         skip = query.operations.first(SkipOperator);
-        skipCount = skip.count;
-
+        
         assert.notEqual(skip, null);
         assert.equal(skip.type, OperatorType.Skip);
         assert.equal(skip.count, 5);
@@ -445,5 +457,9 @@ describe("When using Enumerable", () => {
         assert.notEqual(skip, null);
         assert.equal(skip.type, OperatorType.Skip);
         assert.equal(skip.count, 1);
+
+        let mycars = query.toArray();
+
+        assert.equal(mycars.length, 2);
     })
 });
