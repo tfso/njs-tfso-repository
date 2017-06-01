@@ -15,6 +15,11 @@ export { OperatorType };
 
 (Symbol as any).asyncIterator = Symbol.asyncIterator || "__@@asyncIterator__";
 
+export interface IEnumerableOptions<TEntity> {
+    query?: IEnumerable<TEntity>
+    parent?: IEnumerable<any>
+}
+
 export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<TEntity> {
     readonly operations: Operations<TEntity>
 
@@ -55,7 +60,7 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<T
 
 export class Enumerable<TEntity> implements IEnumerable<TEntity>
 {
-    //private items: Iterable<TEntity> | AsyncIterable<TEntity>;
+    private _name: string = null;
 
     protected _operations: Operations<TEntity>;
     
@@ -69,10 +74,13 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
     }
 
     public get name(): string {
-        if(this.items) 
+        if (this._name != null)
+            return this._name;
+
+        if(this.items)
             return this.items.constructor.name;
 
-        return undefined;
+        return "";
     }
 
     public get operations(): Operations<TEntity> {
@@ -83,13 +91,13 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * A remapper of identifier names, members is seperated with dot.
      * @param remapper Function that returns the new name of the identifier
      */
-    public remap(remapper: (name: string) => string)
+    public remap(remapper: (name: string) => string) : this
     /**
      * A remapper of values that corresponds to a identifier name
      * @param remapper Function that returns the new value
      */
-    public remap(remapper: (name: string, value: any) => any) 
-    public remap(remapper: () => any) {
+    public remap(remapper: (name: string, value: any) => any) : this
+    public remap(remapper: () => any) : this {
         let visitor = remapper.length == 2 ? new RemapVisitor(null, remapper) : new RemapVisitor(remapper, null);
     
         for (let item of this._operations.values()) {
@@ -155,31 +163,34 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * @param outerKey
      * @param innerKey
      * @param selector A function that returns the new object, (outer, inner) => { outer, inner } or (outer, inner) => Object.assign({}, a, { childs: inner.toArray() })
+     * @param indexing If set to true an Array of outerKey will be passed into iterator of TInner as { keys: Array<any> }. Cons, all elements of outer iterator will be be kept in memory.
+     * @returns IEnumerable<TResult>
      */
-    public groupJoin<TInner, TResult>(inner: Iterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult>
+    public groupJoin<TInner, TResult>(inner: Iterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing?: boolean): IEnumerable<TResult>
     /**
      * returns a new IEnumerable of TResult (Left Join)
      * @param inner
      * @param outerKey
      * @param innerKey
      * @param selector A function that returns the new object, (outer, inner) => { outer, inner } or (outer, inner) => Object.assign({}, a, { childs: inner.toArray() })
+     * @param indexing If set to true an Array of outerKey will be passed into iterator of TInner as { keys: Array<any> }. Cons, all elements of outer iterator will be be kept in memory.
+     * @returns IEnumerable<TResult>
      */
-    public groupJoin<TInner, TResult>(inner: AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult> 
-    public groupJoin<TInner, TResult>(inner: Iterable<TInner> | AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult> {
-        let iterable: Iterable<TInner> | AsyncIterable<TInner>;
+    public groupJoin<TInner, TResult>(inner: AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing?: boolean): IEnumerable<TResult> 
+    public groupJoin<TInner, TResult>(inner: Iterable<TInner> | AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing: boolean = false): IEnumerable<TResult> {
+        let iterable: Iterable<TInner> | AsyncIterable<TInner> = ((scope) => <any>{
+            [Symbol.asyncIterator]: (options) => {
+                return inner[Symbol.asyncIterator](Object.assign({ parent: scope }, options));
+            },
+            [Symbol.iterator]: (options) => {
+                return inner[Symbol.iterator](Object.assign({ parent: scope }, options));
+            }
+        })(this);
 
         if (typeof inner == 'object' && typeof inner[Symbol.asyncIterator] == 'function') {
-            iterable = async function* (scope) {
-                yield* (<Function>inner[Symbol.asyncIterator])(undefined, scope);
-            }(this); // pass in parent
-
-            return new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(JoinType.Left, outerKey, innerKey, selector).evaluateAsync(this, <AsyncIterable<TInner>>iterable));
+            return new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(JoinType.Left, outerKey, innerKey, selector, indexing).evaluateAsync(this, <AsyncIterable<TInner>>iterable));
         } else {
-            iterable = function* (scope) {
-                yield* (<Function>inner[Symbol.iterator])(undefined, scope);
-            }(this); // pass in parent
-
-            return new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(JoinType.Left, outerKey, innerKey, selector).evaluate(this, <Iterable<TInner>>iterable));
+            return new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(JoinType.Left, outerKey, innerKey, selector, indexing).evaluate(this, <Iterable<TInner>>iterable));
         }
     }
 
@@ -189,31 +200,34 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * @param outerKey
      * @param innerKey
      * @param selector A function that returns the new object, (outer, inner) => { outer, inner } or (outer, inner) => Object.assign({}, a, { childs: inner.toArray() })
+     * @param indexing If set to true an Array of outerKey will be passed into iterator of TInner as { keys: Array<any> }. Cons, all elements of outer iterator will be be kept in memory.
+     * @returns IEnumerable<TResult>
      */
-    public join<TInner, TResult>(inner: Iterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult> 
+    public join<TInner, TResult>(inner: Iterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing?: boolean): IEnumerable<TResult> 
     /**
      * returns a new IEnumerable of TResult (Inner Join)
      * @param inner
      * @param outerKey
      * @param innerKey
      * @param selector A function that returns the new object, (outer, inner) => { outer, inner } or (outer, inner) => Object.assign({}, a, { childs: inner.toArray() })
+     * @param indexing If set to true an Array of outerKey will be passed into iterator of TInner as { keys: Array<any> }. Cons, all elements of outer iterator will be be kept in memory.
+     * @returns IEnumerable<TResult>
      */
-    public join<TInner, TResult>(inner: AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult>
-    public join<TInner, TResult>(inner: Iterable<TInner> | AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult): IEnumerable<TResult> {
-        let iterable: Iterable<TInner> | AsyncIterable<TInner>;
+    public join<TInner, TResult>(inner: AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing?: boolean): IEnumerable<TResult>
+    public join<TInner, TResult>(inner: Iterable<TInner> | AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing: boolean = false): IEnumerable<TResult> {
+        let iterable: Iterable<TInner> | AsyncIterable<TInner> = ((scope) => <any>{
+            [Symbol.asyncIterator]: (options) => {
+                return inner[Symbol.asyncIterator](Object.assign({ parent: scope }, options));
+            },
+            [Symbol.iterator]: (options) => {
+                return inner[Symbol.iterator](Object.assign({ parent: scope }, options));
+            }
+        })(this);
 
         if (typeof inner == 'object' && typeof inner[Symbol.asyncIterator] == 'function') {
-            iterable = async function* (scope) {
-                yield* (<Function>inner[Symbol.asyncIterator])(undefined, scope);
-            }(this); // pass in parent
-
-            return new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(JoinType.Inner, outerKey, innerKey, selector).evaluateAsync(this, <AsyncIterable<TInner>>iterable));
+            return new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(JoinType.Inner, outerKey, innerKey, selector, indexing).evaluateAsync(this, <AsyncIterable<TInner>>iterable));
         } else {
-            iterable = function* (scope) {
-                yield* (<Function>inner[Symbol.iterator])(undefined, scope);
-            }(this); // pass in parent
-
-            return new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(JoinType.Inner, outerKey, innerKey, selector).evaluate(this, <Iterable<TInner>>iterable));
+            return new Enumerable<TResult>(new JoinOperator<TEntity, TInner, TResult>(JoinType.Inner, outerKey, innerKey, selector, indexing).evaluate(this, <Iterable<TInner>>iterable));
         }
     }
 
@@ -240,6 +254,9 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
     public from(items: AsyncIterable<TEntity>) : this
     public from(items: Array<TEntity> | Iterable<TEntity> | AsyncIterable<TEntity>): this {
         if (items) {
+            if (this._name == null)
+                this._name = items.constructor.name;
+
             this.items = items;
 
             if (typeof items == 'object' && typeof items[Symbol.asyncIterator] == 'function') {
@@ -285,7 +302,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
             this.from(items);
 
         let result: Array<TEntity> = [];
-        for (let item of this[Symbol.iterator]())
+        for (let item of this.iterator())
             result.push(item);
 
         return result;
@@ -296,7 +313,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
             this.from(items);
 
         let result: Array<TEntity> = [];
-        for await(let item of this[Symbol.asyncIterator]()) //.asyncIterator())
+        for await(let item of this.asyncIterator()) //.asyncIterator())
             result.push(item);
 
         return result;
@@ -306,7 +323,10 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         return new Enumerable(items);
     }
 
-    protected * iterator(query?: IEnumerable<TEntity>, parent?: IEnumerable<any>): IterableIterator<TEntity> {
+    protected * iterator(options?: IEnumerableOptions<TEntity>): IterableIterator<TEntity> {
+        if (!options || options.query == null)
+            options = Object.assign(options || {}, { query: this });
+
         let handleItems = function* (items: Iterable<TEntity>, operators: Array<Operator<TEntity>>, idx: number = null) { 
             if(idx == null) idx = operators.length - 1;
             
@@ -322,10 +342,13 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
             }
         }
 
-        yield* handleItems(this.items[Symbol.iterator](query || this, parent), Array.from(this.operations.values()));
+        yield* handleItems(this.items[Symbol.iterator](options), Array.from(this.operations.values()));
     }
 
-    protected async * asyncIterator(query?: IEnumerable<TEntity>, parent?: IEnumerable<any>): AsyncIterableIterator<TEntity> {
+    protected async * asyncIterator(options?: IEnumerableOptions<TEntity>): AsyncIterableIterator<TEntity> {
+        if (!options || options.query == null)
+            options = Object.assign(options || {}, { query: this });
+
         let handleItems = async function* (items: AsyncIterable<TEntity>, operators: Array<Operator<TEntity>>, idx: number = null) { 
             if(idx == null) idx = operators.length - 1;
             
@@ -344,7 +367,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
             }
         }
 
-        yield* handleItems(this.items[Symbol.asyncIterator](query || this, parent), Array.from(this.operations.values()));        
+        yield* handleItems(this.items[Symbol.asyncIterator](options), Array.from(this.operations.values()));        
     }
 
     [Symbol.asyncIterator] = (): AsyncIterableIterator<TEntity> => this.asyncIterator();

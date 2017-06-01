@@ -12,38 +12,52 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
     private outerProperty: IExpression;
     private innerProperty: IExpression;
 
-    constructor(private joinType: JoinType, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, public selector: (a: TEntity, b: IEnumerable<TInner>) => TResult) {
+    constructor(private joinType: JoinType, outerKey: (a: TEntity) => void, innerKey: (b: TInner) => void, private selector: (a: TEntity, b: IEnumerable<TInner>) => TResult, private indexing: boolean = false) {
         super(OperatorType.Join);
 
         this.outerProperty = new ExpressionVisitor().visitLambda(outerKey);
         this.innerProperty = new ExpressionVisitor().visitLambda(innerKey);
     }
 
+    private getPropertyName(expr: IExpression): string {
+        if (this.outerProperty.type == ExpressionType.Member && (<IMemberExpression>this.outerProperty).property.type == ExpressionType.Identifier)
+            return (<IIdentifierExpression>(<IMemberExpression>this.outerProperty).property).name;
+
+        return undefined;
+    }
+
     public getOuterKey(outerItem: TEntity): any { 
-        if (this.outerProperty.type == ExpressionType.Member && (<IMemberExpression>this.outerProperty).property.type == ExpressionType.Identifier) {
-            let property: IIdentifierExpression = <IIdentifierExpression>(<IMemberExpression>this.outerProperty).property;
-
-            return outerItem[property.name];
-        }
-
+        let propertyName: string;
+        
+        if ((propertyName = this.getPropertyName(this.outerProperty))) 
+            return outerItem[propertyName];
+    
         return null;
     }
 
     public getInnerKey(innerItem: TInner): any {
-        if (this.innerProperty.type == ExpressionType.Member && (<IMemberExpression>this.innerProperty).property.type == ExpressionType.Identifier) {
-            let property: IIdentifierExpression = <IIdentifierExpression>(<IMemberExpression>this.innerProperty).property;
+        let propertyName: string;
 
-            return innerItem[property.name];
-        }
+        if ((propertyName = this.getPropertyName(this.innerProperty)))
+            return innerItem[propertyName];
 
         return null;
     }
 
     public * evaluate(outer: Iterable<TEntity>, inner: Iterable<TInner>): IterableIterator<TResult> {
-        let keyvalues = new Map<any, Array<TInner>>();
+        let keyvalues = new Map<any, Array<TInner>>(),
+            outerAr: Array<TEntity> = [],
+            outerKeys: Array<any> = [];
+
+        if (this.indexing === true) {
+            for (let a of outer) {
+                outerAr.push(a); outerKeys.push(this.getOuterKey(a));
+            }
+            outer = <any>outerAr;
+        }
 
         // only able to iterate through once, but build up a Map of <innerKey, TInner[]> to make join match fast 
-        for (let b of inner) {
+        for (let b of inner[Symbol.iterator].apply(inner, { keyProperty: this.getPropertyName(this.innerProperty), keys: outerKeys })) {
             let key: any,
                 values: TInner[];
 
@@ -56,8 +70,19 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
         for (let a of outer) {
             let values: TInner[];
 
-            if (values = keyvalues.get(this.getOuterKey(a))) {
-                yield this.selector(a, new Enumerable<TInner>(values))
+            switch (this.joinType) {
+                case JoinType.Inner:
+                    if (values = keyvalues.get(this.getOuterKey(a)))
+                        yield this.selector(a, new Enumerable<TInner>(values))
+
+                    break;
+
+                case JoinType.Left:
+                    if ((values = keyvalues.get(this.getOuterKey(a))) == null)
+                        values = [];
+
+                    yield this.selector(a, new Enumerable<TInner>(values));
+                    break;
             }
         }
 
@@ -65,9 +90,18 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
     }
 
     public async * evaluateAsync(outer: AsyncIterable<TEntity>, inner: AsyncIterable<TInner>): AsyncIterableIterator<TResult> {
-        let keyvalues = new Map<any, Array<TInner>>();
+        let keyvalues = new Map<any, Array<TInner>>(),
+            outerAr: Array<TEntity> = [],
+            outerKeys: Array<any> = [];
 
-        for await (let b of inner) {
+        if (this.indexing === true) {
+            for await (let a of outer) {
+                outerAr.push(a); outerKeys.push(this.getOuterKey(a));
+            }
+            outer = <any>outerAr;
+        }
+
+        for await (let b of inner[Symbol.asyncIterator].apply(inner, { keyProperty: this.getPropertyName(this.innerProperty), keys: outerKeys }) ) {
             let key: any,
                 values: TInner[];
 

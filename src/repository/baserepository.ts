@@ -1,5 +1,5 @@
 ﻿import { IFilterCriteria, FilterCriteria } from './filters/filtercriteria';
-import Enumerable, { IEnumerable } from './../linq/enumerable';
+import Enumerable, { IEnumerable, IEnumerableOptions } from './../linq/enumerable';
 import { WhereOperator } from './../linq/operators/whereoperator';
 
 import { IRecordSetMeta } from './db/recordset';
@@ -18,6 +18,12 @@ export interface IBaseRepository<TEntity, TEntityId> {
     delete(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
 }
 
+export interface IParentOptions {
+    query?: IEnumerable<any>
+    keyProperty?: string
+    keys?: Array<any>
+}
+
 abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEntity, TEntityId>, AsyncIterable<TEntity>
 {
     constructor() {
@@ -31,7 +37,7 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
     // ((t) => t.gender == 'female' && t.age >= 16).toString()                       => (t) => t.gender == \'female\' && t.age >= 16
     abstract readAll(query: IEnumerable<TEntity>): Promise<TEntity[]>
     abstract readAll(query: IEnumerable<TEntity>, meta?: IRecordSetMeta): Promise<TEntity[]>
-    abstract readAll(query: IEnumerable<TEntity>, meta?: IRecordSetMeta, parent?: IEnumerable<any>): Promise<TEntity[]>
+    abstract readAll(query: IEnumerable<TEntity>, meta?: IRecordSetMeta, parent?: IParentOptions): Promise<TEntity[]>
 
     abstract create(entity: TEntity): Promise<TEntity>
     abstract create(entity: TEntity, meta?: IRecordSetMeta): Promise<TEntity>
@@ -70,14 +76,16 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         return [];
     }
 
-    private async * asyncIterator(query?: IEnumerable<TEntity>, meta?: IRecordSetMeta, parent?: IEnumerable<any>): AsyncIterableIterator<TEntity> {
-        yield* await this.readAll(query, meta, parent);
+    private async * asyncIterator(options?: IEnumerableOptions<TEntity>, meta?: IRecordSetMeta): AsyncIterableIterator<TEntity> {
+        if (!options) options = {};
+
+        yield* await this.readAll(options.query || null, meta, { query: options['parent'], keyProperty: options['keyProperty'], keys: options['keys'] });
     }
 
     public getIterable(meta?: IRecordSetMeta): AsyncIterable<TEntity> {
         let iterable = {
-            [Symbol.asyncIterator]: (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>) => {
-                return this.asyncIterator(query, meta, parent);
+            [Symbol.asyncIterator]: (options?: IEnumerableOptions<TEntity>) => {
+                return this.asyncIterator(options, meta);
             }
         }
 
@@ -86,8 +94,8 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         return iterable;
     }
 
-    [Symbol.asyncIterator] = (query?: IEnumerable<TEntity>, parent?: IEnumerable<any>) => {
-        return this.asyncIterator(query, null, parent);
+    [Symbol.asyncIterator] = (options?: IEnumerableOptions<TEntity>) => {
+        return this.asyncIterator(options, null);
     }
 }
 

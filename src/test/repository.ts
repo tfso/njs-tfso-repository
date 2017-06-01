@@ -83,7 +83,7 @@ class LocationRepository extends Repository<ILocation, string>
         return new Enumerable(this).where((it, id) => it.location == id, id).firstAsync();
     }
 
-    public readAll(query: IEnumerable<ILocation>, meta?: IRecordSetMeta, parent?: IEnumerable<any>) {
+    public readAll(query: IEnumerable<ILocation>, meta?: IRecordSetMeta, parent?) {
         let locations = [
             <ILocation>{ location: 'SKIEN', zipcode: 3955, ziparea: 'Skien' },
             <ILocation>{ location: 'PORSGRUNN', zipcode: 3949, ziparea: 'Porsgrunn' },
@@ -118,9 +118,11 @@ describe("When using Repository", () => {
             ar = new Enumerable(new CarRepository().getIterable(meta))
                 .where(it => it.id == 7)
                 .take(5)
-                .join<ILocation, any>(new LocationRepository(), a => a.location, b => b.location, (a, b) => Object.assign({}, a))
+                .join<ILocation, any>(new LocationRepository(), a => a.location, b => b.location, (a, b) => Object.assign({}, a), true)
 
         let t = await ar.toArrayAsync();
+
+        let b = ar.from(t).toArray();
 
         assert.equal(t.length, 1);
         assert.equal(meta.totalLength, 1);
