@@ -57,7 +57,7 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
         }
 
         // only able to iterate through once, but build up a Map of <innerKey, TInner[]> to make join match fast 
-        for (let b of inner[Symbol.iterator].apply(inner, { keyProperty: this.getPropertyName(this.innerProperty), keys: outerKeys })) {
+        for (let b of inner[Symbol.iterator].call(inner, { keyProperty: this.getPropertyName(this.innerProperty), keys: outerKeys })) {
             let key: any,
                 values: TInner[];
 
@@ -101,7 +101,7 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
             outer = <any>outerAr;
         }
 
-        for await (let b of inner[Symbol.asyncIterator].apply(inner, { keyProperty: this.getPropertyName(this.innerProperty), keys: outerKeys }) ) {
+        for await (let b of inner[Symbol.asyncIterator].call(inner, { keyProperty: this.getPropertyName(this.innerProperty), keys: outerKeys }) ) {
             let key: any,
                 values: TInner[];
 

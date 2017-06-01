@@ -90,7 +90,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
             });
         }, intersection);
 
-        return intersection;
+        return intersection || [];
     }
 
     public getExpressionUnion(): ILogicalExpression[] {
@@ -100,7 +100,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
             return (acc || []).concat(Array.from(curr));
         }, union);
 
-        return union;
+        return union || [];
     }
 
     private getExpressionGroups(): Iterable<IterableIterator<ILogicalExpression>> {
