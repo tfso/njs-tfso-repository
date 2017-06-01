@@ -439,16 +439,19 @@ describe("When using Enumerable", () => {
             skip: SkipOperator<ICar>,
             skipCount: number;
 
-        query.where(it => it.location == 'BREVIK');
-        query.skip(5);
+        query.where(it => it.registrationYear >= 2000);
+        query.take(8);
+        query.skip(6);
         query.take(3);
         query.skip(1);
+
+        assert.equal(Array.from(query.operations.values()).length, 5);
 
         skip = query.operations.first(SkipOperator);
         
         assert.notEqual(skip, null);
         assert.equal(skip.type, OperatorType.Skip);
-        assert.equal(skip.count, 5);
+        assert.equal(skip.count, 6);
 
         query.operations.remove(skip);
 
@@ -457,6 +460,8 @@ describe("When using Enumerable", () => {
         assert.notEqual(skip, null);
         assert.equal(skip.type, OperatorType.Skip);
         assert.equal(skip.count, 1);
+
+        assert.equal(Array.from(query.operations.values()).length, 4);
 
         let mycars = query.toArray();
 

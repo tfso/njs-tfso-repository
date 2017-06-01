@@ -3,6 +3,9 @@
 import Repository, { IRecordSetMeta } from './../repository/baserepository';
 import Enumerable, { IEnumerable, OperatorType } from './../linq/enumerable';
 import { WhereOperator } from './../linq/operators/whereoperator';
+import { SkipOperator } from './../linq/operators/skipoperator';
+import { TakeOperator } from './../linq/operators/takeoperator';
+
 
 import { ExpressionType, IIdentifierExpression, ILiteralExpression } from './../linq/expressions/expression';
 import { LogicalOperatorType } from './../linq/expressions/logicalexpression';
@@ -60,6 +63,22 @@ class CarRepository extends Repository<ICar, number>
                      break;
              }
         }
+
+        let skip = query.operations.first(SkipOperator);
+        if (skip) {
+            query.operations.remove(skip); // removing it as we are doing this part at database level instead
+        }
+
+        let take = query.operations.first(TakeOperator);
+        if (take) {
+            query.operations.remove(take); // removing it as we are doing this part at database level instead
+        }
+
+        let where = query.operations.first(WhereOperator);
+        if (where) cars = cars.filter(where.predicate);
+
+        if (skip) cars = cars.slice(skip.count); // simulating paging at database level
+        if (take) cars = cars.slice(0, take.count); // simulating paging at database level
 
         return Promise.resolve(cars); // unoptimized
     }
@@ -144,5 +163,21 @@ describe("When using Repository", () => {
         assert.ok(repo instanceof Repository);
         assert.equal(cars.length, 1)
         assert.equal(cars[0].id, 6);
+    })
+
+    it("should be able to remove paging operations for manual handling", async () => {
+
+        let repo = new CarRepository(),
+            cars: Array<ICar>;
+
+        cars = await new Enumerable(repo)
+            .where(it => it.registrationYear >= 2005)
+            .skip(5)
+            .take(3)
+            .toArrayAsync();
+
+        assert.equal(cars.length, 2);
+        assert.equal(cars[0].id, 7);
+
     })
 })

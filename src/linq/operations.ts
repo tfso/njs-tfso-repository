@@ -35,7 +35,7 @@ export class Operations<TEntity> {
             return this.values().next().value;
 
         for (let item of this.values())
-            if (this._removed.indexOf(item) == -1 && item.type === o || (typeof o == 'function' && item instanceof o))
+            if (item.type === o || (typeof o == 'function' && item instanceof o))
                 return item;
 
         return null;
@@ -43,9 +43,13 @@ export class Operations<TEntity> {
 
     public* values(): IterableIterator<Operator<TEntity>> {
         while (true) {
-            for (let item of this._stack) {
-                var reset = yield item;
+            let reset;
 
+            for (let item of this._stack) {
+                if (this._removed.indexOf(item) >= 0)
+                    continue;
+
+                reset = yield item;
                 if (reset === true)
                     break;
             }

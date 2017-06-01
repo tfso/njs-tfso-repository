@@ -122,6 +122,10 @@
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\operators.ts">
+      <SubType>Code</SubType>
+      <TestFramework>Mocha</TestFramework>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\test\reducervisitor.ts">
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>

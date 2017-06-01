@@ -8,11 +8,8 @@ export class TakeOperator<TEntity> extends Operator<TEntity> {
     public * evaluate(items: Iterable<TEntity>): IterableIterator<TEntity> {
         let idx = 0;
 
-        if (super.removed)
-            yield* items;
-
         for (let item of items) {
-            if (idx++ == this.count)
+            if (idx++ == this.count && this.removed == false)
                 break;
 
             yield item;
@@ -21,12 +18,9 @@ export class TakeOperator<TEntity> extends Operator<TEntity> {
 
     public async * evaluateAsync(items: AsyncIterable<TEntity>): AsyncIterableIterator<TEntity> {
         let idx = 0;
-
-        if (super.removed)
-            yield* items;
-
+        
         for await (let item of items) {
-            if (idx++ == this.count)
+            if (idx++ == this.count && this.removed == false)
                 break;
 
             yield item;
