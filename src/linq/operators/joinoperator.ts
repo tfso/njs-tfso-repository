@@ -20,8 +20,8 @@ export class JoinOperator<TEntity, TInner, TResult> extends Operator<TResult> {
     }
 
     private getPropertyName(expr: IExpression): string {
-        if (this.outerProperty.type == ExpressionType.Member && (<IMemberExpression>this.outerProperty).property.type == ExpressionType.Identifier)
-            return (<IIdentifierExpression>(<IMemberExpression>this.outerProperty).property).name;
+        if (expr.type == ExpressionType.Member && (<IMemberExpression>expr).property.type == ExpressionType.Identifier)
+            return (<IIdentifierExpression>(<IMemberExpression>expr).property).name;
 
         return undefined;
     }
