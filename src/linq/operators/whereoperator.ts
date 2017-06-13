@@ -103,6 +103,30 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
         return union || [];
     }
 
+    public getExpressionCount(): number {
+        let visit = (expression: IExpression) : number => {
+
+            switch (expression.type)
+            {
+                case ExpressionType.Logical:
+                    switch ((<LogicalExpression>expression).operator)
+                    {
+                        case LogicalOperatorType.And:
+                        case LogicalOperatorType.Or:
+                            return visit((<LogicalExpression>expression).left) + visit((<LogicalExpression>expression).right);
+
+                        default:
+                            return 1;
+                    }
+
+                default:
+                    return 0;
+            }
+        }
+
+        return visit(this.expression);
+    }
+
     private getExpressionGroups(): Iterable<IterableIterator<ILogicalExpression>> {
         let it = this._it,
             visit = function* (expression: IExpression): Iterable<IterableIterator<ILogicalExpression>> {

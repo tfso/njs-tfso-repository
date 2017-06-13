@@ -60,6 +60,15 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         return Promise.resolve();
     }
 
+    protected isQueryPageable(query: IEnumerable<TEntity>): boolean {
+        let where = query.operations.first(WhereOperator);
+
+        if (where)
+            return where.getExpressionCount() == where.getExpressionIntersection().length;
+
+        return true;
+    }
+
     protected getCriteria(query: IEnumerable<TEntity>): FilterCriteria[] 
     protected getCriteria(expressions: ILogicalExpression[]): FilterCriteria[]
     protected getCriteria() {

@@ -7,7 +7,7 @@ import { SkipOperator } from './../linq/operators/skipoperator';
 import { TakeOperator } from './../linq/operators/takeoperator';
 
 
-import { ExpressionType, IIdentifierExpression, ILiteralExpression } from './../linq/expressions/expression';
+import { ExpressionType, IExpression, IIdentifierExpression, ILiteralExpression } from './../linq/expressions/expression';
 import { LogicalOperatorType } from './../linq/expressions/logicalexpression';
 
 interface ICar {
@@ -94,6 +94,14 @@ class CarRepository extends Repository<ICar, number>
     public async delete(car: ICar): Promise<boolean> {
         throw new Error('Not implemented');
     }
+
+    public exposeIfQueryIsPageable(query: IEnumerable<ICar>): boolean {
+        return super.isQueryPageable(query);
+    }
+
+    public exposeCriteriaCount(query: IEnumerable<ICar>): number {
+        return super.getCriteria(query).length;
+    }
 }
 
 class LocationRepository extends Repository<ILocation, string>
@@ -179,5 +187,27 @@ describe("When using Repository", () => {
         assert.equal(cars.length, 2);
         assert.equal(cars[0].id, 7);
 
+    })
+
+    it("should be able to see that a query can't be pageable after plucking union expressions", async () => {
+        let repo = new CarRepository(),
+            query = new Enumerable<ICar>(repo).where(it => (it.registrationYear == 2017 || it.location == 'NO') && it.id >= 7);
+
+        assert.equal(repo.exposeIfQueryIsPageable(query), false)
+    })
+
+    it("should be able to see that a query can be pageable after plucking union expressions", async () => {
+        let repo = new CarRepository(),
+            query = new Enumerable<ICar>(repo).where(it => it.location == 'NO' && it.registrationYear >= 2000);
+
+        assert.equal(repo.exposeIfQueryIsPageable(query), true)
+    })
+
+    it("should be able to see that a query can be pageable after plucking union expressions that is common", async () => {
+        let repo = new CarRepository(),
+            query = new Enumerable<ICar>(repo).where(it => (it.location == 'NO') || (it.registrationYear >= 2000 && it.location == 'NO'));
+
+        assert.equal(repo.exposeCriteriaCount(query), 1);
+        assert.equal(repo.exposeIfQueryIsPageable(query), false)
     })
 })
