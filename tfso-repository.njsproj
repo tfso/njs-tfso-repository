@@ -36,6 +36,9 @@
     <Content Include="appveyor.yml" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <Content Include="src\lib\javascript-parser.pegjs">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="src\lib\odata-parser.pegjs">
       <SubType>Code</SubType>
     </Content>
@@ -54,6 +57,9 @@
     <Folder Include="src\repository\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\lib\javascript-parser.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\lib\odata-parser.ts" />
     <TypeScriptCompile Include="src\linq\expressions\arrayexpression.ts" />
     <TypeScriptCompile Include="src\linq\expressions\binaryexpression.ts" />

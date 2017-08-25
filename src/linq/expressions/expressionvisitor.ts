@@ -1,5 +1,6 @@
 ﻿import * as jsep from 'jsep';
-import OData from './../../lib/odata-parser';
+import ODataParser from './../../lib/odata-parser';
+import JavascriptParser from './../../lib/javascript-parser';
 
 import { IExpression, Expression, ExpressionType } from './expression';
 import { ILiteralExpression, LiteralExpression } from './literalexpression';
@@ -65,10 +66,10 @@ export class ExpressionVisitor {
     public visitOData(filter: string): IExpression {
         filter = filter.replace(/["']?(\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?)?(?:Z|[+-]\d{2}:\d{2})?)["']?/gi, (value, date) => ['\'', date, '\''].join('')); // odata-parser doesn't support date as type, converting it to string
 
-        let ast = OData.parse(filter);
+        let ast = ODataParser.parse(filter);
         try {
             if (ast) {
-                return this.visit(this.transformOData(ast));
+                return this.visit(this.transform(ast));
             }
         }
         catch (ex) {
@@ -82,8 +83,11 @@ export class ExpressionVisitor {
         var expression = (this._lambdaExpression = new LambdaExpression(predicate)).expression;
 
         if (expression) {
+            let ast = JavascriptParser.parse(expression);
             try {
-                return this.visit(this.transform(jsep(expression)));
+                if (ast) {
+                    return this.visit(this.transform(ast));
+                }
             }
             catch (ex) {
                 throw new Error(ex.message);
@@ -175,14 +179,14 @@ export class ExpressionVisitor {
     }
 
     /**
-     * transform odata expression ast tree to our internal ast tree to make it easier to swap expression parser at a later time
+     * transform pegjs expression ast tree to our internal ast tree to make it easier to swap expression parser at a later time
      * @see
      * http://www.odata.org/documentation/odata-version-2-0/uri-conventions/
      *
-     * @param filter odata filter, eg; Name eq 'John' and LastName lt 'Doe'
+     * @param expression pegjs expression object
      * @returns 
      */
-    private transformOData(expression: any): IExpression {
+    private transform(expression: any): IExpression {
         var child: IExpression;
 
         switch (expression.type) {
@@ -190,12 +194,12 @@ export class ExpressionVisitor {
                 return new IdentifierExpression(expression.name);
 
             case 'MemberExpression':
-                return new MemberExpression(new IdentifierExpression(expression.object), this.transformOData(expression.property));
+                return new MemberExpression(new IdentifierExpression(expression.object), this.transform(expression.property));
 
             case 'CallExpression':
                 switch (expression.object.type) {
                     case 'Identifier':
-                        return new MethodExpression(expression.object.name, expression.arguments ? expression.arguments.map((arg) => this.transformOData(arg)) : [], null);
+                        return new MethodExpression(expression.object.name, expression.arguments ? expression.arguments.map((arg) => this.transform(arg)) : [], null);
 
                     default:
                         throw new Error('Caller of method expression is not a Identifier, but is ' + expression.object.type);
@@ -208,64 +212,78 @@ export class ExpressionVisitor {
                 return new LiteralExpression(expression.value)
 
             case 'ConditionalExpression':
-            case 'ConditionalExpression':
+                return <Expression><IExpression><IConditionalExpression>{
+                    type: ExpressionType.Conditional,
+                    condition: this.transform(expression.test),
+                    success: this.transform(expression.left),
+                    failure: this.transform(expression.right)
+                };
+
+            //case 'ArrayExpression':
+            //    return <Expression><IExpression><IArrayExpression>{
+            //        type: ExpressionType.Array,
+            //        elements: expression.elements ? expression.elements.map((arg) => this.transform(arg)) : []
+            //    };
+
+            case 'LogicalExpression':
+            case 'LogicalExpression':
                 switch (expression.operator) {
-                    case 'and':
-                        return new LogicalExpression(LogicalOperatorType.And, this.transformOData(expression.left), this.transformOData(expression.right));
-                    case 'or':
-                        return new LogicalExpression(LogicalOperatorType.Or, this.transformOData(expression.left), this.transformOData(expression.right));
+                    case '&&':
+                        return new LogicalExpression(LogicalOperatorType.And, this.transform(expression.left), this.transform(expression.right));
+                    case '||':
+                        return new LogicalExpression(LogicalOperatorType.Or, this.transform(expression.left), this.transform(expression.right));
                 }
                 break;
 
-            case 'LogicalExpression':
+            case 'RelationalExpression':
                 switch (expression.operator) {
-                    case 'eq': // equal
-                        return new LogicalExpression(LogicalOperatorType.Equal, this.transformOData(expression.left), this.transformOData(expression.right));
+                    case '==': // equal
+                        return new LogicalExpression(LogicalOperatorType.Equal, this.transform(expression.left), this.transform(expression.right));
 
-                    case 'ne': // not equal
-                        return new LogicalExpression(LogicalOperatorType.NotEqual, this.transformOData(expression.left), this.transformOData(expression.right));
+                    case '!=': // not equal
+                        return new LogicalExpression(LogicalOperatorType.NotEqual, this.transform(expression.left), this.transform(expression.right));
 
-                    case 'lt': // lesser
-                        return new LogicalExpression(LogicalOperatorType.Lesser, this.transformOData(expression.left), this.transformOData(expression.right));
+                    case '<': // lesser
+                        return new LogicalExpression(LogicalOperatorType.Lesser, this.transform(expression.left), this.transform(expression.right));
 
-                    case 'le': // lesser or equal
-                        return new LogicalExpression(LogicalOperatorType.LesserOrEqual, this.transformOData(expression.left), this.transformOData(expression.right));
+                    case '<=': // lesser or equal
+                        return new LogicalExpression(LogicalOperatorType.LesserOrEqual, this.transform(expression.left), this.transform(expression.right));
 
-                    case 'gt': // greater
-                        return new LogicalExpression(LogicalOperatorType.Greater, this.transformOData(expression.left), this.transformOData(expression.right));
+                    case '>': // greater
+                        return new LogicalExpression(LogicalOperatorType.Greater, this.transform(expression.left), this.transform(expression.right));
 
-                    case 'ge': // greater or equal
-                        return new LogicalExpression(LogicalOperatorType.GreaterOrEqual, this.transformOData(expression.left), this.transformOData(expression.right));
+                    case '>=': // greater or equal
+                        return new LogicalExpression(LogicalOperatorType.GreaterOrEqual, this.transform(expression.left), this.transform(expression.right));
                 }
                 break;
 
             case 'UnaryExpression':
                 switch (expression.operator) {
-                    case 'not':
-                        return new UnaryExpression(UnaryOperatorType.Invert, UnaryAffixType.Prefix, this.transformOData(expression.argument));
+                    case '!':
+                        return new UnaryExpression(UnaryOperatorType.Invert, UnaryAffixType.Prefix, this.transform(expression.argument));
                     case '+':
-                        return new UnaryExpression(UnaryOperatorType.Positive, UnaryAffixType.Prefix, this.transformOData(expression.argument));
+                        return new UnaryExpression(UnaryOperatorType.Positive, UnaryAffixType.Prefix, this.transform(expression.argument));
                     case '-':
-                        return new UnaryExpression(UnaryOperatorType.Negative, UnaryAffixType.Prefix, this.transformOData(expression.argument));
+                        return new UnaryExpression(UnaryOperatorType.Negative, UnaryAffixType.Prefix, this.transform(expression.argument));
                 }
                 break;
 
             case 'BinaryExpression':
                 switch (expression.operator) {
-                    case 'add': // addition
-                        return new BinaryExpression(BinaryOperatorType.Addition, this.transformOData(expression.left), this.transformOData(expression.right));
+                    case '+': // addition
+                        return new BinaryExpression(BinaryOperatorType.Addition, this.transform(expression.left), this.transform(expression.right));
 
-                    case 'sub': // subtraction
-                        return new BinaryExpression(BinaryOperatorType.Subtraction, this.transformOData(expression.left), this.transformOData(expression.right));
+                    case '-': // subtraction
+                        return new BinaryExpression(BinaryOperatorType.Subtraction, this.transform(expression.left), this.transform(expression.right));
 
-                    case 'mul': // multiplication
-                        return new BinaryExpression(BinaryOperatorType.Multiplication, this.transformOData(expression.left), this.transformOData(expression.right));
+                    case '*': // multiplication
+                        return new BinaryExpression(BinaryOperatorType.Multiplication, this.transform(expression.left), this.transform(expression.right));
 
-                    case 'div': // division
-                        return new BinaryExpression(BinaryOperatorType.Division, this.transformOData(expression.left), this.transformOData(expression.right));
+                    case '/': // division
+                        return new BinaryExpression(BinaryOperatorType.Division, this.transform(expression.left), this.transform(expression.right));
 
-                    case 'mod': // modulus
-                        return new BinaryExpression(BinaryOperatorType.Modulus, this.transformOData(expression.left), this.transformOData(expression.right));
+                    case '%': // modulus
+                        return new BinaryExpression(BinaryOperatorType.Modulus, this.transform(expression.left), this.transform(expression.right));
                 }
                 break;                
         }
@@ -277,7 +295,7 @@ export class ExpressionVisitor {
      * transforming jsep expression ast tree to our internal ast tree to make it easier to swap expression parser at a later time
      * @param expression jsep expression object
      */
-    private transform(expression: any): IExpression {
+    private transform_old(expression: any): IExpression {
         var child: IExpression;
 
         switch (expression.type) {

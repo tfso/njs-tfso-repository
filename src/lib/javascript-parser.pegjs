@@ -49,15 +49,28 @@
 Start = Expression
 
 Expression
-    = LogicalOrExpression
+    = ConditionalExpression
+
+ConditionalExpression
+    = test:LogicalOrExpression __ QMARK __ left:ConditionalExpression __ COLON __ right:ConditionalExpression
+      {
+    	return { 
+        	type: 'ConditionalExpression',
+            test: test,
+            left: left,
+            right: right
+        }
+      }
+      / LogicalOrExpression
 
 LogicalOrExpression
     = first:LogicalAndExpression rest:((OROR __) LogicalAndExpression)*
     {
       return buildTree(first, rest, function(result, element) {
         return {
+        test: JSON.stringify(element),
           type: 'LogicalExpression',
-          operator: '||',
+          operator: element[0][0].toLowerCase(),
           left:  result,
           right: element[1]
         };
@@ -65,27 +78,64 @@ LogicalOrExpression
     }
 
 LogicalAndExpression
-    = first:EqualityExpression rest:((ANDAND __) EqualityExpression)*
+    = first:BitwiseOrExpression rest:((ANDAND __) BitwiseOrExpression)*
     {
       return buildTree(first, rest, function(result, element) {
         return {
           type: 'LogicalExpression',
-          operator: '&&',
-          left: result,
+          operator: element[0][0].toLowerCase(),
+          left:  result,
           right: element[1]
         };
       });
     }
-
-EqualityExpression
-    = first:RelationalExpression rest:((EQUAL __ /  NOTEQUAL __) RelationalExpression)*
+    
+BitwiseOrExpression
+	= first: BitwiseXOrExpression rest:((OR __) BitwiseXOrExpression)*
     {
       return buildTree(first, rest, function(result, element) {
-        let map = { 'eq': '==', 'ne': '!=' }
-        
+        return {
+          type: 'BitwiseExpression',
+          operator: element[0][0].toLowerCase(),
+          left:  result,
+          right: element[1]
+        };
+      });
+    }
+    
+BitwiseXOrExpression
+	= first: BitwiseAndExpression rest:((XOR __) BitwiseAndExpression)*
+    {
+      return buildTree(first, rest, function(result, element) {
+        return {
+          type: 'BitwiseExpression',
+          operator: element[0][0].toLowerCase(),
+          left:  result,
+          right: element[1]
+        };
+      });
+    }
+    
+BitwiseAndExpression
+	= first: EqualityExpression rest:((AND __) EqualityExpression)*
+	{
+      return buildTree(first, rest, function(result, element) {
+        return {
+          type: 'BitwiseExpression',
+          operator: element[0][0].toLowerCase(),
+          left:  result,
+          right: element[1]
+        };
+      });
+    }
+    
+EqualityExpression
+    = first:RelationalExpression rest:((EQUAL __ / EQUALSTRICT __ / NOTEQUAL __ / NOTEQUALSTRICT __) RelationalExpression)*
+    {
+      return buildTree(first, rest, function(result, element) {
         return {
           type: 'RelationalExpression',
-          operator: map[element[0][0].toLowerCase()],
+          operator: element[0][0],
           left:  result,
           right: element[1]
         };
@@ -93,29 +143,39 @@ EqualityExpression
     }
 
 RelationalExpression
-    = first:AdditiveExpression rest:((LE __ / GE __ / LT __ / GT __) AdditiveExpression )*
+    = first:ShiftExpression rest:((LE __ / GE __ / LT __ / GT __) ShiftExpression )*
     {
       return buildTree(first, rest, function(result, element) {
-      	let map = { 'le': '<=', 'ge': '>=', 'lt': '<', 'gt': '>' }
-  
         return {
           type: 'RelationalExpression',
-          operator: map[element[0][0].toLowerCase()],
+          operator: element[0][0].toLowerCase(),
           left:  result,
           right: element[1]
         };
       });
     }
-
+    
+ShiftExpression
+	= first:AdditiveExpression rest:((LSHIFT __ / RSHIFT __ / RSHIFTZEROFILL ) AdditiveExpression )*
+	{
+      return buildTree(first, rest, function(result, element) {
+        return {
+          type: 'ShiftExpression',
+          t: JSON.stringify(element),
+          operator: element[0][0].toLowerCase(),
+          left:  result,
+          right: element[1]
+        };
+      });
+    }
+    
 AdditiveExpression
     = first:MultiplicativeExpression rest:((ADD __ / SUB __) MultiplicativeExpression)*
     {
       return buildTree(first, rest, function(result, element) {
-      	let map = { 'add': '+', 'sub': '-' }
-      
         return {
           type: 'BinaryExpression',
-          operator: map[element[0][0].toLowerCase()],
+          operator: element[0][0].toLowerCase(),
           left:  result,
           right: element[1]
         };
@@ -126,11 +186,9 @@ MultiplicativeExpression
     = first:UnaryExpression rest:((MUL __ / DIV __ / MOD __) UnaryExpression)*
     {
       return buildTree(first, rest, function(result, element) {
-        let map = { 'mul': '*', 'div': '/', 'mod': '%' }
-        
         return {
           type: 'BinaryExpression',
-          operator: map[element[0][0].toLowerCase()],
+          operator: element[0][0].toLowerCase(),
           left:  result,
           right: element[1]
         };
@@ -158,6 +216,7 @@ UnaryExpression
 Primary
     = ParExpression
     / QualifiedIdentifier
+    / TemplateLiteral
     / Literal
     
 ParExpression
@@ -195,14 +254,10 @@ QualifiedIdentifier
     
 PrefixOp
     = op:(
-      NOT __
+      NOT
     / PLUS __
     / MINUS __
-    ) 
-    { 
-    	let map = { 'not': '!', '+': '+', '-': '-' }
-    	return map[op[0].toLowerCase()]; 
-    }
+    ) { return op[0].toLowerCase(); }
 
 Arguments
     = LPAR __ args:(first:Expression rest:((COMMA __) Expression)* { return buildList(first, rest, 1); })? RPAR __
@@ -233,9 +288,31 @@ Letter = [a-z] / [A-Z] / [_$] ;
 
 LetterOrDigit = [a-z] / [A-Z] / [0-9] / [_$] ;
 
+TemplateLiteral
+	= "\`" capture:(TemplateExpression / Escape / ![`\\\n\r] . )* "\`"                   
+    { return { 
+        type: 'TemplateLiteral', 
+        values: capture.reduce((r, v) => {
+            if(Array.isArray(v)) {
+            	if(typeof(r[r.length - 1]) != 'string')
+                	r.push('')
+            	r[r.length - 1] += v[0] == undefined ? v[1] : v[0] + v[1]
+            } else {
+            	r.push(v);
+            }
+            return r;
+        }, []).map(v => typeof v == 'string' ? { type: 'Literal', value: v } : v )
+      }
+    }
+
+TemplateExpression
+	= "$" LCBRK __ expression:(Expression) RCBRK
+    { return expression; }
+
 Literal
     = literal:( 
-      FloatLiteral
+      Object
+      / FloatLiteral
       / IntegerLiteral          // May be a prefix of FloatLiteral
       / StringLiteral
       / "true"  !LetterOrDigit
@@ -246,6 +323,14 @@ Literal
       { return { type: 'NullLiteral' }; }
       ) __
     { return literal; }
+
+Object 
+	= LCBRK __ properties:(first:ObjectProperty rest:(COMMA __ ObjectProperty)* { return buildList(first, rest, 1)})? __ RCBRK __
+    { return { type: 'Object', properties: properties } }
+    
+ObjectProperty 
+	= __ key:(Identifier / IntegerLiteral) __ ":" __ value:(Expression) __
+    { return { key: key, value: value} }
 
 IntegerLiteral
     = ( HexNumeral
@@ -318,27 +403,38 @@ UnicodeEscape
 
 /* ---- Separators, Operators ----- */
 
-ADD             =   "add"i
-ANDAND          =   "and"i
+ADD             =   "+"i
+AND             =   "&"i
+ANDAND          =   "&&"i
 COLON           =   ":"
 COMMA           =   ","
-DIV             =   "div"i
-DOT             =   "/"
-EQUAL           =   "eq"i
-GE              =   "ge"i
-GT              =   "gt"i
+DIV             =   "/"i
+DOT             =   "."
+EQUAL           =   "=="i
+EQUALSTRICT     =   "==="i
+GE              =   ">="i
+GT              =   ">"i
 HYPHEN          =   "-"
 LBRK            =   "["
-LE              =   "le"i
+LCBRK           =   "{"
+LE              =   "<="i
 LPAR            =   "("
-LT              =   "lt"i
+LT              =   "<"i
+LSHIFT          =   "<<"i
+RSHIFT          =   ">>"i
+RSHIFTZEROFILL	=   ">>>"i
 MINUS           =   "-"
-MOD             =   "mod"i
-NOTEQUAL        =   "ne"i
-NOT             =   "not"i
-OROR            =   "or"i
+MOD             =   "%"i
+NOTEQUAL        =   "!="i
+NOTEQUALSTRICT  =   "!=="i
+NOT             =   "!"i
+OR              =   "|"i
+OROR            =   "||"i
+XOR             =   "^"i
 PLUS            =   "+"
 RBRK            =   "]"
+RCBRK           =   "}"
 RPAR            =   ")"
-SUB             =   "sub"i
-MUL             =   "mul"i
+SUB             =   "-"i
+MUL             =   "*"i
+QMARK           =   "?"i
