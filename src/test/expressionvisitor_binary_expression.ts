@@ -252,7 +252,7 @@ describe("When using ExpressionVisitor for binary", () => {
 
             assert.ok(expr.type == Expr.ExpressionType.Binary, "Expected a BinaryExpression");
             assert.ok((<Expr.IBinaryExpression>expr).operator == Expr.BinaryOperatorType.Addition, "Expected a binary operation of addition");
-            assert.ok((<Expr.IBinaryExpression>expr).right.type == Expr.ExpressionType.Unary, "Expected a unary expression at right side of addition");
+            assert.ok((<Expr.IBinaryExpression>expr).right.type == Expr.ExpressionType.Literal, "Expected a literal at right side of addition");
         });
 
         it("should handle binary operation for addition for positive number", () => {
@@ -260,7 +260,7 @@ describe("When using ExpressionVisitor for binary", () => {
 
             assert.ok(expr.type == Expr.ExpressionType.Binary, "Expected a BinaryExpression");
             assert.ok((<Expr.IBinaryExpression>expr).operator == Expr.BinaryOperatorType.Addition, "Expected a binary operation of addition");
-            assert.ok((<Expr.IBinaryExpression>expr).right.type == Expr.ExpressionType.Unary, "Expected a unary expression at right side of addition");
+            assert.ok((<Expr.IBinaryExpression>expr).right.type == Expr.ExpressionType.Literal, "Expected a literal at right side of addition");
         });
 
         it("should handle binary operation for subtraction", () => {
@@ -275,7 +275,7 @@ describe("When using ExpressionVisitor for binary", () => {
 
             assert.ok(expr.type == Expr.ExpressionType.Binary, "Expected a BinaryExpression");
             assert.ok((<Expr.IBinaryExpression>expr).operator == Expr.BinaryOperatorType.Subtraction, "Expected a binary operation of subtraction");
-            assert.ok((<Expr.IBinaryExpression>expr).right.type == Expr.ExpressionType.Unary, "Expected a unary expression at right side of substraction");
+            assert.ok((<Expr.IBinaryExpression>expr).right.type == Expr.ExpressionType.Literal, "Expected a literal at right side of addition");
         });
 
         it("should handle binary operation for subtraction for positive number", () => {
@@ -283,7 +283,7 @@ describe("When using ExpressionVisitor for binary", () => {
 
             assert.ok(expr.type == Expr.ExpressionType.Binary, "Expected a BinaryExpression");
             assert.ok((<Expr.IBinaryExpression>expr).operator == Expr.BinaryOperatorType.Subtraction, "Expected a binary operation of subtraction");
-            assert.ok((<Expr.IBinaryExpression>expr).right.type == Expr.ExpressionType.Unary, "Expected a unary expression at right side of substraction");
+            assert.ok((<Expr.IBinaryExpression>expr).right.type == Expr.ExpressionType.Literal, "Expected a literal at right side of addition");
         });
 
         it("should handle binary operation for multiplication", () => {

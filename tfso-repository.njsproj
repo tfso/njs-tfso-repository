@@ -68,6 +68,9 @@
     <TypeScriptCompile Include="src\linq\expressions\expression.ts" />
     <TypeScriptCompile Include="src\linq\expressions\expressionvisitor.ts" />
     <TypeScriptCompile Include="src\linq\expressions\identifierexpression.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\indexexpression.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\linq\expressions\lambdaexpression.ts" />
     <TypeScriptCompile Include="src\linq\expressions\literalexpression.ts" />
     <TypeScriptCompile Include="src\linq\expressions\logicalexpression.ts" />

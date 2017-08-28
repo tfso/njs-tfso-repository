@@ -186,10 +186,10 @@ QualifiedIdentifier
       if(list) {
         return {
           type: 'MemberExpression',
-          object: first.name,
+          object: first,
           property: list
         }
-      }  
+      }
       return first;
     }
     

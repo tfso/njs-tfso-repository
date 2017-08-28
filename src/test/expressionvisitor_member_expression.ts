@@ -22,8 +22,8 @@ describe("When using ExpressionVisitor for member Lambda expression", () => {
 
         assert.ok(expr.type == Expr.ExpressionType.Member, "Expected a MemberExpression");
         assert.ok((<Expr.IMemberExpression>expr).object.type == Expr.ExpressionType.Identifier, "Expected a identifier as object");
-        assert.ok((<Expr.IMemberExpression>expr).property.type == Expr.ExpressionType.Member, "Expected a new member as property");
-        assert.ok((<Expr.IMemberExpression>(<Expr.IMemberExpression>expr).property).object.type == Expr.ExpressionType.Identifier, "Expected that member property has a member as a identifier");
-        assert.ok((<Expr.IMemberExpression>(<Expr.IMemberExpression>expr).property).property.type == Expr.ExpressionType.Array, "Expected that member property has a property as an array");
+        assert.ok((<Expr.IMemberExpression>expr).property.type == Expr.ExpressionType.Index, "Expected a index expression as property");
+        assert.ok((<Expr.IIndexExpression>(<Expr.IMemberExpression>expr).property).object.type == Expr.ExpressionType.Identifier, "Expected the object of index property is an identifier");
+        assert.ok((<Expr.IIndexExpression>(<Expr.IMemberExpression>expr).property).index.type == Expr.ExpressionType.Literal, "Expected the index of index property is a literal");
     })
 })

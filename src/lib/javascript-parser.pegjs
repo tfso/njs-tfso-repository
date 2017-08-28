@@ -68,10 +68,9 @@ LogicalOrExpression
     {
       return buildTree(first, rest, function(result, element) {
         return {
-        test: JSON.stringify(element),
           type: 'LogicalExpression',
           operator: element[0][0].toLowerCase(),
-          left:  result,
+          left: result,
           right: element[1]
         };
       });
@@ -156,12 +155,11 @@ RelationalExpression
     }
     
 ShiftExpression
-	= first:AdditiveExpression rest:((LSHIFT __ / RSHIFT __ / RSHIFTZEROFILL ) AdditiveExpression )*
+	= first:AdditiveExpression rest:((RSHIFTZEROFILL __ / LSHIFT __ / RSHIFT __) AdditiveExpression )*
 	{
       return buildTree(first, rest, function(result, element) {
         return {
           type: 'ShiftExpression',
-          t: JSON.stringify(element),
           operator: element[0][0].toLowerCase(),
           left:  result,
           right: element[1]
@@ -196,14 +194,20 @@ MultiplicativeExpression
     }
 
 UnaryExpression
-    = operator:PrefixOp operand:Primary
-    {
-      return operand.type === 'NumberLiteral' && (operator === '-' || operator === '+')
+    = operator:PrefixOp operand:PostfixExpression
+    { return operand.type === 'NumberLiteral' && (operator === '-' || operator === '+')
         ? 
         { 
           type: 'NumberLiteral', 
           value: (operator === '-' ? operator : '') + operand.value
         }
+        :
+        (operator === '-' || operator === '+') && operand.type === 'PostfixExpression' && operand.argument.type === 'NumberLiteral'
+        ?
+        Object.assign(operand, {argument: { 
+        	type: 'NumberLiteral',
+            value: (operator === '-' ? operator : '') + operand.argument.value
+      	}})
         :
         {
           type: 'UnaryExpression', 
@@ -211,7 +215,20 @@ UnaryExpression
           argument:  operand
         };
     }
-    / Primary
+    / PostfixExpression
+    
+PostfixExpression
+    = operand:Primary operator:(INCREMENT / DECREMENT)? __
+    { return operator 
+		? 
+        {
+        	type: 'PostfixExpression',
+            operator: operator,
+            argument: operand
+        }
+        :
+        operand
+    }
 
 Primary
     = ParExpression
@@ -224,39 +241,42 @@ ParExpression
     { return expr; }
 
 QualifiedIdentifier
-    = qual:Identifier LBRK __ expr:Expression RBRK __
+    = !ReservedWord qual:Identifier LBRK __ expr:Expression RBRK __
     { 
       return { 
     	type: 'ArrayExpression', 
-        array: qual, 
+        object: qual, 
         index: expr 
       };
     }
-    / qual:Identifier args:Arguments
+    / !ReservedWord qual:Identifier args:Arguments
     { 
       return {
       	type: 'CallExpression', 
         object: qual,
         arguments: args
       };
-    }
-    / first:Identifier list:(DOT i:QualifiedIdentifier { return i; })?
-    { 
-      if(list) {
+    } 
+    / !ReservedWord first:(Identifier / StringLiteral / TemplateLiteral) rest:(DOT QualifiedIdentifier)*
+    {
+       return buildTree(first, rest, function(result, element) {
         return {
           type: 'MemberExpression',
-          object: first.name,
-          property: list
-        }
-      }  
-      return first;
+          object:  result,
+          property: element[1]
+        };
+      });
     }
-    
+    / !ReservedWord Identifier
+        
 PrefixOp
     = op:(
       NOT
+    / INCREMENT __
+    / DECREMENT __
     / PLUS __
     / MINUS __
+    / BNOT __
     ) { return op[0].toLowerCase(); }
 
 Arguments
@@ -311,10 +331,11 @@ TemplateExpression
 
 Literal
     = literal:( 
-      Object
+      ObjectLiteral
       / FloatLiteral
       / IntegerLiteral          // May be a prefix of FloatLiteral
       / StringLiteral
+      / ArrayLiteral
       / "true"  !LetterOrDigit
       { return { type: 'BooleanLiteral', value: true }; }
       / "false" !LetterOrDigit
@@ -324,13 +345,17 @@ Literal
       ) __
     { return literal; }
 
-Object 
-	= LCBRK __ properties:(first:ObjectProperty rest:(COMMA __ ObjectProperty)* { return buildList(first, rest, 1)})? __ RCBRK __
+ObjectLiteral
+	= LCBRK __ properties:(first:ObjectProperty rest:(COMMA __ ObjectProperty)* { return buildList(first, rest, 2)})? (COMMA __)? __ RCBRK __
     { return { type: 'Object', properties: properties } }
     
 ObjectProperty 
 	= __ key:(Identifier / IntegerLiteral) __ ":" __ value:(Expression) __
     { return { key: key, value: value} }
+
+ArrayLiteral
+	= LBRK __ elements:(first:Expression rest:(COMMA __ Expression)* { return buildList(first, rest, 2)})? (COMMA __)? __ RBRK __
+    { return { type: 'Array', elements: elements } }
 
 IntegerLiteral
     = ( HexNumeral
@@ -386,7 +411,9 @@ HexDigit
     = [a-f] / [A-F] / [0-9]
 
 StringLiteral
-    = "\'" chars:(Escape / !['\\\n\r] . )* "\'"                   
+    = "\'" chars:(Escape / !['\\\n\r] . )* "\'"
+    { return { type: 'Literal', value: chars.map(l => l[0] == undefined ? l[1] : l[0] + l[1]).join('') } }
+    / "\"" chars:(Escape / !["\\\n\r] . )* "\""
     { return { type: 'Literal', value: chars.map(l => l[0] == undefined ? l[1] : l[0] + l[1]).join('') } }
 
 Escape
@@ -400,6 +427,10 @@ OctalEscape
 UnicodeEscape
     = "u"+ HexDigit HexDigit HexDigit HexDigit
 
+ReservedWord
+	= "true" !LetterOrDigit
+    / "false" !LetterOrDigit
+    / "null" !LetterOrDigit
 
 /* ---- Separators, Operators ----- */
 
@@ -428,10 +459,13 @@ MOD             =   "%"i
 NOTEQUAL        =   "!="i
 NOTEQUALSTRICT  =   "!=="i
 NOT             =   "!"i
+BNOT            =   "~"i
 OR              =   "|"i
 OROR            =   "||"i
 XOR             =   "^"i
 PLUS            =   "+"
+INCREMENT       =   "++"
+DECREMENT       =   "--"
 RBRK            =   "]"
 RCBRK           =   "}"
 RPAR            =   ")"

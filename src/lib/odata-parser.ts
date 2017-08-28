@@ -243,10 +243,10 @@
               if(list) {
                 return {
                   type: 'MemberExpression',
-                  object: first.name,
+                  object: first,
                   property: list
                 }
-              }  
+              }
               return first;
             },
         peg$c12 = function(op) { 

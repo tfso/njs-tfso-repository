@@ -4,6 +4,7 @@ import JavascriptParser from './../../lib/javascript-parser';
 
 import { IExpression, Expression, ExpressionType } from './expression';
 import { ILiteralExpression, LiteralExpression } from './literalexpression';
+import { IIndexExpression, IndexExpression } from './indexexpression';
 import { ICompoundExpression } from './compoundexpression';
 import { IIdentifierExpression, IdentifierExpression } from './identifierexpression';
 import { IMemberExpression, MemberExpression } from './memberexpression';
@@ -121,6 +122,13 @@ export class ExpressionVisitor {
         return expression;
     }
 
+    public visitIndex(expression: IIndexExpression): IExpression {
+        expression.index = expression.index.accept(this);
+        expression.object = expression.object.accept(this);
+
+        return expression;
+    }
+
     public visitCompound(expression: ICompoundExpression): IExpression {
         expression.body = expression.body.map((expr) => expr.accept(this));
 
@@ -194,7 +202,18 @@ export class ExpressionVisitor {
                 return new IdentifierExpression(expression.name);
 
             case 'MemberExpression':
-                return new MemberExpression(new IdentifierExpression(expression.object), this.transform(expression.property));
+                switch (expression.property.type)
+                {
+                    case 'CallExpression':
+                        child = this.transform(expression.property);
+                        (<MethodExpression>child).caller = this.transform(expression.object);
+
+                        return child;
+
+                    default:
+                        return new MemberExpression(this.transform(expression.object), this.transform(expression.property));
+                }
+                
 
             case 'CallExpression':
                 switch (expression.object.type) {
@@ -219,11 +238,14 @@ export class ExpressionVisitor {
                     failure: this.transform(expression.right)
                 };
 
-            //case 'ArrayExpression':
-            //    return <Expression><IExpression><IArrayExpression>{
-            //        type: ExpressionType.Array,
-            //        elements: expression.elements ? expression.elements.map((arg) => this.transform(arg)) : []
-            //    };
+            case 'ArrayExpression':
+                return new IndexExpression(this.transform(expression.object), this.transform(expression.index))
+
+            case 'ArrayLiteral':
+                return <Expression><IExpression><IArrayExpression>{
+                    type: ExpressionType.Array,
+                    elements: expression.elements ? expression.elements.map((arg) => this.transform(arg)) : []
+                };
 
             case 'LogicalExpression':
             case 'LogicalExpression':
@@ -257,14 +279,54 @@ export class ExpressionVisitor {
                 }
                 break;
 
+            case 'PostfixExpression':
+                switch (expression.operator)
+                {
+                    case '--':
+                        return new UnaryExpression(UnaryOperatorType.Decrement, UnaryAffixType.Postfix, this.transform(expression.argument));
+                    case '++':
+                        return new UnaryExpression(UnaryOperatorType.Increment, UnaryAffixType.Postfix, this.transform(expression.argument));
+                }
+                break;
+
             case 'UnaryExpression':
                 switch (expression.operator) {
                     case '!':
                         return new UnaryExpression(UnaryOperatorType.Invert, UnaryAffixType.Prefix, this.transform(expression.argument));
+                    case '~':
+                        return new UnaryExpression(UnaryOperatorType.Complement, UnaryAffixType.Prefix, this.transform(expression.argument));
                     case '+':
                         return new UnaryExpression(UnaryOperatorType.Positive, UnaryAffixType.Prefix, this.transform(expression.argument));
                     case '-':
                         return new UnaryExpression(UnaryOperatorType.Negative, UnaryAffixType.Prefix, this.transform(expression.argument));
+                    case '--':
+                        return new UnaryExpression(UnaryOperatorType.Decrement, UnaryAffixType.Prefix, this.transform(expression.argument));
+                    case '++':
+                        return new UnaryExpression(UnaryOperatorType.Increment, UnaryAffixType.Prefix, this.transform(expression.argument));
+                }
+                break;
+
+            case 'ShiftExpression':
+                switch (expression.operator)
+                {
+                    case '<<':
+                        return new BinaryExpression(BinaryOperatorType.LeftShift, this.transform(expression.left), this.transform(expression.right));
+                    case '>>':
+                        return new BinaryExpression(BinaryOperatorType.RightShift, this.transform(expression.left), this.transform(expression.right));
+                    case '>>>': // zero-fill right-shift 
+                        return new BinaryExpression(BinaryOperatorType.RightShift, this.transform(expression.left), this.transform(expression.right));
+                }
+                break;
+
+            case 'BitwiseExpression':
+                switch (expression.operator)
+                {
+                    case '|':
+                        return new BinaryExpression(BinaryOperatorType.Or, this.transform(expression.left), this.transform(expression.right));
+                    case '^':
+                        return new BinaryExpression(BinaryOperatorType.ExclusiveOr, this.transform(expression.left), this.transform(expression.right));
+                    case '&':
+                        return new BinaryExpression(BinaryOperatorType.And, this.transform(expression.left), this.transform(expression.right));
                 }
                 break;
 
@@ -320,6 +382,12 @@ export class ExpressionVisitor {
 
             case 'Literal':
                 return new LiteralExpression(expression.value);
+
+            case 'BooleanLiteral':
+                return new LiteralExpression(expression.value == "true" || expression.value === true ? true : false);
+
+            case 'NullLiteral':
+                return new LiteralExpression(null);
 
             case 'CallExpression':
                 switch (expression.callee.type) {
@@ -462,3 +530,4 @@ export { IBinaryExpression, BinaryExpression, BinaryOperatorType } from './binar
 export { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './logicalexpression';
 export { IConditionalExpression } from './conditionalexpression';
 export { IArrayExpression, ArrayExpression } from './arrayexpression';
+export { IIndexExpression, IndexExpression } from './indexexpression';

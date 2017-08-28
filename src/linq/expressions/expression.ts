@@ -8,6 +8,7 @@ import { IBinaryExpression } from './binaryexpression';
 import { ILogicalExpression } from './logicalexpression';
 import { IConditionalExpression } from './conditionalexpression';
 import { IArrayExpression } from './arrayexpression';
+import { IIndexExpression } from './indexexpression';
 
 import { ExpressionVisitor } from './expressionvisitor';
 
@@ -22,7 +23,8 @@ export enum ExpressionType {
     Binary,
     Logical,
     Conditional,
-    Array
+    Array,
+    Index
 }
 
 export interface IExpression {
@@ -83,6 +85,9 @@ export abstract class Expression implements IExpression {
 
             case ExpressionType.Array:
                 expression = visitor.visitArray(<IArrayExpression><Object>this); break;
+
+            case ExpressionType.Index:
+                expression = visitor.visitIndex(<IIndexExpression><Object>this); break;
         }
 
         // remove it from stack
