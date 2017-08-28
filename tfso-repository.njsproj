@@ -43,7 +43,6 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="tsconfig.json" />
-    <Content Include="typings.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\linq\" />

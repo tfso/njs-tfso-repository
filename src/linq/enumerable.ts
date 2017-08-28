@@ -97,7 +97,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * @param remapper Function that returns the new value
      */
     public remap(remapper: (name: string, value: any) => any) : this
-    public remap(remapper: () => any) : this {
+    public remap(remapper: (...args) => any) : this {
         let visitor = remapper.length == 2 ? new RemapVisitor(null, remapper) : new RemapVisitor(remapper, null);
     
         for (let item of this._operations.values()) {
