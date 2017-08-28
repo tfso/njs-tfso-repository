@@ -75,10 +75,10 @@ describe("When using Reducer for ExpressionVisitor", () => {
         assert.ok(reducer.isSolvable == false, "Expected a unsolvable expression");
     })
 
-    it("should have a solvable expression using valid scope that is passed in", () => {
+    it("should have a solvable expression using valid scope that is passed into constructor", () => {
 
-        reducer = new ReducerVisitor();
-        expr = reducer.visitLambda(() => this.number == 2 + 3, { number: 5 });
+        reducer = new ReducerVisitor({ number: 5 });
+        expr = reducer.visitLambda(() => this.number == 2 + 3);
 
         assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
         assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
@@ -86,10 +86,28 @@ describe("When using Reducer for ExpressionVisitor", () => {
     })
 
     it("should have a solvable expression using valid parameter", () => {
+        reducer = new ReducerVisitor();
+        expr = reducer.visitLambda((myobject: any) => myobject.number == 2 + 3);
+
+        assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+    })
+
+    it("should have a solvable expression using valid parameter", () => {
 
         expr = reducer.visitLambda((myobject: any) => myobject.number == 2 + 3);
 
         assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'true'");
+    })
+
+    it("should have a solvable expression using named parameters", () => {
+        reducer = new ReducerVisitor();
+        expr = reducer.visitLambda((myobject: any, num: number, letter: string) => myobject.number == 2 + 3 && num == 5 && letter == 'a', 5, 'a');
+
+        assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Logical, "Expected a logical expression");
+
     })
 
     it("should have a solvable expression using named parameters", () => {
@@ -97,7 +115,35 @@ describe("When using Reducer for ExpressionVisitor", () => {
         expr = reducer.visitLambda((myobject: any, num: number, letter: string) => myobject.number == 2 + 3 && num == 5 && letter == 'a', 5, 'a');
 
         assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
-        assert.ok(expr.type == Expr.ExpressionType.Logical, "Expected a logical expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'true'");
+    })
+
+    it("should have a solvable expression using object parameters", () => {
+        reducer = new ReducerVisitor({
+            subobject: {
+                number: 5
+            }
+        });
+
+        expr = reducer.visitLambda((myobject: any, data: any, letter: string) => myobject.subobject.number == 2 + 3 && data.number == 5 && data.letter == 'a' && letter == 'b', { number: 5, letter: 'a' }, 'b');
+
+        assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'true'");
+
+    })
+
+    it("should not overwrite global/this parameters with input parameters", () => {
+        reducer = new ReducerVisitor({
+            number: 5
+        });
+
+        expr = reducer.visitLambda((myobject: any, number: any) => myobject.number == 2 + 3, 6);
+
+        assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'true'");
 
     })
 })

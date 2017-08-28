@@ -7,7 +7,7 @@ describe("When using OData for ExpressionVisitor", () => {
         expr: Expr.IExpression;
 
     beforeEach(() => {
-        reducer = new ODataVisitor({ number: 5, string: 'abc', decimal: 5.50, date: new Date("2017-05-10T06:48:00Z") });
+        reducer = new ODataVisitor({ number: 5, string: 'abc', decimal: 5.50, date: new Date("2017-05-10T06:48:00Z"), object: { number: 5 } });
     })
 
     it("should evaluate a simple expression with binary operation", () => {
@@ -104,6 +104,14 @@ describe("When using OData for ExpressionVisitor", () => {
     it("should evaluate a complex expression with binary operation", () => {
 
         expr = reducer.visitOData("number ge 5 and number lt 10");
+
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value true");
+    })
+
+    it("should evaluate a complex expression with binary operation using object", () => {
+
+        expr = reducer.visitOData("object/number ge 5 and object/number lt 10");
 
         assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
         assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value true");

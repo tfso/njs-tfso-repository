@@ -15,13 +15,15 @@ import { ExpressionVisitor } from './expressionvisitor';
 
 export class ReducerVisitor extends ExpressionVisitor {
     private _params: Array<any>
+    protected _it: Object
     private _isSolvable: boolean;
 
     private _parentExpressionStack: Array<IExpression> = [];
 
-    constructor(...param: Array<any>) {
+    constructor(it?: Object, ...param: Array<any>) {
         super();
 
+        this._it = it || {};
         this._params = param || null;
     }
 
@@ -51,11 +53,18 @@ export class ReducerVisitor extends ExpressionVisitor {
     public visitIdentifier(expression: IIdentifierExpression): IExpression {
         let parent = this.stack.peek();
 
-        if (parent.type != ExpressionType.Member) {
-            let value = this.evaluate(expression);
-
-            if (value != null) {
+        if (parent.type != ExpressionType.Member)
+        {
+            let it = Object.assign({}, this._it /* global/this variables */, this.getInputParameters() /* special case for javascript function */);
+            
+            let value = this.evaluate(expression, it);
+            if (value != null)
+            {
                 return new LiteralExpression(value);
+            }
+            else
+            {
+                this._isSolvable = false;
             }
         }
 
@@ -67,11 +76,21 @@ export class ReducerVisitor extends ExpressionVisitor {
 
         expr = new MemberExpression(expression.object.accept(this), expression.property.accept(this));
 
-        if (this.stack.peek().type != ExpressionType.Member) {
-            let value = this.evaluate(expr);
-
+        if (this.stack.peek().type != ExpressionType.Member)
+        {
+            let it = Object.assign({},
+                this._it /* global/this variables */,
+                (expr.object.type == ExpressionType.Identifier && (<IIdentifierExpression>expr.object).name != this.it) ? this.getInputParameters() /* special case for javascript function */ : {}
+            );
+            
+            let value = this.evaluate(expr, it);
             if (value != null)
                 return new LiteralExpression(value);
+            else
+            {
+                if(expr.object.type == ExpressionType.Identifier && (<IIdentifierExpression>expr.object).name != this.it)
+                    this._isSolvable = false;
+            }
         }
 
         return expr;
@@ -199,8 +218,6 @@ export class ReducerVisitor extends ExpressionVisitor {
             case ExpressionType.Identifier:
                 var identifier = (<IIdentifierExpression>expression);
 
-                var idx: number = -1;
-
                 if (it != null) {
                     // this object
                     if (it.hasOwnProperty(identifier.name) && (value = it[identifier.name]) != null) {
@@ -219,14 +236,7 @@ export class ReducerVisitor extends ExpressionVisitor {
                                 value = null;
                         }
                     }
-                }
-                else if (this._lambdaExpression != null && (idx = this._lambdaExpression.parameters.indexOf(identifier.name) - 1) >= 0) {
-                    if (this._params.length >= 0 && this._params.length > idx)
-                        value = this._params[idx];
-                }
-
-                if (value == null)
-                    this._isSolvable = false;
+                }  
 
                 break;
 
@@ -234,27 +244,40 @@ export class ReducerVisitor extends ExpressionVisitor {
                 let object = (<IMemberExpression>expression).object,
                     property = (<IMemberExpression>expression).property;
 
-                if (this._lambdaExpression != null) {
-                    if (object.type == ExpressionType.Identifier && (<IIdentifierExpression>object).name == "this") {
-                        it = (this._lambdaExpression.parameters.length == 1 && this._params.length == 1) ? this._params[0] : {};
-
-                        if ((value = this.evaluate(property, it)) == null)
-                            this._isSolvable = false;
+                if (object.type == ExpressionType.Identifier)
+                {
+                    
+                    if ((<IIdentifierExpression>object).name == 'this' || (<IIdentifierExpression>object).name == this.it)
+                    {
+                        value = this.evaluate(property, it);
                     }
                     else
                     {
-                        if (object.type == ExpressionType.Identifier) {
-                            if ((<IIdentifierExpression>object).name != this.it)
-                                this._isSolvable = false;
+                        let descriptor = Object.getOwnPropertyDescriptor(it, (<IIdentifierExpression>object).name);
+                        if (descriptor && typeof descriptor.value == 'object')
+                        {
+                            value = this.evaluate(property, descriptor.value);
                         }
                     }
                 }
-        
+
 
                 break;                
         }
 
         return value;
+    }
+
+    private getInputParameters(): {} {
+        if (this._lambdaExpression && this._lambdaExpression.parameters.length > 0)
+            return this._lambdaExpression.parameters.reduce((res, val, index) => {
+                if (index > 0 && index <= this._params.length)
+                    res[val] = this._params[index - 1]
+
+                return res;
+            }, {})
+
+        return {}
     }
 }
 

@@ -14,8 +14,8 @@ import { LambdaExpression } from './lambdaexpression';
 import { ReducerVisitor } from './reducervisitor';
 
 export class ODataVisitor extends ReducerVisitor {
-    constructor(private _it?: Object) {
-        super();
+    constructor(_it?: Object) {
+        super(_it);
     }
     
     public visitOData(filter: string): IExpression {
@@ -206,37 +206,4 @@ export class ODataVisitor extends ReducerVisitor {
         return result;
     }
 
-    protected evaluate(expression: IExpression, it: Object = null): any {
-        var value: any = null;
-
-        if (it == null)
-            it = this._it;
-
-        switch (expression.type) {
-            case ExpressionType.Identifier:
-                let identifier = (<IIdentifierExpression>expression);
-
-                if (it != null && it.hasOwnProperty(identifier.name) == true) {
-                    value = it[identifier.name];
-                }
-                break;
-
-            case ExpressionType.Member:
-                let member = <IMemberExpression>expression,
-                    name: string;
-
-                if (it != null) {
-                    if (member.object.type == ExpressionType.Identifier && it.hasOwnProperty(name = (<IIdentifierExpression>member.object).name) && typeof it[name] == 'object')
-                        value = this.evaluate(member.property, it[name]);
-                }
-
-                break;
-            
-            default:
-                value = super.evaluate(expression);
-                break;
-        }
-
-        return value;
-    }
 }
