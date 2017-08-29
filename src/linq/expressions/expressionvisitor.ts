@@ -12,8 +12,9 @@ import { IMethodExpression, MethodExpression } from './methodexpression';
 import { IUnaryExpression, UnaryExpression, UnaryOperatorType, UnaryAffixType } from './unaryexpression';
 import { IBinaryExpression, BinaryExpression, BinaryOperatorType } from './binaryexpression';
 import { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './logicalexpression';
-import { IConditionalExpression } from './conditionalexpression';
+import { IConditionalExpression, ConditionalExpression } from './conditionalexpression';
 import { IArrayExpression, ArrayExpression } from './arrayexpression';
+import { ITemplateLiteralExpression, TemplateLiteralExpression } from './templateliteralexpression';
 
 import { LambdaExpression } from './lambdaexpression';
 
@@ -44,11 +45,13 @@ export class ExpressionStack {
         return this.items.pop();
     }
 
-    public peek(): IExpression {
-        if (this.count <= 1)
-            return null;
+    public peek(steps: number = 0): IExpression {
+        if ((this.count + steps) <= 1)
+            return <any>{ // dummy
+                type: 0
+            };
 
-        return this.items[this.count - 2]; // current object is always last
+        return this.items[this.count - 2 + steps]; // current object is always last
     }
 }
 
@@ -117,6 +120,12 @@ export class ExpressionVisitor {
     }
 
     public visitArray(expression: IArrayExpression): IExpression {
+        expression.elements = expression.elements.map((element) => element.accept(this));
+
+        return expression;
+    }
+
+    public visitTemplateLiteral(expression: ITemplateLiteralExpression): IExpression {
         expression.elements = expression.elements.map((element) => element.accept(this));
 
         return expression;
@@ -231,21 +240,16 @@ export class ExpressionVisitor {
                 return new LiteralExpression(expression.value)
 
             case 'ConditionalExpression':
-                return <Expression><IExpression><IConditionalExpression>{
-                    type: ExpressionType.Conditional,
-                    condition: this.transform(expression.test),
-                    success: this.transform(expression.left),
-                    failure: this.transform(expression.right)
-                };
+                return new ConditionalExpression(this.transform(expression.test), this.transform(expression.left), this.transform(expression.right));
+
+            case 'TemplateLiteral':
+                return new TemplateLiteralExpression(expression.values ? expression.values.map(value => this.transform(value)) : []);
 
             case 'ArrayExpression':
                 return new IndexExpression(this.transform(expression.object), this.transform(expression.index))
 
             case 'ArrayLiteral':
-                return <Expression><IExpression><IArrayExpression>{
-                    type: ExpressionType.Array,
-                    elements: expression.elements ? expression.elements.map((arg) => this.transform(arg)) : []
-                };
+                return new ArrayExpression(expression.elements ? expression.elements.map((arg) => this.transform(arg)) : []);
 
             case 'LogicalExpression':
             case 'LogicalExpression':

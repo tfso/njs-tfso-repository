@@ -7,7 +7,7 @@ describe("When using Reducer for ExpressionVisitor", () => {
         expr: Expr.IExpression;
 
     beforeEach(() => {
-        reducer = new ReducerVisitor({ number: 5 });
+        reducer = new ReducerVisitor({ number: 5, array: [8,7,6,5,4,3,2,1] });
     })
 
     it("should evaluate a simple expression with binary operation", () => {
@@ -145,5 +145,77 @@ describe("When using Reducer for ExpressionVisitor", () => {
         assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
         assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'true'");
 
+    })
+
+    it("should handle conditional expression for success", () => {
+
+        expr = reducer.visitLambda(() => this.number == 5 ? true : false);
+
+        assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'true'");
+    })
+
+    it("should handle conditional expression for failure", () => {
+
+        expr = reducer.visitLambda(() => this.number > 5 ? true : false);
+
+        assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == false, "Expected a literal of value 'false'");
+    })
+
+    it("should handle index expressions for variable with index as literal", () => {
+
+        expr = reducer.visitLambda(() => this.array[3] == 5);
+
+        assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'false'");
+    })
+
+    it("should handle index expressions for variable with index as expression", () => {
+
+        expr = reducer.visitLambda(() => this.array[1+2] == 5);
+
+        assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'false'");
+    })
+
+    it("should handle index expressions for array literal with index as literal", () => {
+
+        expr = reducer.visitLambda(() => [8, 7, 6, 5, 4][3] == 5);
+
+        assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'false'");
+    })
+
+    it("should handle index expressions for array literal with index as expression", () => {
+
+        expr = reducer.visitLambda(() => [8, 7, 6, 5, 4][1+2] == 5);
+
+        assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'false'");
+    })
+
+    it("should handle index expressions for array literal of expression with index as expression", () => {
+
+        expr = reducer.visitLambda(() => [4+4, 5+2, 3+3, 2+3, 2+2][1 + 2] == 5);
+
+        assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'false'");
+    })
+
+    it("should handle index expressions for array literal of expression and variables with index as expression", () => {
+
+        expr = reducer.visitLambda(() => this.array[[8, 7, 6, this.number, 4][1 + 2]] == 3);
+
+        assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'false'");
     })
 })

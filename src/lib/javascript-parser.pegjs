@@ -241,7 +241,7 @@ ParExpression
     { return expr; }
 
 QualifiedIdentifier
-    = !ReservedWord qual:Identifier LBRK __ expr:Expression RBRK __
+    = !ReservedWord qual:(Identifier / Literal) LBRK __ expr:Expression RBRK __
     { 
       return { 
     	type: 'ArrayExpression', 
@@ -347,7 +347,7 @@ Literal
 
 ObjectLiteral
 	= LCBRK __ properties:(first:ObjectProperty rest:(COMMA __ ObjectProperty)* { return buildList(first, rest, 2)})? (COMMA __)? __ RCBRK __
-    { return { type: 'Object', properties: properties } }
+    { return { type: 'ObjectLiteral', properties: properties } }
     
 ObjectProperty 
 	= __ key:(Identifier / IntegerLiteral) __ ":" __ value:(Expression) __
@@ -355,7 +355,7 @@ ObjectProperty
 
 ArrayLiteral
 	= LBRK __ elements:(first:Expression rest:(COMMA __ Expression)* { return buildList(first, rest, 2)})? (COMMA __)? __ RBRK __
-    { return { type: 'Array', elements: elements } }
+    { return { type: 'ArrayLiteral', elements: elements } }
 
 IntegerLiteral
     = ( HexNumeral

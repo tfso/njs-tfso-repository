@@ -9,6 +9,7 @@ import { ILogicalExpression } from './logicalexpression';
 import { IConditionalExpression } from './conditionalexpression';
 import { IArrayExpression } from './arrayexpression';
 import { IIndexExpression } from './indexexpression';
+import { ITemplateLiteralExpression } from './templateliteralexpression';
 
 import { ExpressionVisitor } from './expressionvisitor';
 
@@ -24,7 +25,8 @@ export enum ExpressionType {
     Logical,
     Conditional,
     Array,
-    Index
+    Index,
+    TemplateLiteral
 }
 
 export interface IExpression {
@@ -88,6 +90,9 @@ export abstract class Expression implements IExpression {
 
             case ExpressionType.Index:
                 expression = visitor.visitIndex(<IIndexExpression><Object>this); break;
+
+            case ExpressionType.TemplateLiteral:
+                expression = visitor.visitTemplateLiteral(<ITemplateLiteralExpression><Object>this); break;
         }
 
         // remove it from stack
@@ -100,4 +105,4 @@ export abstract class Expression implements IExpression {
     public abstract equal(expression: IExpression): boolean
 }
 
-export { ILiteralExpression, ICompoundExpression, IIdentifierExpression, IMemberExpression, IMethodExpression, IUnaryExpression, IBinaryExpression, ILogicalExpression, IConditionalExpression, IArrayExpression }
+export { ILiteralExpression, ICompoundExpression, IIdentifierExpression, IMemberExpression, IMethodExpression, IUnaryExpression, IBinaryExpression, ILogicalExpression, IConditionalExpression, IArrayExpression, IIndexExpression, ITemplateLiteralExpression }

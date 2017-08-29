@@ -321,11 +321,11 @@
         peg$c46 = function() { return { type: 'NullLiteral' }; },
         peg$c47 = function(literal) { return literal; },
         peg$c48 = function(first, rest) { return buildList(first, rest, 2)},
-        peg$c49 = function(properties) { return { type: 'Object', properties: properties } },
+        peg$c49 = function(properties) { return { type: 'ObjectLiteral', properties: properties } },
         peg$c50 = ":",
         peg$c51 = peg$literalExpectation(":", false),
         peg$c52 = function(key, value) { return { key: key, value: value} },
-        peg$c53 = function(elements) { return { type: 'Array', elements: elements } },
+        peg$c53 = function(elements) { return { type: 'ArrayLiteral', elements: elements } },
         peg$c54 = /^[lL]/,
         peg$c55 = peg$classExpectation(["l", "L"], false, false),
         peg$c56 = function() { return { type: 'NumberLiteral', value: text() }; },
@@ -2195,6 +2195,9 @@
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parseIdentifier();
+        if (s2 === peg$FAILED) {
+          s2 = peg$parseLiteral();
+        }
         if (s2 !== peg$FAILED) {
           s3 = peg$parseLBRK();
           if (s3 !== peg$FAILED) {

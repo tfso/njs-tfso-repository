@@ -79,6 +79,9 @@
     <TypeScriptCompile Include="src\linq\expressions\reducervisitor.ts" />
     <TypeScriptCompile Include="src\linq\expressions\remapvisitor.ts" />
     <TypeScriptCompile Include="src\linq\expressions\renamevisitor.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\templateliteralexpression.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\linq\expressions\unaryexpression.ts" />
     <TypeScriptCompile Include="src\linq\enumerable.ts" />
     <TypeScriptCompile Include="src\linq\operations.ts">
