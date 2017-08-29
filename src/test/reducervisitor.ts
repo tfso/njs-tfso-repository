@@ -139,7 +139,7 @@ describe("When using Reducer for ExpressionVisitor", () => {
             number: 5
         });
 
-        expr = reducer.visitLambda((myobject: any, number: any) => myobject.number == 2 + 3, 6);
+        expr = reducer.visitLambda((myobject: any, number: any) => myobject.number == 2 + 3 && number == 6, 6);
 
         assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
         assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
