@@ -22,6 +22,8 @@ describe("When using Reducer for ExpressionVisitor", () => {
 
         expr = reducer.visitLambda(() => this.number + 3);
 
+        //assert.equal(reducer.evaluate(expr, { number: 5 }), 8);
+
         assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
         assert.ok((<Expr.ILiteralExpression>expr).value == 8, "Expected a literal of value 8");
     })

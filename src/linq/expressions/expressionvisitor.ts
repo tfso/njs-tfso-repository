@@ -1,5 +1,4 @@
-﻿import * as jsep from 'jsep';
-import ODataParser from './../../lib/odata-parser';
+﻿import ODataParser from './../../lib/odata-parser';
 import JavascriptParser from './../../lib/javascript-parser';
 
 import { IExpression, Expression, ExpressionType } from './expression';
@@ -223,7 +222,6 @@ export class ExpressionVisitor {
                         return new MemberExpression(this.transform(expression.object), this.transform(expression.property));
                 }
                 
-
             case 'CallExpression':
                 switch (expression.object.type) {
                     case 'Identifier':

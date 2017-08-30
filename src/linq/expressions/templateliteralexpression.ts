@@ -6,7 +6,7 @@ export interface ITemplateLiteralExpression extends IExpression {
 
 export class TemplateLiteralExpression extends Expression implements ITemplateLiteralExpression {
     constructor(public elements: Array<IExpression>) {
-        super(ExpressionType.Array);
+        super(ExpressionType.TemplateLiteral);
     }
 
     public equal(expression: ITemplateLiteralExpression): boolean {
