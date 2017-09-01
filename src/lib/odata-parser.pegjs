@@ -165,7 +165,7 @@ ParExpression
     { return expr; }
 
 QualifiedIdentifier
-    = qual:Identifier LBRK __ expr:Expression RBRK __
+    = !ReservedWord qual:Identifier LBRK __ expr:Expression RBRK __
     { 
       return { 
     	type: 'ArrayExpression', 
@@ -173,7 +173,7 @@ QualifiedIdentifier
         index: expr 
       };
     }
-    / qual:Identifier args:Arguments
+    / !ReservedWord qual:Identifier args:Arguments
     { 
       return {
       	type: 'CallExpression', 
@@ -181,7 +181,7 @@ QualifiedIdentifier
         arguments: args
       };
     }
-    / first:Identifier list:(DOT i:QualifiedIdentifier { return i; })?
+    / !ReservedWord first:Identifier list:(DOT i:QualifiedIdentifier { return i; })?
     { 
       if(list) {
         return {
@@ -315,7 +315,11 @@ OctalEscape
 UnicodeEscape
     = "u"+ HexDigit HexDigit HexDigit HexDigit
 
-
+ReservedWord
+	= "true" !LetterOrDigit
+    / "false" !LetterOrDigit
+    / "null" !LetterOrDigit
+    
 /* ---- Separators, Operators ----- */
 
 ADD             =   "add"i

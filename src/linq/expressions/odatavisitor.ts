@@ -14,8 +14,8 @@ import { LambdaExpression } from './lambdaexpression';
 import { ReducerVisitor } from './reducervisitor';
 
 export class ODataVisitor extends ReducerVisitor {
-    constructor(_it?: Object) {
-        super(_it);
+    constructor() {
+        super();
     }
     
     public visitOData(filter: string): IExpression {
@@ -198,12 +198,44 @@ export class ODataVisitor extends ReducerVisitor {
         return new MethodExpression(expression.name, parameters, caller);
     }
 
-    public static evaluate(expression: IExpression, it: Object): any {
-        let reducer = new ODataVisitor(it),
-            resultExpression = reducer.visit(expression),
-            result = reducer.evaluate(resultExpression);
+    public evaluate(expression: IExpression, it: Object = null): IExpression {
+        if (expression == null)
+            return null;
 
-        return result;
+        switch (expression.type)
+        {
+            case ExpressionType.Literal: {
+                let literal = (<ILiteralExpression>expression);
+
+                if (typeof (literal.value) == 'string')
+                {
+                    if (/(\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?)?(?:Z|[+-]\d{2}:\d{2})?)/i.test(literal.value)) // check for date for handyness? but it takes some resources as ops/sec goes from 400k to 300k
+                        return new LiteralExpression(new Date(literal.value));
+                }
+
+                break;
+            }
+
+            default:
+                return super.evaluate(expression, it);
+
+        }
+
+        return expression;
+    }
+
+    public static evaluate(expression: string, it?: Object): any
+    public static evaluate(expression: IExpression, it?: Object): any
+    public static evaluate(expression: IExpression | string, it: Object = null): any {
+        let reducer = new ODataVisitor(),
+            result: IExpression;
+
+        if (typeof expression == 'string')
+            expression = reducer.visitOData(expression);
+
+        result = reducer.evaluate(expression, it);
+
+        return result.type == ExpressionType.Literal ? (<ILiteralExpression>result).value : undefined;
     }
 
 }

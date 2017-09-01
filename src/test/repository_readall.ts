@@ -60,14 +60,14 @@ describe("When using repository to read all", () => {
         assert.ok(list[0].operator == ">", "Expected operator to be greater than");
     })
 
-    it("should cast an exception if a unsolvable expression is used", () => {
-        assert.throws(
-            () => {
-                repository.exposeFilters(new Enumerable<ICar>().where((car: ICar) => this.unknown == 5));
-            },
-            Error
-        );
-    })
+    //it("should cast an exception if a unsolvable expression is used", () => {
+    //    assert.throws(
+    //        () => {
+    //            repository.exposeFilters(new Enumerable<ICar>().where((car: ICar) => this.unknown == 5));
+    //        },
+    //        Error
+    //    );
+    //})
 
     it("should intersection filter properties that is common ", () => {
         var intersection = repository.exposeFilters(new Enumerable<ICar>().where((car: ICar) => (car.registrationYear == 2015 && car.location == 'NO') || car.registrationYear == 2015 || (car.location == 'SE' && car.registrationYear == 2015)));

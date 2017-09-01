@@ -192,6 +192,17 @@ describe("When using Enumerable", () => {
             assert.equal(result.length, 1);
         })
 
+        it("should return nothing when an usolvable query is used", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>(),
+                unknown;
+
+            query.where(it => it.location == 'BREVIK' && unknown == true);
+
+            let result = query.toArray(cars);
+
+            assert.equal(result.length, 0);
+        })
+
         it("should be able to do a simple query using one named parameters", () => {
             let query: Enumerable<ICar> = new Enumerable<ICar>();
 
@@ -237,6 +248,16 @@ describe("When using Enumerable", () => {
             let result = query.toArray(cars);
 
             assert.equal(result.length, 1);
+        })
+
+        it("should return nothing when an usolvable query is used", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>();
+
+            query.where("location eq 'BREVIK' and unkown eq true");
+           
+            let result = query.toArray(cars);
+
+            assert.equal(result.length, 0);
         })
 
         it("should be able to do a complex query", () => {

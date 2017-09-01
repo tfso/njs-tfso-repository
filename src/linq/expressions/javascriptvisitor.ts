@@ -8,8 +8,8 @@ import { LambdaExpression } from './lambdaexpression';
 import { ReducerVisitor } from './reducervisitor';
 
 export class JavascriptVisitor extends ReducerVisitor {
-    constructor(_it?: Object) {
-        super(_it);
+    constructor() {
+        super();
     }
 
     public visitMember(expression: IMemberExpression): IExpression {
@@ -69,8 +69,7 @@ export class JavascriptVisitor extends ReducerVisitor {
                                 case 'tan':
                                 case 'tanh':
                                 case 'trunc':
-                                    value = Math[name].call(null, ...params);
-                                    break;
+                                    return new LiteralExpression(Math[name].call(null, ...params));
                             }
                     }
 
@@ -108,8 +107,7 @@ export class JavascriptVisitor extends ReducerVisitor {
                                 case 'toString':
                                 case 'toUpperCase':
                                 case 'trim':
-                                    value = String.prototype[name].call(value, ...params);
-                                    break;
+                                    return new LiteralExpression(String.prototype[name].call(value, ...params));
 
                                 default:
                                     break;
@@ -131,8 +129,7 @@ export class JavascriptVisitor extends ReducerVisitor {
                                 case 'toLocaleString':
                                 case 'toPrecision':
                                 case 'toString':
-                                    value = Number.prototype[name].call(value, ...params);
-                                    break;
+                                    return new LiteralExpression(Number.prototype[name].call(value, ...params));
                             }
                             break;
 
@@ -150,19 +147,23 @@ export class JavascriptVisitor extends ReducerVisitor {
 
                     break;
             }
-
-            return new LiteralExpression(value);
-
         }
 
         return new MethodExpression(name, parameters, caller);
     }
 
-    public static evaluate(expression: IExpression, it: Object): any {
-        let reducer = new JavascriptVisitor(it),
-            resultExpression = reducer.visit(expression),
-            result = reducer.evaluate(resultExpression);
+    public static evaluate(predicate: (it: Object, ...param: Array<any>) => any, it: Object): any
+    public static evaluate(expression: IExpression, it: Object): any
+    public static evaluate(expression: IExpression | ((it: Object, ...param: Array<any>) => any), it: Object): any {
+        let reducer = new JavascriptVisitor(),
+            result: IExpression;
 
-        return result;
+        if (typeof expression == 'function')
+            expression = reducer.visitLambda(expression);
+
+        result = reducer.evaluate(expression, it);
+
+        return result.type == ExpressionType.Literal ? (<ILiteralExpression>result).value : undefined;
     }
+
 }

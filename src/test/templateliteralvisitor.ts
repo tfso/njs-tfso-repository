@@ -4,23 +4,23 @@ import { TemplateLiteralVisitor } from './../linq/expressions/templateliteralvis
 
 describe("When using TemplateLiteral for ExpressionVisitor", () => {
     var template: TemplateLiteralVisitor,
-        expr: Expr.IExpression;
+        vars = { number: 5, array: [8, 7, 6, 5, 4, 3, 2, 1] }
 
     beforeEach(() => {
-        template = new TemplateLiteralVisitor({ number: 5, array: [8, 7, 6, 5, 4, 3, 2, 1] });
+        template = new TemplateLiteralVisitor();
     })
 
+    var number = 5;
+
     it("should handle a simple template literal", () => {
-        let expr = template.visitLambda(() => `My number is ${this.number} and my next is ${this.number + 1}`);
+        let reduced = template.visitLambda(() => `My number is ${this.number} and my next is ${this.number + 1}`),
+            expr = template.evaluate(reduced, vars);
 
+        var expression = new TemplateLiteralVisitor().visitLambda(() => `template string adds ${2 + number} to ${2+5} like nothing`);
 
-        var number: number,
-            expression = new TemplateLiteralVisitor().visitLambda(() => `template string adds ${2 + number} like nothing`);
+        let val = TemplateLiteralVisitor.evaluate(expression, { number: number })
 
-        let value = TemplateLiteralVisitor.evaluate(expression, { number: 5 });
-
-
-        assert.ok(template.isSolvable == true, "Expected a solvable expression");
+        //assert.ok(template.isSolvable == true, "Expected a solvable expression");
         assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
         assert.ok((<Expr.ILiteralExpression>expr).value == 'My number is 5 and my next is 6');
     })

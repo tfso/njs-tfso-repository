@@ -4,28 +4,31 @@ import { JavascriptVisitor } from './../linq/expressions/javascriptvisitor';
 
 describe("When using JavascriptVisitor", () => {
     var parser: JavascriptVisitor,
-        expr: Expr.IExpression;
+        vars = { number: 5, string: 'abc', decimal: 5.50, date: new Date("2017-05-10T06:48:00Z"), object: { number: 7 } };
 
     beforeEach(() => {
-        parser = new JavascriptVisitor({ number: 5, string: 'abc', decimal: 5.50, date: new Date("2017-05-10T06:48:00Z"), object: { number: 7 } });
+        parser = new JavascriptVisitor();
     })
 
     it("should evaluate a simple expression with binary operation", () => {
-        expr = parser.visitLambda(() => 2 + 3);
+        let reduced = parser.visitLambda(() => 2 + 3),
+            expr = parser.evaluate(reduced, vars);
 
         assert.equal(expr.type, Expr.ExpressionType.Literal);
         assert.equal((<Expr.LiteralExpression>expr).value, 5);
     })
 
     it("should be able to do string operations at literal", () => {
-        expr = parser.visitLambda(() => "ABC".toLowerCase());
+        let reduced = parser.visitLambda(() => "ABC".toLowerCase()),
+            expr = parser.evaluate(reduced, vars);
 
         assert.equal(expr.type, Expr.ExpressionType.Literal);
         assert.equal((<Expr.LiteralExpression>expr).value, 'abc');
     })
 
     it("should be able to do string operations at variables", () => {
-        expr = parser.visitLambda(() => this.string.toUpperCase());
+        let reduced = parser.visitLambda(() => this.string.toUpperCase()),
+            expr = parser.evaluate(reduced, vars);
 
         assert.equal(expr.type, Expr.ExpressionType.Literal);
         assert.equal((<Expr.LiteralExpression>expr).value, 'ABC');

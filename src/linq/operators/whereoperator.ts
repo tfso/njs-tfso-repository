@@ -37,8 +37,8 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                     return predicate.apply({}, [entity].concat(parameters)) === true;
                 };
 
-                if (visitor.isSolvable == false)
-                    throw new Error('Predicate is not solvable');
+                //if (visitor.isSolvable == false)
+                //    throw new Error('Predicate is not solvable');
 
                 break;
 

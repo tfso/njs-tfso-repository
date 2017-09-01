@@ -105,16 +105,6 @@ export class ExpressionVisitor {
     }
 
     public visitLiteral(expression: ILiteralExpression): IExpression {
-        switch (typeof expression.value) {
-            case 'string':
-
-                break;
-
-            case 'number':
-
-                break;
-        }
-
         return expression;
     }
 
@@ -232,8 +222,14 @@ export class ExpressionVisitor {
                 }
 
             case 'NumberLiteral':
+                return new LiteralExpression(Number(expression.value))
+
             case 'BooleanLiteral':
+                return new LiteralExpression(expression.value == true || expression.value == 'true' ? true : false);
+
             case 'NullLiteral':
+                return new LiteralExpression(null);
+
             case 'Literal':
                 return new LiteralExpression(expression.value)
 
@@ -355,167 +351,7 @@ export class ExpressionVisitor {
         throw new Error('Expression type "' + expression.type + '" is unknown');
     }
 
-    /**
-     * transforming jsep expression ast tree to our internal ast tree to make it easier to swap expression parser at a later time
-     * @param expression jsep expression object
-     */
-    private transform_old(expression: any): IExpression {
-        var child: IExpression;
-
-        switch (expression.type) {
-            case 'Compound':
-                return Object.create(Expression, <PropertyDescriptorMap><Object><ICompoundExpression>{
-                    type: ExpressionType.Compound,
-                    body: expression.body ? expression.body.map((expr) => this.transform(expr)) : []
-                });
-
-            case 'Identifier':
-                return new IdentifierExpression(expression.name);
-
-            case 'ThisExpression':
-                return new IdentifierExpression('this');
-
-            case 'MemberExpression':
-                child = this.transform(expression.object);
-                if (child.type == ExpressionType.Member)
-                    return new MemberExpression((<IMemberExpression>child).object, new MemberExpression((<IMemberExpression>child).property, (expression.computed == true ? new ArrayExpression([this.transform(expression.property)]) : this.transform(expression.property)))); // this.ar[5] should be member 'this' with property member 'ar' with property [5].
-                else
-                    return new MemberExpression(child, this.transform(expression.property));
-
-            case 'Literal':
-                return new LiteralExpression(expression.value);
-
-            case 'BooleanLiteral':
-                return new LiteralExpression(expression.value == "true" || expression.value === true ? true : false);
-
-            case 'NullLiteral':
-                return new LiteralExpression(null);
-
-            case 'CallExpression':
-                switch (expression.callee.type) {
-                    case 'MemberExpression':
-                        return new MethodExpression(expression.callee.property.name, expression.arguments ? expression.arguments.map((arg) => this.transform(arg)) : [], this.transform(expression.callee.object));
-
-                    default:
-                        throw new Error('Caller of method expression is not a MemberExpression, but is ' + expression.callee.type);
-                }
-
-            case 'UnaryExpression':
-                var operatorTypeUnary: UnaryOperatorType;
-                switch (expression.operator) {
-                    case '!':
-                        return new UnaryExpression(UnaryOperatorType.Invert, expression.prefix === true ? UnaryAffixType.Prefix : UnaryAffixType.Postfix, this.transform(expression.argument));
-                    case '~':
-                        return new UnaryExpression(UnaryOperatorType.Complement, expression.prefix === true ? UnaryAffixType.Prefix : UnaryAffixType.Postfix, this.transform(expression.argument));
-                    case '+':
-                    case '++':
-                        if (expression.argument == false) {
-                            return new UnaryExpression(UnaryOperatorType.Negative, expression.prefix === true ? UnaryAffixType.Prefix : UnaryAffixType.Postfix, null);
-                        }
-                        else {
-                            child = this.transform(expression.argument);
-                            if (child.type == ExpressionType.Unary)
-                                return new UnaryExpression(UnaryOperatorType.Increment, expression.prefix === true ? UnaryAffixType.Prefix : UnaryAffixType.Postfix, (<IUnaryExpression>child).argument)
-                            else
-                                return new UnaryExpression(UnaryOperatorType.Positive, expression.prefix === true ? UnaryAffixType.Prefix : UnaryAffixType.Postfix, this.transform(expression.argument));
-                        }
-                    case '-':
-                    case '--':
-                        if (expression.argument == false) {
-                            return new UnaryExpression(UnaryOperatorType.Negative, expression.prefix === true ? UnaryAffixType.Prefix : UnaryAffixType.Postfix, null);
-                        }
-                        else {
-                            child = this.transform(expression.argument);
-                            if (child.type == ExpressionType.Unary)
-                                return new UnaryExpression(UnaryOperatorType.Decrement, expression.prefix === true ? UnaryAffixType.Prefix : UnaryAffixType.Postfix, (<IUnaryExpression>child).argument)
-                            else
-                                return new UnaryExpression(UnaryOperatorType.Negative, expression.prefix === true ? UnaryAffixType.Prefix : UnaryAffixType.Postfix, this.transform(expression.argument));
-                        }
-                    default:
-                        throw new Error('Operator "' + expression.operator + '" is unknown for ' + expression.type);
-                }
-
-            case 'LogicalExpression':
-            case 'BinaryExpression':
-                switch (expression.operator) {
-                    case '|':
-                        return new BinaryExpression(BinaryOperatorType.Or, this.transform(expression.left), this.transform(expression.right));
-                    case '^':
-                        return new BinaryExpression(BinaryOperatorType.ExclusiveOr, this.transform(expression.left), this.transform(expression.right));
-                    case '&':
-                        return new BinaryExpression(BinaryOperatorType.And, this.transform(expression.left), this.transform(expression.right));
-                    case '<<':
-                        return new BinaryExpression(BinaryOperatorType.LeftShift, this.transform(expression.left), this.transform(expression.right));
-                    case '>>':
-                        return new BinaryExpression(BinaryOperatorType.RightShift, this.transform(expression.left), this.transform(expression.right));
-                    case '>>>': // zero-fill right-shift 
-                        return new BinaryExpression(BinaryOperatorType.RightShift, this.transform(expression.left), this.transform(expression.right));
-                    case '+':
-                        child = this.transform(expression.right); // 5++ is handled as binary expression with right side a unaryexpression with empty argument
-                        if (child.type == ExpressionType.Unary && (<IUnaryExpression>child).argument == null)
-                            if ((child = this.transform(expression.left)).type == ExpressionType.Binary) // 5+a++ is handled with wrong precedence (5+a)+(+), this will fix it
-                                return new BinaryExpression((<IBinaryExpression>child).operator, (<IBinaryExpression>child).left, new UnaryExpression(UnaryOperatorType.Increment, UnaryAffixType.Postfix, (<IBinaryExpression>child).right));
-                            else
-                                return new UnaryExpression(UnaryOperatorType.Increment, UnaryAffixType.Postfix, this.transform(expression.left))
-                        else
-                            return new BinaryExpression(BinaryOperatorType.Addition, this.transform(expression.left), child);
-                    case '-':
-                        child = this.transform(expression.right); // 5-- is handled as binary expression (5)-(-) with right side a unaryexpression with empty argument
-                        if (child.type == ExpressionType.Unary && (<IUnaryExpression>child).argument == null)
-                            if ((child = this.transform(expression.left)).type == ExpressionType.Binary) // 5-a++ is handled with wrong precedence (5-a)+(+), this will fix it
-                                return new BinaryExpression((<IBinaryExpression>child).operator, (<IBinaryExpression>child).left, new UnaryExpression(UnaryOperatorType.Decrement, UnaryAffixType.Postfix, (<IBinaryExpression>child).right));
-                            else
-                                return new UnaryExpression(UnaryOperatorType.Decrement, UnaryAffixType.Postfix, this.transform(expression.left))
-                        else
-                            return new BinaryExpression(BinaryOperatorType.Subtraction, this.transform(expression.left), child);
-                    case '*':
-                        return new BinaryExpression(BinaryOperatorType.Multiplication, this.transform(expression.left), this.transform(expression.right));
-                    case '/':
-                        return new BinaryExpression(BinaryOperatorType.Division, this.transform(expression.left), this.transform(expression.right));
-                    case '%':
-                        return new BinaryExpression(BinaryOperatorType.Modulus, this.transform(expression.left), this.transform(expression.right));
-                    case '==':
-                        return new LogicalExpression(LogicalOperatorType.Equal, this.transform(expression.left), this.transform(expression.right));
-                    case '!=':
-                        return new LogicalExpression(LogicalOperatorType.NotEqual, this.transform(expression.left), this.transform(expression.right));
-                    case '===':
-                        return new LogicalExpression(LogicalOperatorType.Equal, this.transform(expression.left), this.transform(expression.right));
-                    case '!==':
-                        return new LogicalExpression(LogicalOperatorType.NotEqual, this.transform(expression.left), this.transform(expression.right));
-                    case '<':
-                        return new LogicalExpression(LogicalOperatorType.Lesser, this.transform(expression.left), this.transform(expression.right));
-                    case '>':
-                        return new LogicalExpression(LogicalOperatorType.Greater, this.transform(expression.left), this.transform(expression.right));
-                    case '<=':
-                        return new LogicalExpression(LogicalOperatorType.LesserOrEqual, this.transform(expression.left), this.transform(expression.right));
-                    case '>=':
-                        return new LogicalExpression(LogicalOperatorType.GreaterOrEqual, this.transform(expression.left), this.transform(expression.right));
-                    case '||':
-                        return new LogicalExpression(LogicalOperatorType.Or, this.transform(expression.left), this.transform(expression.right));
-                    case '&&':
-                        return new LogicalExpression(LogicalOperatorType.And, this.transform(expression.left), this.transform(expression.right));
-                    default:
-                        throw new Error('Operator "' + expression.operator + '" is unknown for ' + expression.type);
-                }
-
-            case 'ConditionalExpression':
-                return <Expression><IExpression><IConditionalExpression>{
-                    type: ExpressionType.Conditional,
-                    condition: this.transform(expression.test),
-                    success: this.transform(expression.consequent),
-                    failure: this.transform(expression.alternate)
-                };
-
-            case 'ArrayExpression':
-                return <Expression><IExpression><IArrayExpression>{
-                    type: ExpressionType.Array,
-                    elements: expression.elements ? expression.elements.map((arg) => this.transform(arg)) : []
-                };
-
-            default:
-                return null;
-        }
-    }
+  
 }
 
 //export { IExpression, Expression, ExpressionType } from './expression';
