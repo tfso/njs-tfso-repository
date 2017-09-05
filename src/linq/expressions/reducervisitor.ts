@@ -222,15 +222,7 @@ export class ReducerVisitor extends ExpressionVisitor {
                 return new ArrayExpression((<IArrayExpression>expression).elements.map(v => this.evaluate(v, it)));
 
             case ExpressionType.Object:
-                let properties = (<IObjectExpression>expression).properties.map(el => <IObjectProperty>{ key: this.evaluate(el.key, it), value: this.evaluate(el.value, it) });
-
-                if (properties.every(el => el.value.type == ExpressionType.Literal) == true)
-                    return new LiteralExpression(properties.reduce((o, p) => {
-                        o[p.key.type == ExpressionType.Identifier ? (<IdentifierExpression>p.key).name : (<ILiteralExpression>p.key).value] = (<ILiteralExpression>p.value).value;
-                        return o;
-                    }, {}));
-
-                break;
+                return new ObjectExpression((<IObjectExpression>expression).properties.map(el => <IObjectProperty>{ key: this.evaluate(el.key, it), value: this.evaluate(el.value, it) }));
 
             case ExpressionType.Index: {
                 let object = this.evaluate((<IIndexExpression>expression).object, it),

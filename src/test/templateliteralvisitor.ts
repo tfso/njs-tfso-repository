@@ -39,7 +39,7 @@ describe("When using TemplateLiteral for ExpressionVisitor", () => {
 
     it("should handle objects as expression", () => {
 
-        let reduced = template.visitLambda(() => `My number is ${{ key: 1, value: 'test' }} and my next is ${this.number + 1}`)
+        let reduced = template.visitLambda(() => `My number is ${{ key: 0 + 1, value: this.number + 1 }} and my next is ${this.number + 1}`)
             
         assert.equal(reduced.type, Expr.ExpressionType.TemplateLiteral);
         assert.equal((<Expr.ITemplateLiteralExpression>reduced).elements.length, 4);
@@ -49,6 +49,6 @@ describe("When using TemplateLiteral for ExpressionVisitor", () => {
 
         let expr = template.evaluate(reduced, vars);
 
-        assert.ok((<Expr.ILiteralExpression>expr).value == 'My number is <a href="#1">test</a> and my next is 6');
+        assert.ok((<Expr.ILiteralExpression>expr).value == 'My number is <a href="#1">6</a> and my next is 6');
     })
 })

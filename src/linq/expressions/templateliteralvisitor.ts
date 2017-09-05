@@ -1,6 +1,9 @@
 ﻿import { IExpression, Expression, ExpressionType } from './expression';
 import { ILiteralExpression, LiteralExpression } from './literalexpression';
+import { IIdentifierExpression, IdentifierExpression } from './identifierexpression';
+
 import { ITemplateLiteralExpression, TemplateLiteralExpression } from './templateliteralexpression';
+import { IObjectExpression, ObjectExpression, IObjectProperty } from './objectexpression';
 
 import { JavascriptVisitor } from './javascriptvisitor';
 
@@ -35,22 +38,35 @@ export class TemplateLiteralVisitor extends JavascriptVisitor {
         switch (expression.type)
         {
             case ExpressionType.TemplateLiteral:
+                let elements = (<ITemplateLiteralExpression>expression).elements.map(el => this.evaluate(el, it));
+
                 if (it)
                 {
-                    let elements = (<ITemplateLiteralExpression>expression).elements.map(el => this.evaluate(el, it));
-
                     if (elements.every(el => el.type == ExpressionType.Literal) == true)
                         return new LiteralExpression(elements.reduce((out, el) => out += this._wrapper((<ILiteralExpression>el).value), ''));
-
-                    return new TemplateLiteralExpression(elements);
                 }
-                break;
+
+                return new TemplateLiteralExpression(elements);
+
+            case ExpressionType.Object:
+                let properties = (<IObjectExpression>expression).properties.map(el => <IObjectProperty>{ key: this.evaluate(el.key, it), value: this.evaluate(el.value, it) });
+
+                if (it)
+                {
+                    if (properties.every(el => el.value.type == ExpressionType.Literal) == true)
+                        return new LiteralExpression(properties.reduce((o, p) => {
+                            o[p.key.type == ExpressionType.Identifier ? (<IdentifierExpression>p.key).name : (<ILiteralExpression>p.key).value] = (<ILiteralExpression>p.value).value;
+                            return o;
+                        }, {}));
+                }
+
+                return new ObjectExpression(properties);
                 
             default:
                 return super.evaluate(expression, it);
         }
 
-        return expression;
+        //return expression;
     }
 
     public static evaluate(predicate: (it: Object, ...param: Array<any>) => any, it: Object): any
