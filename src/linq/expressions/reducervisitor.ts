@@ -11,6 +11,7 @@ import { IConditionalExpression, ConditionalExpression } from './conditionalexpr
 import { IArrayExpression, ArrayExpression } from './arrayexpression';
 import { IIndexExpression, IndexExpression } from './indexexpression';
 import { ITemplateLiteralExpression, TemplateLiteralExpression } from './templateliteralexpression';
+import { IObjectExpression, ObjectExpression, IObjectProperty } from './objectexpression';
 
 import { LambdaExpression } from './lambdaexpression';
 import { ExpressionVisitor } from './expressionvisitor';
@@ -219,7 +220,18 @@ export class ReducerVisitor extends ExpressionVisitor {
 
             case ExpressionType.Array:
                 return new ArrayExpression((<IArrayExpression>expression).elements.map(v => this.evaluate(v, it)));
-            
+
+            case ExpressionType.Object:
+                let properties = (<IObjectExpression>expression).properties.map(el => <IObjectProperty>{ key: this.evaluate(el.key, it), value: this.evaluate(el.value, it) });
+
+                if (properties.every(el => el.value.type == ExpressionType.Literal) == true)
+                    return new LiteralExpression(properties.reduce((o, p) => {
+                        o[p.key.type == ExpressionType.Identifier ? (<IdentifierExpression>p.key).name : (<ILiteralExpression>p.key).value] = (<ILiteralExpression>p.value).value;
+                        return o;
+                    }, {}));
+
+                break;
+
             case ExpressionType.Index: {
                 let object = this.evaluate((<IIndexExpression>expression).object, it),
                     index = this.evaluate((<IIndexExpression>expression).index, it);

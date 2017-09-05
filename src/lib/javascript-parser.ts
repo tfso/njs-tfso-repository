@@ -324,7 +324,7 @@
         peg$c49 = function(properties) { return { type: 'ObjectLiteral', properties: properties } },
         peg$c50 = ":",
         peg$c51 = peg$literalExpectation(":", false),
-        peg$c52 = function(key, value) { return { key: key, value: value} },
+        peg$c52 = function(key, value) { return { type: 'Property', key: key, value: value} },
         peg$c53 = function(elements) { return { type: 'ArrayLiteral', elements: elements } },
         peg$c54 = /^[lL]/,
         peg$c55 = peg$classExpectation(["l", "L"], false, false),
@@ -3425,6 +3425,9 @@
         s2 = peg$parseIdentifier();
         if (s2 === peg$FAILED) {
           s2 = peg$parseIntegerLiteral();
+          if (s2 === peg$FAILED) {
+            s2 = peg$parseStringLiteral();
+          }
         }
         if (s2 !== peg$FAILED) {
           s3 = peg$parse__();

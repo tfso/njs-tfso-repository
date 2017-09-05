@@ -14,6 +14,7 @@ import { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './lo
 import { IConditionalExpression, ConditionalExpression } from './conditionalexpression';
 import { IArrayExpression, ArrayExpression } from './arrayexpression';
 import { ITemplateLiteralExpression, TemplateLiteralExpression } from './templateliteralexpression';
+import { IObjectExpression, ObjectExpression, IObjectProperty} from './objectexpression';
 
 import { LambdaExpression } from './lambdaexpression';
 
@@ -116,6 +117,12 @@ export class ExpressionVisitor {
 
     public visitTemplateLiteral(expression: ITemplateLiteralExpression): IExpression {
         expression.elements = expression.elements.map((element) => element.accept(this));
+
+        return expression;
+    }
+
+    public visitObject(expression: IObjectExpression): IExpression {
+        expression.properties = expression.properties.map((element) => <IObjectProperty>{ key: element.key.accept(this), value: element.value.accept(this) });
 
         return expression;
     }
@@ -235,6 +242,9 @@ export class ExpressionVisitor {
 
             case 'ConditionalExpression':
                 return new ConditionalExpression(this.transform(expression.test), this.transform(expression.left), this.transform(expression.right));
+
+            case 'ObjectLiteral':
+                return new ObjectExpression(expression.properties ? expression.properties.map(value => <any>{ key: this.transform(value.key), value: this.transform(value.value) }) : []);
 
             case 'TemplateLiteral':
                 return new TemplateLiteralExpression(expression.values ? expression.values.map(value => this.transform(value)) : []);
@@ -369,3 +379,5 @@ export { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './lo
 export { IConditionalExpression } from './conditionalexpression';
 export { IArrayExpression, ArrayExpression } from './arrayexpression';
 export { IIndexExpression, IndexExpression } from './indexexpression';
+export { ITemplateLiteralExpression, TemplateLiteralExpression } from './templateliteralexpression';
+export { IObjectExpression, ObjectExpression } from './objectexpression';

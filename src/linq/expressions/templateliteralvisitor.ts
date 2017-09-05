@@ -5,8 +5,12 @@ import { ITemplateLiteralExpression, TemplateLiteralExpression } from './templat
 import { JavascriptVisitor } from './javascriptvisitor';
 
 export class TemplateLiteralVisitor extends JavascriptVisitor {
-    constructor(private wrapper?: (value: any) => string) {
+    private _wrapper: (value: any) => string;
+
+    constructor(wrapper?: (value: any) => string) {
         super();
+
+        this._wrapper = wrapper || ((value: any) => value);
     }
 
     //public visitTemplateLiteral(expression: ITemplateLiteralExpression): IExpression {
@@ -36,7 +40,7 @@ export class TemplateLiteralVisitor extends JavascriptVisitor {
                     let elements = (<ITemplateLiteralExpression>expression).elements.map(el => this.evaluate(el, it));
 
                     if (elements.every(el => el.type == ExpressionType.Literal) == true)
-                        return new LiteralExpression(elements.reduce((out, el) => out += String((<ILiteralExpression>el).value), ''));
+                        return new LiteralExpression(elements.reduce((out, el) => out += this._wrapper((<ILiteralExpression>el).value), ''));
 
                     return new TemplateLiteralExpression(elements);
                 }

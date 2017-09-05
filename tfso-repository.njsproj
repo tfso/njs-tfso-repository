@@ -85,6 +85,7 @@
     <TypeScriptCompile Include="src\linq\expressions\reducervisitor.ts" />
     <TypeScriptCompile Include="src\linq\expressions\remapvisitor.ts" />
     <TypeScriptCompile Include="src\linq\expressions\renamevisitor.ts" />
+    <TypeScriptCompile Include="src\linq\expressions\objectexpression.ts" />
     <TypeScriptCompile Include="src\linq\expressions\templateliteralexpression.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

@@ -350,8 +350,8 @@ ObjectLiteral
     { return { type: 'ObjectLiteral', properties: properties } }
     
 ObjectProperty 
-	= __ key:(Identifier / IntegerLiteral) __ ":" __ value:(Expression) __
-    { return { key: key, value: value} }
+	= __ key:(Identifier / IntegerLiteral / StringLiteral) __ ":" __ value:(Expression) __
+    { return { type: 'Property', key: key, value: value} }
 
 ArrayLiteral
 	= LBRK __ elements:(first:Expression rest:(COMMA __ Expression)* { return buildList(first, rest, 2)})? (COMMA __)? __ RBRK __
