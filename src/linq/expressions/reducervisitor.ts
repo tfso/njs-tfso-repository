@@ -190,8 +190,11 @@ export class ReducerVisitor extends ExpressionVisitor {
                 if (it != null)
                 {
                     // this object
-                    if (it.hasOwnProperty(identifier.name) && (value = it[identifier.name]) != null)
+                    if (it.hasOwnProperty(identifier.name) && (value = it[identifier.name]) !== undefined)
                     {
+                        if (value == null)
+                            return new LiteralExpression(null);
+
                         switch (typeof value)
                         {
                             case 'string':

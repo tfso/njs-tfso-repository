@@ -58,6 +58,16 @@ describe("When using Reducer for ExpressionVisitor", () => {
         //assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
     })
 
+    it("should have a solvable expression using nullable variable", () => {
+        let reduced = reducer.visitLambda((it, mynullvar) => this.number == mynullvar, null),
+            expr = reducer.evaluate(reduced, vars);
+
+        //assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal expression");
+        assert.ok((<Expr.ILiteralExpression>expr).value == false, "Expected the literal value to be false");
+    })
+
+
     it("should have a unsolvable expression using unknown scope", () => {
         let expr = reducer.visitLambda(() => this.unknown == 2 + 3);
 
