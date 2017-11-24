@@ -173,6 +173,16 @@ describe("When using Repository", () => {
         assert.equal(cars[0].id, 6);
     })
 
+    it("should work with random query using input param", async () => {
+
+        let repo = new CarRepository(),
+            cars = await new Enumerable<ICar>(repo).where((it, id) => it.id == id, 6).toArrayAsync();
+
+        assert.ok(repo instanceof Repository);
+        assert.equal(cars.length, 1)
+        assert.equal(cars[0].id, 6);
+    })
+
     it("should be able to remove paging operations for manual handling", async () => {
 
         let repo = new CarRepository(),

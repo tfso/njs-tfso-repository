@@ -93,6 +93,17 @@ describe("When using repository to read all", () => {
         //assert.ok(list.length == 1, "Expected a single criteria");
         //assert.ok(list[0].method == "toLowerCase");
     })
+
+    it("should handle nested member expressions", () => {
+
+        var list = repository.exposeFilters(new Enumerable<ICar>().where(car => car.type.make == "Toyota"));
+
+        assert.equal(list.length, 1);
+        assert.equal(list[0].property, 'type.make')
+        assert.equal(list[0].operator, '==');
+        assert.equal(list[0].value, 'Toyota');
+
+    })
 });
 
 
@@ -102,6 +113,11 @@ interface ICar {
     location: string
 
     registrationYear: number
+
+    type: {
+        make: string
+        model: string
+    }
 }
 
 class CarRepository extends Repository<ICar, number>

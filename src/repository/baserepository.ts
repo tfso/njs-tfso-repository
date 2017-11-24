@@ -40,13 +40,19 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
     abstract readAll(query: IEnumerable<TEntity>, meta?: IRecordSetMeta, parent?: IParentOptions): Promise<TEntity[]>
 
     abstract create(entity: TEntity): Promise<TEntity>
+    abstract create(entity: Partial<TEntity>): Promise<TEntity>
     abstract create(entity: TEntity, meta?: IRecordSetMeta): Promise<TEntity>
+    abstract create(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<TEntity>
 
     abstract update(entity: TEntity): Promise<boolean>
+    abstract update(entity: Partial<TEntity>): Promise<boolean>
     abstract update(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
+    abstract update(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<boolean>
 
     abstract delete(entity: TEntity): Promise<boolean>
+    abstract delete(entity: Partial<TEntity>): Promise<boolean>
     abstract delete(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
+    abstract delete(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<boolean>
 
     public beginTransaction(): Promise<void> {
         return Promise.resolve();
