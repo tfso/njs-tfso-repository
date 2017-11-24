@@ -1,0 +1,32 @@
+import { IExpression } from './expression';
+import { ILiteralExpression } from './literalexpression';
+import { IMethodExpression } from './methodexpression';
+import { IBinaryExpression } from './binaryexpression';
+import { ILogicalExpression } from './logicalexpression';
+import { IConditionalExpression } from './conditionalexpression';
+import { ExpressionVisitor } from './expressionvisitor';
+export declare class ReducerVisitor extends ExpressionVisitor {
+    private _parentExpressionStack;
+    private _it;
+    constructor();
+    readonly it: string;
+    visitLambda(predicate: (it: Object, ...param: Array<any>) => any, ...param: Array<any>): IExpression;
+    visitLiteral(expression: ILiteralExpression): IExpression;
+    visitMethod(expression: IMethodExpression): IExpression;
+    visitBinary(expression: IBinaryExpression): IExpression;
+    visitConditional(expression: IConditionalExpression): IExpression;
+    visitLogical(expression: ILogicalExpression): IExpression;
+    evaluate(expression: IExpression, it?: Object): IExpression;
+    static evaluate(expression: IExpression, it?: Object): any;
+}
+export { IExpression, Expression, ExpressionType } from './expression';
+export { ILiteralExpression, LiteralExpression } from './literalexpression';
+export { ICompoundExpression } from './compoundexpression';
+export { IIdentifierExpression, IdentifierExpression } from './identifierexpression';
+export { IMemberExpression, MemberExpression } from './memberexpression';
+export { IMethodExpression, MethodExpression } from './methodexpression';
+export { IUnaryExpression, UnaryExpression, UnaryOperatorType, UnaryAffixType } from './unaryexpression';
+export { IBinaryExpression, BinaryExpression, BinaryOperatorType } from './binaryexpression';
+export { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './logicalexpression';
+export { IConditionalExpression } from './conditionalexpression';
+export { IArrayExpression, ArrayExpression } from './arrayexpression';

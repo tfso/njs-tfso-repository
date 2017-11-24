@@ -1,6 +1,6 @@
 {
   "name": "tfso-repository",
-  "version": "0.0.0",
+  "version": "1.2.101",
   "description": "CRUD repository using JavaScript Expressions as a boolean predicate for database queries ",
   "author": {
     "name": "Nicolai"
