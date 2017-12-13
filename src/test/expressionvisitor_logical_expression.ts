@@ -211,7 +211,7 @@ describe("When using ExpressionVisitor for logical", () => {
             assert.ok((<Expr.ILogicalExpression>expr).operator == Expr.LogicalOperatorType.Lesser, "Expected a binary operation of lesser");
         });
 
-        it("should handle logical operation for or", () => {
+        it("should handle logical operation for lesser and equal", () => {
             expr = visitor.visitOData("5 le 2");
 
             assert.ok(expr.type == Expr.ExpressionType.Logical, "Expected a LogicalExpression");
@@ -279,7 +279,7 @@ describe("When using ExpressionVisitor for logical", () => {
             assert.ok((<Expr.ILogicalExpression>expr).operator == Expr.LogicalOperatorType.Lesser, "Expected a binary operation of lesser");
         });
 
-        it("should handle logical operation for or", () => {
+        it("should handle logical operation for lesser and equal", () => {
             expr = visitor.visitLambda(() => 5 <= 2);
 
             assert.ok(expr.type == Expr.ExpressionType.Logical, "Expected a LogicalExpression");

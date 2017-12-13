@@ -19,22 +19,32 @@ export class FilterCriteria implements IFilterCriteria {
         return this._expression;
     }
 
+    protected getMemberName(expression: IExpression): string {
+        switch (expression.type)
+        {
+            case ExpressionType.Identifier:
+                return (<IIdentifierExpression>expression).name;
+
+            case ExpressionType.Member:
+                return `${this.getMemberName((<IMemberExpression>expression).object)}.${this.getMemberName((<IMemberExpression>expression).property)}`;
+
+            default:
+                return '';
+        }
+    }
+
     public get property() {
         switch (this._expression.left.type) {
             case ExpressionType.Identifier:
-                return (<IIdentifierExpression>this._expression.left).name;
-
             case ExpressionType.Member:
-                return (<IIdentifierExpression>(<IMemberExpression>this._expression.left).property).name;
+                return this.getMemberName(this._expression.left);
 
             case ExpressionType.Literal:
 
                 switch (this._expression.right.type) {
                     case ExpressionType.Identifier:
-                        return (<IIdentifierExpression>this._expression.right).name;
-
                     case ExpressionType.Member:
-                        return (<IIdentifierExpression>(<IMemberExpression>this._expression.right).property).name;
+                        return this.getMemberName(this._expression.right);
 
                     default:
                         return "";

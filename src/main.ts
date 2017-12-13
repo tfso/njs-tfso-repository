@@ -30,3 +30,57 @@ import Repository from './repository/baserepository';
 
 export { default as Enumerable, IEnumerable, OperatorType } from './linq/enumerable';
 export default Repository;
+
+import Enumerable, { IEnumerable } from './linq/enumerable';
+
+interface ICar {
+
+    id: number
+    location: string
+
+    registrationYear: number
+
+    type: {
+        make: string
+        model: string
+    }
+}
+
+class CarRepository extends Repository<ICar, number>
+{
+    constructor() {
+        super();
+    }
+
+    public read(id) {
+        return Promise.reject<ICar>(new Error('Not implemented'));
+    }
+
+    public readAll(predicate) {
+        return Promise.reject<ICar[]>(new Error('Not implemented'));
+    }
+
+    public delete(entity) {
+        return Promise.reject<boolean>(new Error('Not implemented'));
+    }
+
+    public update(entity) {
+        return Promise.reject<boolean>(new Error('Not implemented'));
+    }
+
+    public create(entity: ICar) {
+        return Promise.reject<ICar>(new Error('Not implemented'));
+    }
+
+    public exposeFilters(query: IEnumerable<ICar>) {
+        return super.getCriteria(query);
+    }
+}
+
+var repository = new CarRepository();
+
+var list = repository.exposeFilters(new Enumerable<ICar>().where(car => car.type.make == "Toyota"));
+
+if (list[0].property == 'type.make')
+{
+}

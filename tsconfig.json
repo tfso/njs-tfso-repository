@@ -11,12 +11,12 @@
     "removeComments": false,
     "sourceMap": true,
     "inlineSources": true,
-    "preserveConstEnums": true
-    //"outDir": "./lib",
-    //"rootDir": "./src"
+    "preserveConstEnums": true,
+    "outDir": "./lib",
+    "rootDir": "./src"
   },
   "exclude": [
-    //"lib",
+    "lib",
     "node_modules",
     "examples"
   ]

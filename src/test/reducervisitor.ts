@@ -43,7 +43,7 @@ describe("When using Reducer for ExpressionVisitor", () => {
         assert.ok((<Expr.ILiteralExpression>(<Expr.ILogicalExpression>expr).right).value == 5, "Expected a literal expression at right side of value 5");
     })
 
-    it("should have a solvable expression using valid scope", () => {
+    it("should have a solvable evaluated expression using valid scope", () => {
         let reduced = reducer.visitLambda(() => this.number == 2 + 3),
             expr = reducer.evaluate(reduced, vars);
 
@@ -95,7 +95,7 @@ describe("When using Reducer for ExpressionVisitor", () => {
         //assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
     })
 
-    it("should have a solvable expression using valid parameter", () => {
+    it("should have a solvable evaluated expression using valid parameter", () => {
         let reduced = reducer.visitLambda((myobject: any) => myobject.number == 2 + 3),
             expr = reducer.evaluate(reduced, vars);
 
@@ -111,7 +111,7 @@ describe("When using Reducer for ExpressionVisitor", () => {
         assert.ok(expr.type == Expr.ExpressionType.Logical, "Expected a logical expression");
     })
 
-    it("should have a solvable expression using named parameters", () => {
+    it("should have a solvable expression (simple) using named parameters", () => {
         let expr = reducer.visitLambda((myobject: any, num: number) => myobject.number == num, 5);
 
         //assert.ok(reducer.isSolvable == true, "Expected a solvable expression");
@@ -121,7 +121,7 @@ describe("When using Reducer for ExpressionVisitor", () => {
 
     })
 
-    it("should have a solvable expression using named parameters", () => {
+    it("should have a solvable evaluated expression using named parameters", () => {
         let reduced = reducer.visitLambda((myobject: any, num: number, letter: string) => myobject.number == 2 + 3 && num == 5 && letter == 'a', 5, 'a'),
             expr = reducer.evaluate(reduced, vars);
 
