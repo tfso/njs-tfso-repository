@@ -31,6 +31,9 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
     }
 
     abstract read(id: TEntityId): Promise<TEntity>
+    abstract read(id: Partial<TEntityId>): Promise<TEntity>
+    abstract read(id: TEntityId, meta?: IRecordSetMeta): Promise<TEntity>
+    abstract read(id: Partial<TEntityId>, meta?: IRecordSetMeta): Promise<TEntity>
     abstract read(id: TEntityId, meta?: IRecordSetMeta): Promise<TEntity>
 
     // ((t) => t.gender == 'female' && t.age >= 16)({gender: 'female', age: 17})     => true
@@ -43,15 +46,18 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
     abstract create(entity: Partial<TEntity>): Promise<TEntity>
     abstract create(entity: TEntity, meta?: IRecordSetMeta): Promise<TEntity>
     abstract create(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<TEntity>
+    abstract create(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<TEntity>
 
     abstract update(entity: TEntity): Promise<boolean>
     abstract update(entity: Partial<TEntity>): Promise<boolean>
     abstract update(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
     abstract update(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<boolean>
+    abstract update(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<boolean>
 
     abstract delete(entity: TEntity): Promise<boolean>
     abstract delete(entity: Partial<TEntity>): Promise<boolean>
     abstract delete(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
+    abstract delete(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<boolean>
     abstract delete(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<boolean>
 
     public beginTransaction(): Promise<void> {

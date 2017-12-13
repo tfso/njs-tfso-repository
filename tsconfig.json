@@ -1,7 +1,7 @@
 ﻿{
   "compileOnSave": true,
   "compilerOptions": {
-    "target": "es6",
+    "target": "ES2017",
     "downlevelIteration": true,
     //"types": ["node", "mocha"],
     "module": "commonjs",
