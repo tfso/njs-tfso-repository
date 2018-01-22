@@ -1,0 +1,1 @@
+{"version":3,"file":"itemplateliteralexpression.js","sourceRoot":"","sources":["../../../../src/linq/expressions/interfaces/itemplateliteralexpression.ts"],"names":[],"mappings":"","sourcesContent":["import { IExpression } from './iexpression';\n\nexport interface ITemplateLiteralExpression extends IExpression {\n    elements: Array<IExpression>\n}\n"]}
