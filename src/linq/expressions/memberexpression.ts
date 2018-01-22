@@ -1,9 +1,5 @@
-﻿import { IExpression, Expression, ExpressionType } from './expression';
-
-export interface IMemberExpression extends IExpression {
-    object: IExpression
-    property: IExpression
-}
+﻿import { IMemberExpression } from './interfaces/imemberexpression';
+import { IExpression, Expression, ExpressionType } from './expression';
 
 export class MemberExpression extends Expression implements IMemberExpression {
     constructor(public object: IExpression, public property: IExpression) {
@@ -14,3 +10,5 @@ export class MemberExpression extends Expression implements IMemberExpression {
         return this.type == expression.type && this.object.equal(expression.object) && this.property.equal(expression.property);
     }
 }
+
+export { IMemberExpression };

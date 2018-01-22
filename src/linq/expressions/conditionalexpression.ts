@@ -1,13 +1,9 @@
-﻿import { IExpression, Expression, ExpressionType } from './expression';
+﻿import { IConditionalExpression } from './interfaces/iconditionalexpression';
+import { IExpression, Expression, ExpressionType } from './expression';
 
 /**
  * Not in use for now
  */
-export interface IConditionalExpression extends IExpression {
-    condition: IExpression
-    success: IExpression
-    failure: IExpression
-}
 
 export class ConditionalExpression extends Expression implements IConditionalExpression {
     constructor(public condition: IExpression, public success: IExpression, public failure: IExpression) {
@@ -21,3 +17,5 @@ export class ConditionalExpression extends Expression implements IConditionalExp
         return false;
     }
 }
+
+export { IConditionalExpression }

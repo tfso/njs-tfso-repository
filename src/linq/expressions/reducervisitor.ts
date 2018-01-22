@@ -1,17 +1,19 @@
-﻿import { IExpression, Expression, ExpressionType } from './expression';
-import { ILiteralExpression, LiteralExpression } from './literalexpression';
-import { ICompoundExpression } from './compoundexpression';
-import { IIdentifierExpression, IdentifierExpression } from './identifierexpression';
-import { IMemberExpression, MemberExpression } from './memberexpression';
-import { IMethodExpression, MethodExpression } from './methodexpression';
-import { IUnaryExpression, UnaryExpression, UnaryOperatorType, UnaryAffixType } from './unaryexpression';
-import { IBinaryExpression, BinaryExpression, BinaryOperatorType } from './binaryexpression';
-import { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './logicalexpression';
-import { IConditionalExpression, ConditionalExpression } from './conditionalexpression';
-import { IArrayExpression, ArrayExpression } from './arrayexpression';
-import { IIndexExpression, IndexExpression } from './indexexpression';
-import { ITemplateLiteralExpression, TemplateLiteralExpression } from './templateliteralexpression';
-import { IObjectExpression, ObjectExpression, IObjectProperty } from './objectexpression';
+﻿import { 
+    IExpression, Expression, ExpressionType,
+    ILiteralExpression, LiteralExpression,
+    ICompoundExpression,
+    IIdentifierExpression, IdentifierExpression,
+    IMemberExpression, MemberExpression,
+    IMethodExpression, MethodExpression,
+    IUnaryExpression, UnaryExpression, UnaryOperatorType, UnaryAffixType,
+    IBinaryExpression, BinaryExpression, BinaryOperatorType,
+    ILogicalExpression, LogicalExpression, LogicalOperatorType,
+    IConditionalExpression, ConditionalExpression,
+    IArrayExpression, ArrayExpression,
+    IIndexExpression, IndexExpression,
+    ITemplateLiteralExpression, TemplateLiteralExpression,
+    IObjectExpression, ObjectExpression, IObjectProperty 
+} from './expressionvisitor';
 
 import { LambdaExpression } from './lambdaexpression';
 import { ExpressionVisitor } from './expressionvisitor';
@@ -326,14 +328,3 @@ export class ReducerVisitor extends ExpressionVisitor {
     //}
 }
 
-export { IExpression, Expression, ExpressionType } from './expression';
-export { ILiteralExpression, LiteralExpression } from './literalexpression';
-export { ICompoundExpression } from './compoundexpression';
-export { IIdentifierExpression, IdentifierExpression } from './identifierexpression';
-export { IMemberExpression, MemberExpression } from './memberexpression';
-export { IMethodExpression, MethodExpression } from './methodexpression';
-export { IUnaryExpression, UnaryExpression, UnaryOperatorType, UnaryAffixType } from './unaryexpression';
-export { IBinaryExpression, BinaryExpression, BinaryOperatorType } from './binaryexpression';
-export { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './logicalexpression';
-export { IConditionalExpression } from './conditionalexpression';
-export { IArrayExpression, ArrayExpression } from './arrayexpression';

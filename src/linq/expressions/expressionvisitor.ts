@@ -1,6 +1,8 @@
 ﻿import ODataParser from './../../lib/odata-parser';
 import JavascriptParser from './../../lib/javascript-parser';
 
+import { IExpressionVisitor, IExpressionStack } from './interfaces/iexpressionvisitor'
+
 import { IExpression, Expression, ExpressionType } from './expression';
 import { ILiteralExpression, LiteralExpression } from './literalexpression';
 import { IIndexExpression, IndexExpression } from './indexexpression';
@@ -19,7 +21,7 @@ import { IObjectExpression, ObjectExpression, IObjectProperty} from './objectexp
 import { LambdaExpression } from './lambdaexpression';
 
 
-export class ExpressionStack {
+export class ExpressionStack implements IExpressionStack {
     private items: Array<IExpression>;
     private count: number;
 
@@ -55,7 +57,7 @@ export class ExpressionStack {
     }
 }
 
-export class ExpressionVisitor {
+export class ExpressionVisitor implements IExpressionVisitor {
     protected _lambdaExpression: LambdaExpression;
     private _expressionStack: ExpressionStack;
 
@@ -376,8 +378,8 @@ export { IMethodExpression, MethodExpression } from './methodexpression';
 export { IUnaryExpression, UnaryExpression, UnaryOperatorType, UnaryAffixType } from './unaryexpression';
 export { IBinaryExpression, BinaryExpression, BinaryOperatorType } from './binaryexpression';
 export { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './logicalexpression';
-export { IConditionalExpression } from './conditionalexpression';
+export { IConditionalExpression, ConditionalExpression } from './conditionalexpression';
 export { IArrayExpression, ArrayExpression } from './arrayexpression';
 export { IIndexExpression, IndexExpression } from './indexexpression';
 export { ITemplateLiteralExpression, TemplateLiteralExpression } from './templateliteralexpression';
-export { IObjectExpression, ObjectExpression } from './objectexpression';
+export { IObjectExpression, ObjectExpression, IObjectProperty } from './objectexpression';

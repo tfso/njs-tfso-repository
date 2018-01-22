@@ -6,8 +6,10 @@ import { WhereOperator } from './../linq/operators/whereoperator';
 import { SkipOperator } from './../linq/operators/skipoperator';
 import { TakeOperator } from './../linq/operators/takeoperator';
 
+import { ExpressionType, IExpression } from './../linq/expressions/expression';
 
-import { ExpressionType, IExpression, IIdentifierExpression, ILiteralExpression } from './../linq/expressions/expression';
+import { IIdentifierExpression } from './../linq/expressions/identifierexpression';
+import { ILiteralExpression } from './../linq/expressions/literalexpression';
 import { LogicalOperatorType } from './../linq/expressions/logicalexpression';
 
 interface ICar {

@@ -1,8 +1,5 @@
-﻿import { IExpression, Expression, ExpressionType } from './expression';
-
-export interface IIdentifierExpression extends IExpression {
-    name: string
-}
+﻿import { IIdentifierExpression } from './interfaces/iidentifierexpression';
+import { IExpression, Expression, ExpressionType } from './expression';
 
 export class IdentifierExpression extends Expression implements IIdentifierExpression {
     constructor(public name: string) {
@@ -13,3 +10,5 @@ export class IdentifierExpression extends Expression implements IIdentifierExpre
         return this.type == expression.type && this.name == expression.name;
     }
 }
+
+export { IIdentifierExpression }

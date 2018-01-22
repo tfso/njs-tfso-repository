@@ -18,7 +18,7 @@ install:
   - npm install -g mocha-appveyor-reporter
   - npm install -g mocha
 build_script:
-  - node node_modules\typescript\bin\tsc --rootDir ./src/ --outDir ./lib
+  - node node_modules\typescript\bin\tsc
   - patch-version
 test_script:
   - mocha --reporter mocha-appveyor-reporter ./lib/test/ --no-exit

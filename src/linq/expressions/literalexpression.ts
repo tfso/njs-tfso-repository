@@ -1,8 +1,5 @@
-﻿import { IExpression, Expression, ExpressionType } from './expression';
-
-export interface ILiteralExpression extends IExpression {
-    value: any
-}
+﻿import { ILiteralExpression } from './interfaces/iliteralexpression';
+import { IExpression, Expression, ExpressionType } from './expression';
 
 export class LiteralExpression extends Expression implements ILiteralExpression {
     constructor(public value: any) {
@@ -13,3 +10,5 @@ export class LiteralExpression extends Expression implements ILiteralExpression 
         return this.type == expression.type && this.value == expression.value;
     }
 }
+
+export { ILiteralExpression }

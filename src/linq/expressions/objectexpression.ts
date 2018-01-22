@@ -1,14 +1,5 @@
-﻿import { IExpression, Expression, ExpressionType } from './expression';
-
-export interface IObjectExpression extends IExpression {
-    properties: Array<IObjectProperty>
-}
-
-export interface IObjectProperty {
-    key: IExpression, 
-    value: IExpression
-}
-
+﻿import { IObjectExpression, IObjectProperty } from './interfaces/iobjectexpression';
+import { IExpression, Expression, ExpressionType } from './expression';
 
 export class ObjectExpression extends Expression implements IObjectExpression {
     constructor(public properties: Array<IObjectProperty>) {
@@ -30,3 +21,5 @@ export class ObjectExpression extends Expression implements IObjectExpression {
         return false;
     }
 }
+
+export { IObjectExpression, IObjectProperty }

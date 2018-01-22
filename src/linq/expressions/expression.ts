@@ -1,42 +1,21 @@
-﻿import { ILiteralExpression } from './literalexpression';
-import { ICompoundExpression } from './compoundexpression';
-import { IIdentifierExpression } from './identifierexpression';
-import { IMemberExpression } from './memberexpression';
-import { IMethodExpression } from './methodexpression';
-import { IUnaryExpression } from './unaryexpression';
-import { IBinaryExpression } from './binaryexpression';
-import { ILogicalExpression } from './logicalexpression';
-import { IConditionalExpression } from './conditionalexpression';
-import { IArrayExpression } from './arrayexpression';
-import { IIndexExpression } from './indexexpression';
-import { ITemplateLiteralExpression } from './templateliteralexpression';
-import { IObjectExpression } from './objectexpression';
+﻿import { IExpression } from './interfaces/iexpression';
+import { ExpressionType } from './expressiontype';
 
-import { ExpressionVisitor } from './expressionvisitor';
+import { ILiteralExpression } from './interfaces/iliteralexpression';
+import { ICompoundExpression } from './interfaces/icompoundexpression';
+import { IIdentifierExpression } from './interfaces/iidentifierexpression';
+import { IMemberExpression } from './interfaces/imemberexpression';
+import { IMethodExpression } from './interfaces/imethodexpression';
+import { IUnaryExpression } from './interfaces/iunaryexpression';
+import { IBinaryExpression } from './interfaces/ibinaryexpression';
+import { ILogicalExpression } from './interfaces/ilogicalexpression';
+import { IConditionalExpression } from './interfaces/iconditionalexpression';
+import { IArrayExpression } from './interfaces/iarrayexpression';
+import { IIndexExpression } from './interfaces/iindexexpression';
+import { ITemplateLiteralExpression } from './interfaces/itemplateliteralexpression';
+import { IObjectExpression } from './interfaces/iobjectexpression';
 
-export enum ExpressionType {
-    Compound,
-
-    Identifier,
-    Member,
-    Literal,
-    Method,
-    Unary,
-    Binary,
-    Logical,
-    Conditional,
-    Array,
-    Index,
-    TemplateLiteral,
-    Object
-}
-
-export interface IExpression {
-    type: ExpressionType
-
-    accept<T extends ExpressionVisitor>(visitor: T): IExpression
-    equal(expression: IExpression): boolean;
-}
+import { IExpressionVisitor } from './interfaces/iexpressionvisitor';
 
 export abstract class Expression implements IExpression {
     private _type: ExpressionType;
@@ -53,7 +32,7 @@ export abstract class Expression implements IExpression {
         this._type = value;
     }
 
-    public accept<T extends ExpressionVisitor>(visitor: T) {
+    public accept<T extends IExpressionVisitor>(visitor: T) {
         let expression: IExpression;
 
         // add this as parent to stack for next acceptance/visit
@@ -110,4 +89,4 @@ export abstract class Expression implements IExpression {
     public abstract equal(expression: IExpression): boolean
 }
 
-export { ILiteralExpression, ICompoundExpression, IIdentifierExpression, IMemberExpression, IMethodExpression, IUnaryExpression, IBinaryExpression, ILogicalExpression, IConditionalExpression, IArrayExpression, IIndexExpression, ITemplateLiteralExpression, IObjectExpression }
+export { IExpression, ExpressionType }

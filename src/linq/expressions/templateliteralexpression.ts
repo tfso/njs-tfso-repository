@@ -1,8 +1,5 @@
-﻿import { IExpression, Expression, ExpressionType } from './expression';
-
-export interface ITemplateLiteralExpression extends IExpression {
-    elements: Array<IExpression>
-}
+﻿import { ITemplateLiteralExpression } from './interfaces/itemplateliteralexpression';
+import { IExpression, Expression, ExpressionType } from './expression';
 
 export class TemplateLiteralExpression extends Expression implements ITemplateLiteralExpression {
     constructor(public elements: Array<IExpression>) {
@@ -24,3 +21,5 @@ export class TemplateLiteralExpression extends Expression implements ITemplateLi
         return false;
     }
 }
+
+export { ITemplateLiteralExpression }

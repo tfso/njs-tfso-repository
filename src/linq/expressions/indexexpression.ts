@@ -1,9 +1,5 @@
-﻿import { IExpression, Expression, ExpressionType } from './expression';
-
-export interface IIndexExpression extends IExpression {
-    object: IExpression
-    index: IExpression
-}
+﻿import { IIndexExpression } from './interfaces/iindexexpression';
+import { IExpression, Expression, ExpressionType } from './expression';
 
 export class IndexExpression extends Expression implements IIndexExpression {
     constructor(public object: IExpression, public index: IExpression) {
@@ -14,3 +10,5 @@ export class IndexExpression extends Expression implements IIndexExpression {
         return this.type == expression.type && this.object.equal(expression.object) && this.index.equal(expression.index);
     }
 }
+
+export { IIndexExpression }
