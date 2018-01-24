@@ -9,13 +9,14 @@ export interface IRecordSetMeta {
     totalLength: number
     length: number
     executionTime: number
+    continuationToken: any
 }
 
 export class RecordSet<TEntity> implements IRecordSet<TEntity> {
     constructor(records: Array<TEntity>, affected: number) 
     constructor(records: Array<TEntity>, affected: number, executionTime: number) 
     constructor(records: Array<TEntity>, affected: number, executionTime: number, totalLength: number) 
-    constructor(public records: Array<TEntity>, public affected: number = 0, public executionTime: number = 0, private _totalLength: number = -1) {
+    constructor(public records: Array<TEntity>, public affected: number = 0, public executionTime: number = 0, private _totalLength: number = -1, public continuationToken: any = null) {
 
     }
 
