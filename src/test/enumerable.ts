@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+﻿import * as assert from 'assert';
 import Enumerable, { IEnumerable, OperatorType } from './../linq/enumerable';
 import { SkipOperator } from './../linq/operators/skipoperator';
 import { WhereOperator } from './../linq/operators/whereoperator';
@@ -380,6 +380,19 @@ describe("When using Enumerable", () => {
 
         assert.equal(el.id, 5);
     })
+
+    it("should slice a portion", () => {
+        var ar = new Enumerable(cars).slice(3, 6).toArray();
+
+        assert.ok(ar.length == 3);
+        assert.ok(ar[0].id == 4);
+    })
+
+    it("shouldn't slice a portion when a token is used", () => {
+        var ar = new Enumerable(cars).slice('test').toArray();
+
+        assert.ok(ar.length == 8);
+    })    
 
     it("should be able to iterate", () => {
         var enumerable = new Enumerable(cars).take(3),

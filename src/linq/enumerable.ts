@@ -1,4 +1,4 @@
-import { Operator, OperatorType } from './operators/operator';
+﻿import { Operator, OperatorType } from './operators/operator';
 import { OrderByOperator } from './operators/orderbyoperator';
 import { SkipOperator } from './operators/skipoperator';
 import { SkipWhileOperator } from './operators/skipwhileoperator';
@@ -6,6 +6,7 @@ import { TakeOperator } from './operators/takeoperator';
 import { WhereOperator } from './operators/whereoperator';
 import { SelectOperator } from './operators/selectoperator';
 import { JoinOperator, JoinType } from './operators/joinoperator';
+import { SliceOperator } from './operators/sliceoperator';
 
 import { RenameVisitor } from './expressions/renamevisitor';
 import { RemapVisitor } from './expressions/remapvisitor';
@@ -232,12 +233,20 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         }
     }
 
+    /**
+     * Returns a specified number of contiguous elements from the start of a sequence.
+     * @param count The number of elements to return
+     */
     public take(count: number): this {
         this._operations.add(new TakeOperator<TEntity>(count));
 
         return this;
     }
 
+    /**
+     * Bypasses a specified number of elements in a sequence and then returns the remaining elements
+     * @param count The number of elements to skip before returning the remaining elements
+     */
     public skip(count: number): this {
         this._operations.add(new SkipOperator<TEntity>(count));
 
@@ -284,6 +293,25 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         return this;
     }
 
+    /**
+     * Bypasses all elements before beginning and returns the remaining elements or up to the specified end
+     * @param begin zero-based index at which to begin extraction
+     * @param end zero-based index before which to end extraction
+     */
+    public slice(begin: number, end?: number): this
+    /**
+     * Bypasses all elements before beginning and returns the remaining elements
+     * Note: If the beginning is not an index it's up to the repository to handle slicing.
+     * @param token a token that indicates where to begin extraction
+     */
+    public slice(token: any): this
+    public slice(begin: any, end: number = undefined): this
+    {
+        this._operations.add(new SliceOperator<TEntity>(begin, typeof begin == 'number' ? end : undefined));
+
+        return this;
+    }
+    
     public from(items: Array<TEntity>) : this
     public from(items: Iterable<TEntity>) : this
     public from(items: AsyncIterable<TEntity>) : this

@@ -1,4 +1,4 @@
-export enum OperatorType {
+﻿export enum OperatorType {
     Where       = 1 << 0,
     Take        = 1 << 1,
     Skip        = 1 << 2,
