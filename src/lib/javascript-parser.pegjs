@@ -309,7 +309,7 @@ Letter = [a-z] / [A-Z] / [_$] ;
 LetterOrDigit = [a-z] / [A-Z] / [0-9] / [_$] ;
 
 TemplateLiteral
-	= "\`" capture:(TemplateExpression / Escape / ![`\\\n\r] . )* "\`"                   
+	= "\`" capture:(TemplateExpression / Escape / "\\" [`] / ![`\\\n\r] . )* "\`"                   
     { return { 
         type: 'TemplateLiteral', 
         values: capture.reduce((r, v) => {
@@ -327,7 +327,11 @@ TemplateLiteral
 
 TemplateExpression
 	= "$" LCBRK __ expression:(Expression) RCBRK
-    { return expression; }
+    { return {
+    	type: 'TemplateExpression',
+        value: expression
+      }
+    }
 
 Literal
     = literal:( 

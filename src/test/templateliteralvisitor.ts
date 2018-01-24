@@ -28,10 +28,6 @@ describe("When using TemplateLiteral for ExpressionVisitor", () => {
         let reduced = template.visitLambda(() => `My number is ${this.number} and my next is ${this.number + 1}`),
             expr = template.evaluate(reduced, vars);
 
-        var expression = new TemplateLiteralVisitor().visitLambda(() => `template string adds ${2 + number} to ${2+5} like nothing`);
-
-        let val = TemplateLiteralVisitor.evaluate(expression, { number: number })
-
         //assert.ok(template.isSolvable == true, "Expected a solvable expression");
         assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
         assert.ok((<Expr.ILiteralExpression>expr).value == 'My number is 5 and my next is 6');
@@ -51,4 +47,41 @@ describe("When using TemplateLiteral for ExpressionVisitor", () => {
 
         assert.ok((<Expr.ILiteralExpression>expr).value == 'My number is <a href="#1">6</a> and my next is 6');
     })
+
+    it("should reduce it as much as possible", () => {
+        let reduced = template.visitLambda(() => `My number is ${this.number} and my next is ${5 + 1}`)
+            
+        assert.equal(reduced.type, Expr.ExpressionType.TemplateLiteral);
+        assert.equal((<Expr.ITemplateLiteralExpression>reduced).elements.length, 4);
+
+        assert.equal((<Expr.ITemplateLiteralExpression>reduced).elements[3].type, Expr.ExpressionType.Literal);
+        assert.equal((<Expr.ILiteralExpression>(<Expr.ITemplateLiteralExpression>reduced).elements[3]).value, '6');
+
+        let compiled = template.evaluate(reduced, vars);
+        assert.ok((<Expr.ILiteralExpression>compiled).value == 'My number is 5 and my next is 6');
+    })
+
+    it("should handle the signature of tagged template literals", () => {
+        let expr = template.visitLambda(() => `My number is ${5} and my next is ${5 + 1}`);
+        let es6literal = tag `My number is ${5} and my next is ${5 + 1}`
+
+        assert.equal(expr.type, Expr.ExpressionType.TemplateLiteral);
+        assert.equal((<Expr.ITemplateLiteralExpression>expr).elements.length, 4);
+
+        assert.equal((<Expr.ITemplateLiteralExpression>expr).literals.length, 2);
+        assert.equal((<Expr.ITemplateLiteralExpression>expr).expressions.length, 2);
+
+        for(let literal of (<Expr.ITemplateLiteralExpression>expr).literals)
+            assert.equal(literal.value, es6literal.literals.shift());
+
+        for(let expression of (<Expr.ITemplateLiteralExpression>expr).expressions)
+            assert.equal((<Expr.ILiteralExpression>expression).value, es6literal.expressions.shift());
+    })
 })
+
+function tag(parts: TemplateStringsArray, ...expressions: Array<any>) {
+    return {
+        literals: Array.from(parts),
+        expressions: Array.from(expressions)
+    }
+}

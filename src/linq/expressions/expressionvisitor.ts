@@ -249,7 +249,21 @@ export class ExpressionVisitor implements IExpressionVisitor {
                 return new ObjectExpression(expression.properties ? expression.properties.map(value => <any>{ key: this.transform(value.key), value: this.transform(value.value) }) : []);
 
             case 'TemplateLiteral':
-                return new TemplateLiteralExpression(expression.values ? expression.values.map(value => this.transform(value)) : []);
+                if(expression.values && expression.values.length > 0) {
+                    let literals: Array<ILiteralExpression> = [], 
+                        expressions: Array<IExpression> = [],
+                        first = expression.values[0];
+
+                    if(first.type == 'TemplateExpression') 
+                        literals.push(<ILiteralExpression>this.transform({ type: 'Literal', value: '' }))
+
+                    literals.push(...expression.values.filter(value => value.type == 'Literal').map(value => this.transform(value)));
+                    expressions.push(...expression.values.filter(value => value.type == 'TemplateExpression').map(value => this.transform(value.value)));
+
+                    return new TemplateLiteralExpression(literals, expressions);
+                }
+
+                return new TemplateLiteralExpression([], []);
 
             case 'ArrayExpression':
                 return new IndexExpression(this.transform(expression.object), this.transform(expression.index))

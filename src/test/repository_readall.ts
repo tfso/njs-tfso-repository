@@ -95,7 +95,6 @@ describe("When using repository to read all", () => {
     })
 
     it("should handle nested member expressions", () => {
-        debugger;
         var list = repository.exposeFilters(new Enumerable<ICar>().where(car => car.type.make == "Toyota"));
 
         assert.equal(list.length, 1);

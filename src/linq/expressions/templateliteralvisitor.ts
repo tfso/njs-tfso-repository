@@ -38,15 +38,24 @@ export class TemplateLiteralVisitor extends JavascriptVisitor {
         switch (expression.type)
         {
             case ExpressionType.TemplateLiteral:
-                let elements = (<ITemplateLiteralExpression>expression).elements.map(el => this.evaluate(el, it));
-
+                let templateExpr: ITemplateLiteralExpression = <ITemplateLiteralExpression>expression,
+                    expressions = templateExpr.expressions.map(expr => this.evaluate(expr, it));
+                
                 if (it)
                 {
-                    if (elements.every(el => el.type == ExpressionType.Literal) == true)
-                        return new LiteralExpression(elements.reduce((out, el) => out += this._wrapper((<ILiteralExpression>el).value), ''));
+                    if (expressions.every(el => el.type == ExpressionType.Literal) == true) {
+                        return new LiteralExpression(
+                            templateExpr.literals.reduce(
+                                (out, str, idx) => out += str.value + this._wrapper(idx < expressions.length ? (<ILiteralExpression>expressions[idx]).value : ''), 
+                                ''
+                            )
+                        );
+                       
+                        //return new LiteralExpression(elements.reduce((out, el) => out += this._wrapper((<ILiteralExpression>el).value), ''));
+                    }
                 }
 
-                return new TemplateLiteralExpression(elements);
+                return new TemplateLiteralExpression(templateExpr.literals, expressions);
 
             case ExpressionType.Object:
                 let properties = (<IObjectExpression>expression).properties.map(el => <IObjectProperty>{ key: this.evaluate(el.key, it), value: this.evaluate(el.value, it) });
