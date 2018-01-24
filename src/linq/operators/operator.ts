@@ -1,10 +1,12 @@
-﻿export enum OperatorType {
-    Where = 1,
-    Take = 2,
-    Skip = 4,
-    OrderBy = 8,
-    Select = 16,
-    Join = 32
+export enum OperatorType {
+    Where       = 1 << 0,
+    Take        = 1 << 1,
+    Skip        = 1 << 2,
+    OrderBy     = 1 << 3,
+    Select      = 1 << 4,
+    Join        = 1 << 5,
+    SkipWhile   = 1 << 6,
+    Slice       = 1 << 7
 }
 
 export abstract class Operator<TEntity> {

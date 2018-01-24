@@ -1,4 +1,4 @@
-﻿import * as assert from 'assert';
+import * as assert from 'assert';
 import Enumerable, { IEnumerable, OperatorType } from './../linq/enumerable';
 import { SkipOperator } from './../linq/operators/skipoperator';
 import { WhereOperator } from './../linq/operators/whereoperator';
@@ -361,6 +361,13 @@ describe("When using Enumerable", () => {
         assert.ok(ar.length == 3);
         assert.ok(ar[0].id == 6);
     });
+
+    it("should skip while year is greater than 2010", () => {
+        var ar = new Enumerable(cars).skipWhile(it => it.registrationYear >= 2010).toArray();
+
+        assert.ok(ar.length == 6);
+        assert.ok(ar[0].id == 3);
+    })
 
     it("should order by a property", () => {
         var ar = new Enumerable(cars).orderBy(it => it.location).toArray();

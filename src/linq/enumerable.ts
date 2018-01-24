@@ -1,6 +1,7 @@
-﻿import { Operator, OperatorType } from './operators/operator';
+import { Operator, OperatorType } from './operators/operator';
 import { OrderByOperator } from './operators/orderbyoperator';
 import { SkipOperator } from './operators/skipoperator';
+import { SkipWhileOperator } from './operators/skipwhileoperator';
 import { TakeOperator } from './operators/takeoperator';
 import { WhereOperator } from './operators/whereoperator';
 import { SelectOperator } from './operators/selectoperator';
@@ -239,6 +240,40 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
 
     public skip(count: number): this {
         this._operations.add(new SkipOperator<TEntity>(count));
+
+        return this;
+    }
+
+    /**
+     * Bypassing elements using OData $filter expression as long as specified condition is true and then returns the remaining elements
+     * @param predicate OData expression
+     */
+    public skipWhile(predicate: string): this 
+    /**
+     * Bypassing elements using Javascript expression as long as specified condition is true and then returns the remaining elements
+     * @param predicate javascript expression
+     * @param parameters any javascript parameters has to be declared
+     */
+    public skipWhile(predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: any[]): this
+    public skipWhile(): this {
+        let predicate: any = arguments[0],
+            parameters: Array<any> = [];
+
+        if (arguments.length >= 2)
+            parameters = Array.from(arguments).slice(1)
+
+        switch (typeof predicate) {
+            case 'string':
+                this._operations.add(new SkipWhileOperator<TEntity>('OData', predicate));
+                break;
+
+            case 'function':
+                this._operations.add(new SkipWhileOperator<TEntity>('Javascript', predicate, ...parameters));
+                break;
+
+            default:
+                throw new Error('SkipWhile operator can not recognize predicate either as javascript or odata');
+        }
 
         return this;
     }
