@@ -1,0 +1,10 @@
+import { IMethodExpression } from './interfaces/imethodexpression';
+import { IExpression, Expression } from './expression';
+export declare class MethodExpression extends Expression implements IMethodExpression {
+    name: string;
+    parameters: Array<IExpression>;
+    caller: IExpression;
+    constructor(name: string, parameters: Array<IExpression>, caller: IExpression);
+    equal(expression: IMethodExpression): boolean;
+}
+export { IMethodExpression };
