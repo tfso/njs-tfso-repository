@@ -77,6 +77,16 @@ describe("When using TemplateLiteral for ExpressionVisitor", () => {
         for(let expression of (<Expr.ITemplateLiteralExpression>expr).expressions)
             assert.equal((<Expr.ILiteralExpression>expression).value, es6literal.expressions.shift());
     })
+
+    it("should handle template literal expression as string", () => {
+        let expr = template.visitLambdaExpression('`My number is ${5} and my next is ${5 + 1}`');
+
+        assert.equal(expr.type, Expr.ExpressionType.TemplateLiteral);
+        assert.equal((<Expr.ITemplateLiteralExpression>expr).elements.length, 4);
+
+        assert.equal((<Expr.ITemplateLiteralExpression>expr).literals.length, 2);
+        assert.equal((<Expr.ITemplateLiteralExpression>expr).expressions.length, 2);
+    })
 })
 
 function tag(parts: TemplateStringsArray, ...expressions: Array<any>) {

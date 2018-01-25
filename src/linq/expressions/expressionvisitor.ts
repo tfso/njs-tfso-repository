@@ -85,9 +85,7 @@ export class ExpressionVisitor implements IExpressionVisitor {
         return null;
     }
 
-    public visitLambda(predicate: (it: Object, ...param: Array<any>) => any): IExpression {
-        var expression = (this._lambdaExpression = new LambdaExpression(predicate)).expression;
-
+    public visitLambdaExpression(expression: string): IExpression {
         if (expression) {
             let ast = JavascriptParser.parse(expression);
             try {
@@ -101,6 +99,12 @@ export class ExpressionVisitor implements IExpressionVisitor {
         }
 
         return null;
+    }
+
+    public visitLambda(predicate: (it: Object, ...param: Array<any>) => any): IExpression {
+        var expression = (this._lambdaExpression = new LambdaExpression(predicate)).expression;
+
+        return this.visitLambdaExpression(expression);
     }
 
     public visit(expression: IExpression): IExpression {
