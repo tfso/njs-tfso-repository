@@ -236,11 +236,39 @@ export class ReducerVisitor extends ExpressionVisitor {
                 if (index.type == ExpressionType.Literal)
                     switch (object.type)
                     {
+                        case ExpressionType.Object: 
+                            let property = (<IObjectExpression>object).properties.find(prop => {
+                                switch(prop.key.type) {
+                                    case ExpressionType.Identifier:
+                                        if( (<IIdentifierExpression>prop.key).name == (<ILiteralExpression>index).value)
+                                            return true;
+                                        break;
+
+                                    case ExpressionType.Literal:
+                                        if((<ILiteralExpression>prop.key).value == (<ILiteralExpression>index).value)
+                                            return true;
+                                        break;
+                                }
+
+                                return false;
+                            })
+                            return property ? this.evaluate(property.value) : new LiteralExpression(null);
+
                         case ExpressionType.Array:
                             return Array.from((<IArrayExpression>object).elements)[(<ILiteralExpression>index).value];
                             
                         case ExpressionType.Literal:
-                            return new LiteralExpression(Array.from((<ILiteralExpression>object).value)[(<ILiteralExpression>index).value]);
+                            if(typeof (<ILiteralExpression>object).value == 'object') {
+                                if(Array.isArray((<ILiteralExpression>object).value)) {
+                                    return new LiteralExpression(Array.from((<ILiteralExpression>object).value)[(<ILiteralExpression>index).value]);
+                                }
+                                
+                                let descriptor: PropertyDescriptor;
+                                if( descriptor = Object.getOwnPropertyDescriptor( (<ILiteralExpression>object).value, (<ILiteralExpression>index).value))
+                                    return new LiteralExpression(descriptor.value);
+                            }
+                            
+                            return new LiteralExpression(null);                            
                     }
 
                 break;

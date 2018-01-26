@@ -87,6 +87,16 @@ describe("When using TemplateLiteral for ExpressionVisitor", () => {
         assert.equal((<Expr.ITemplateLiteralExpression>expr).literals.length, 2);
         assert.equal((<Expr.ITemplateLiteralExpression>expr).expressions.length, 2);
     })
+
+    it("should handle a complex template literal", () => {
+        let reduced = template.visitLambda(() => `My answer is ${ {'Yes': 1, 'No': 0}[this.answer] == 1 ? 'Yeah' : 'Nope' } all ${5+2} days`);
+
+        let firstAnswer = template.evaluate(reduced, { answer: 'Yes'});
+        assert.ok((<Expr.ILiteralExpression>firstAnswer).value == 'My answer is Yeah all 7 days');
+
+        let secondAnswer = template.evaluate(reduced, { answer: 'No'});
+        assert.ok((<Expr.ILiteralExpression>secondAnswer).value == 'My answer is Nope all 7 days');
+    })
 })
 
 function tag(parts: TemplateStringsArray, ...expressions: Array<any>) {

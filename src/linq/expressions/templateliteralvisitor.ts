@@ -92,3 +92,5 @@ export class TemplateLiteralVisitor extends JavascriptVisitor {
         return result.type == ExpressionType.Literal ? (<ILiteralExpression>result).value : undefined;
     }
 }
+
+export { IExpression, ExpressionType, ITemplateLiteralExpression }

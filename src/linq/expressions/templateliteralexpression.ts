@@ -58,7 +58,9 @@ export class TemplateLiteralExpression extends Expression implements ITemplateLi
         for(let i = 0; i < literals.length; i++)
         {
             this.indexerLiterals.push( this._elements.push(literals[i]) - 1 );
-            this.indexerExpressions.push( this._elements.push(expressions[i]) - 1);
+            
+            if(i < expressions.length)
+                this.indexerExpressions.push( this._elements.push(expressions[i]) - 1);
         }
     }
 }

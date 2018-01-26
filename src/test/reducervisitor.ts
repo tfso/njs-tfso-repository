@@ -232,4 +232,11 @@ describe("When using Reducer for ExpressionVisitor", () => {
         assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
         assert.ok((<Expr.ILiteralExpression>expr).value == true, "Expected a literal of value 'false'");
     })
+
+    it("should handle index expression for object literal", () => {
+        let expr = reducer.visitLambda(() => <Object>{0: 'No', 1: 'Yes'}[1]);
+
+        assert.ok(expr.type == Expr.ExpressionType.Literal, "Expected a literal");
+        assert.ok((<Expr.ILiteralExpression>expr).value == 'Yes', "Expected a literal of value 'Yes'");
+    })
 })
