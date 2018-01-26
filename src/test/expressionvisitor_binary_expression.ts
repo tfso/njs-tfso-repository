@@ -227,6 +227,14 @@ describe("When using ExpressionVisitor for binary", () => {
             assert.ok(expr.type == Expr.ExpressionType.Binary, "Expected a BinaryExpression");
             assert.ok((<Expr.IBinaryExpression>expr).operator == Expr.BinaryOperatorType.Modulus, "Expected a binary operation of modulus");
         });
+
+        it("should handle toString", () => {
+            assert.equal(visitor.visitOData("5 add 2").toString(), "5 + 2");
+            assert.equal(visitor.visitOData("5 add +2").toString(), "5 + 2");
+            assert.equal(visitor.visitOData("5 add -2").toString(), "5 + -2");
+        })
+
+
     })
 
     describe("Lambda Expression", () => {

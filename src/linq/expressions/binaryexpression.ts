@@ -23,6 +23,25 @@ export class BinaryExpression extends Expression implements IBinaryExpression {
 
         return false;
     }
+
+    public toString() {
+        switch (this.operator) {
+            case BinaryOperatorType.Addition:
+                return `${this.left.toString()} + ${this.right.toString()}`;
+
+            case BinaryOperatorType.Multiplication:
+                return `${this.left} * ${this.right}`;
+
+            case BinaryOperatorType.ExclusiveOr:
+                return `${this.left} ^ ${this.right}`;
+
+            case BinaryOperatorType.And:
+                return `${this.left} & ${this.right}`;
+
+            case BinaryOperatorType.Or:
+                return `${this.left} | ${this.right}`;
+        }
+    }
 }
 
 export { IBinaryExpression, BinaryOperatorType };

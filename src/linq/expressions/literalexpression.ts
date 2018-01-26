@@ -9,6 +9,10 @@ export class LiteralExpression extends Expression implements ILiteralExpression 
     public equal(expression: ILiteralExpression): boolean {
         return this.type == expression.type && this.value == expression.value;
     }
+
+    public toString() {
+        return new String(this.value).toString();
+    }
 }
 
 export { ILiteralExpression }

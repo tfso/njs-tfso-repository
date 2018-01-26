@@ -87,6 +87,7 @@ export abstract class Expression implements IExpression {
     }
 
     public abstract equal(expression: IExpression): boolean
+    public abstract toString(): string
 }
 
 export { IExpression, ExpressionType }
