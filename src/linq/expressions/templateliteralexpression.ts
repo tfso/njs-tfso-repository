@@ -55,7 +55,17 @@ export class TemplateLiteralExpression extends Expression implements ITemplateLi
     }
 
     public toString() {
-        return `\`${(this.elements || []).map( (element, idx) => this.indexerLiterals.indexOf(idx) >= 0 ? element.toString() : `\$\{${element.toString()}\}`).join('')}\``
+        return `\`${(this.elements || [])
+            .map((element, idx) => {
+                let value = element.toString();
+
+                if( this.indexerLiterals.indexOf(idx) >= 0 )
+                    return value.slice(1, value.length - 1);
+                
+                return `\$\{${element.toString()}\}`
+            })
+            .join('')
+        }\``
     }
 
     private combine(literals: Array<IExpression> = [], expressions: Array<IExpression> = []) {
