@@ -22,7 +22,18 @@ export class ObjectExpression extends Expression implements IObjectExpression {
     }
 
     public toString() {
-        return `{${this.properties.map(property => `"${property.key.toString()}": ${property.value.toString()}`).join(', ')}}`
+        return `{${
+            this.properties
+                .map(property => {
+                    let key = property.key.toString();
+
+                    if(key.charAt(0) == '"' && key.charAt(key.length - 1) == '"')
+                        return `${key}: ${property.value}`
+
+                    return `"${key}": ${property.value.toString()}`
+                })
+                .join(', ')
+        }}`
     }
 }
 
