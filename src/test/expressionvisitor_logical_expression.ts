@@ -285,5 +285,11 @@ describe("When using ExpressionVisitor for logical", () => {
             assert.ok(expr.type == Expr.ExpressionType.Logical, "Expected a LogicalExpression");
             assert.ok((<Expr.ILogicalExpression>expr).operator == Expr.LogicalOperatorType.LesserOrEqual, "Expected a binary operation of lesser or equal than");
         });
+
+        it("it should handle toString", () => {
+            assert.equal(visitor.visitLambda(() => true && true).toString(), '(true && true)');
+            assert.equal(visitor.visitLambda(() => false || true && true).toString(), "false || (true && true)");
+            assert.equal(visitor.visitLambda(() => false && true || true && true).toString(), "(false && true) || (true && true)");
+        });
     })
 });

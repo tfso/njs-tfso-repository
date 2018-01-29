@@ -9,6 +9,26 @@ export class UnaryExpression extends Expression implements IUnaryExpression {
     public equal(expression: IUnaryExpression) {
         return (this.type == expression.type && this.operator == expression.operator && this.affix == expression.affix && this.argument.equal(expression.argument));
     }
+
+    public toString() {
+
+        let operator = () => {
+            switch(this.operator) {
+                case UnaryOperatorType.Complement: return '~';
+                case UnaryOperatorType.Invert: return '!';
+                case UnaryOperatorType.Negative: return '-';
+                case UnaryOperatorType.Positive: return '+';
+                case UnaryOperatorType.Increment: return '++';
+                case UnaryOperatorType.Decrement: return '--';
+            }
+        }
+
+        if(this.affix == UnaryAffixType.Prefix) {
+            return `${operator()}${this.argument.toString()}`;
+        } else {
+            return `${this.argument.toString()}${operator()}`;
+        }
+    }
 }
 
 export { IUnaryExpression, UnaryOperatorType, UnaryAffixType }

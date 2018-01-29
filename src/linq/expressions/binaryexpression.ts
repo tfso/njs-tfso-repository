@@ -25,22 +25,22 @@ export class BinaryExpression extends Expression implements IBinaryExpression {
     }
 
     public toString() {
-        switch (this.operator) {
-            case BinaryOperatorType.Addition:
-                return `${this.left.toString()} + ${this.right.toString()}`;
-
-            case BinaryOperatorType.Multiplication:
-                return `${this.left} * ${this.right}`;
-
-            case BinaryOperatorType.ExclusiveOr:
-                return `${this.left} ^ ${this.right}`;
-
-            case BinaryOperatorType.And:
-                return `${this.left} & ${this.right}`;
-
-            case BinaryOperatorType.Or:
-                return `${this.left} | ${this.right}`;
+        let operator = () => {
+            switch(this.operator) {
+                case BinaryOperatorType.Addition: return '+';
+                case BinaryOperatorType.Subtraction: return '-';
+                case BinaryOperatorType.Multiplication: return '*';
+                case BinaryOperatorType.Division: return '/';
+                case BinaryOperatorType.Modulus: return '%';
+                case BinaryOperatorType.And: return '&';
+                case BinaryOperatorType.Or: return '|';
+                case BinaryOperatorType.ExclusiveOr: return '^';
+                case BinaryOperatorType.LeftShift: return '<<';
+                case BinaryOperatorType.RightShift: return '>>';
+            }
         }
+
+        return `${(this.left.type == ExpressionType.Binary) ? `(${this.left.toString()})` : this.left.toString()} ${operator()} ${(this.right.type == ExpressionType.Binary) ? `(${this.right.toString()})` : this.right.toString()}`;
     }
 }
 

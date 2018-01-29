@@ -1,5 +1,6 @@
 ﻿import { ILogicalExpression, LogicalOperatorType } from './interfaces/ilogicalexpression';
 import { IExpression, Expression, ExpressionType } from './expression';
+import { OperatorType } from '../operators/operator';
 
 export class LogicalExpression extends Expression implements ILogicalExpression {
     constructor(public operator: LogicalOperatorType, public left: IExpression, public right: IExpression) {
@@ -31,6 +32,40 @@ export class LogicalExpression extends Expression implements ILogicalExpression 
         }
 
         return false;
+    }
+
+    public toString() {
+        let left: string, right: string,
+            operator = () => {
+                switch (this.operator) {
+                    case LogicalOperatorType.And: return '&&';
+                    case LogicalOperatorType.Or: return '||';
+                    case LogicalOperatorType.Equal: return '==';
+                    case LogicalOperatorType.Greater: return '>';
+                    case LogicalOperatorType.GreaterOrEqual: return '>=';
+                    case LogicalOperatorType.Lesser: return '<';
+                    case LogicalOperatorType.LesserOrEqual: return '<=';
+                    case LogicalOperatorType.NotEqual: return '!=';
+                }
+            }
+
+        switch(this.left.type) {
+            case ExpressionType.Binary: 
+                left = `(${this.left.toString()})`; break;
+
+           default:
+                left = this.left.toString(); break;
+        }
+
+        switch(this.right.type) {
+            case ExpressionType.Binary: 
+                right = `(${this.right.toString()})`; break;
+            
+           default:
+                right = this.right.toString(); break;
+        }
+
+        return (this.operator == LogicalOperatorType.And) ? `(${left} ${operator()} ${right})` : `${left} ${operator()} ${right}`;
     }
 }
 

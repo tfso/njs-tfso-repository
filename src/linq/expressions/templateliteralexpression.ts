@@ -54,6 +54,10 @@ export class TemplateLiteralExpression extends Expression implements ITemplateLi
             .filter((expr, idx) => this.indexerExpressions.indexOf(idx) >= 0)
     }
 
+    public toString() {
+        return `\`${(this.elements || []).map( (element, idx) => this.indexerLiterals.indexOf(idx) >= 0 ? element.toString() : `\$\{${element.toString()}\}`).join('')}\``
+    }
+
     private combine(literals: Array<IExpression> = [], expressions: Array<IExpression> = []) {
         for(let i = 0; i < literals.length; i++)
         {

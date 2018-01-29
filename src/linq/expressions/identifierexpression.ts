@@ -9,6 +9,10 @@ export class IdentifierExpression extends Expression implements IIdentifierExpre
     public equal(expression: IIdentifierExpression): boolean {
         return this.type == expression.type && this.name == expression.name;
     }
+
+    public toString() {
+        return this.name;
+    }
 }
 
 export { IIdentifierExpression }

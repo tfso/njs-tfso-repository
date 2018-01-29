@@ -9,6 +9,10 @@ export class IndexExpression extends Expression implements IIndexExpression {
     public equal(expression: IIndexExpression): boolean {
         return this.type == expression.type && this.object.equal(expression.object) && this.index.equal(expression.index);
     }
+
+    public toString() {
+        return `${this.object.toString()}[${this.index.toString()}]`;
+    }
 }
 
 export { IIndexExpression }

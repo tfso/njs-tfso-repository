@@ -11,7 +11,16 @@ export class LiteralExpression extends Expression implements ILiteralExpression 
     }
 
     public toString() {
-        return new String(this.value).toString();
+        switch(typeof(this.value)) {
+            case 'string':
+                return `"${new String(this.value).toString().replace(/"/g, '\"')}"`
+
+            case 'object':
+                return JSON.stringify(this.value);
+
+            default:
+                return new String(this.value).toString();
+        }
     }
 }
 

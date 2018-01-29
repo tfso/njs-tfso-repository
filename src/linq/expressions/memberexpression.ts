@@ -9,6 +9,10 @@ export class MemberExpression extends Expression implements IMemberExpression {
     public equal(expression: IMemberExpression): boolean {
         return this.type == expression.type && this.object.equal(expression.object) && this.property.equal(expression.property);
     }
+
+    public toString() {
+        return `${this.object.toString()}.${this.property.toString()}`; 
+    }
 }
 
 export { IMemberExpression };

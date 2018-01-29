@@ -1,7 +1,7 @@
 ﻿import * as assert from 'assert';
 import * as Expr from './../linq/expressions/expressionvisitor';
 
-describe("When using ExpressionVisitor for logical Lambda expression", () => {
+describe("When using ExpressionVisitor for unary Lambda expression", () => {
     var visitor: Expr.ExpressionVisitor,
         expr: Expr.IExpression;
 
@@ -102,4 +102,16 @@ describe("When using ExpressionVisitor for logical Lambda expression", () => {
         assert.ok((<Expr.IUnaryExpression>(<Expr.IBinaryExpression>expr).right).operator == Expr.UnaryOperatorType.Decrement, "Expected a unary operation to be decrement");
         assert.ok((<Expr.IUnaryExpression>(<Expr.IBinaryExpression>expr).right).argument.type == Expr.ExpressionType.Identifier, "Expected a unary operation to have an argument as Identifier");
     });
+
+    it("it should handle toString", () => {
+        assert.equal(visitor.visitLambda((a: number) => 5 - a--).toString(), '5 - a--');
+        assert.equal(visitor.visitLambda((a: number) => !a).toString(), '!a');
+        assert.equal(visitor.visitLambda((a: number) => -a).toString(), '-a');
+        assert.equal(visitor.visitLambda((a: number) => +a).toString(), '+a');
+        assert.equal(visitor.visitLambda((a: number) => ~a).toString(), '~a');
+        assert.equal(visitor.visitLambda((a: number) => ++a).toString(), '++a');
+        assert.equal(visitor.visitLambda((a: number) => --a).toString(), '--a');
+        assert.equal(visitor.visitLambda((a: number) => a++).toString(), 'a++');
+        assert.equal(visitor.visitLambda((a: number) => a--).toString(), 'a--');
+    })
 });

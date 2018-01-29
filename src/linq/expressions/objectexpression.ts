@@ -20,6 +20,10 @@ export class ObjectExpression extends Expression implements IObjectExpression {
 
         return false;
     }
+
+    public toString() {
+        return `{${this.properties.map(property => `"${property.key.toString()}": ${property.value.toString()}`).join(', ')}}`
+    }
 }
 
 export { IObjectExpression, IObjectProperty }

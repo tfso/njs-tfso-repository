@@ -25,6 +25,10 @@ export class MethodExpression extends Expression implements IMethodExpression {
 
         return false;
     }
+
+    public toString() {
+        return `${this.caller ? `${this.caller.toString()}.` : ''}${this.name}(${(this.parameters || []).map(parameter => parameter.toString()).join(', ')})`;
+    }
 }
 
 export { IMethodExpression }

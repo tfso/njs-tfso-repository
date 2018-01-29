@@ -233,8 +233,6 @@ describe("When using ExpressionVisitor for binary", () => {
             assert.equal(visitor.visitOData("5 add +2").toString(), "5 + 2");
             assert.equal(visitor.visitOData("5 add -2").toString(), "5 + -2");
         })
-
-
     })
 
     describe("Lambda Expression", () => {
@@ -356,5 +354,17 @@ describe("When using ExpressionVisitor for binary", () => {
             assert.ok(expr.type == Expr.ExpressionType.Binary, "Expected a BinaryExpression");
             assert.ok((<Expr.IBinaryExpression>expr).operator == Expr.BinaryOperatorType.ExclusiveOr, "Expected a binary operation of exclusive or");
         });
+
+        it("should handle toString", () => {
+            assert.equal(visitor.visitLambda(() => 5 + 2).toString(), "5 + 2");
+            assert.equal(visitor.visitLambda(() => 5 + +2).toString(), "5 + 2");
+            assert.equal(visitor.visitLambda(() => 5 + -2).toString(), "5 + -2");
+            assert.equal(visitor.visitLambda(() => 5 - 2).toString(), "5 - 2");
+            assert.equal(visitor.visitLambda(() => 5 - +2).toString(), "5 - 2");
+            assert.equal(visitor.visitLambda(() => 5 - -2).toString(), "5 - -2");
+
+            assert.equal(visitor.visitLambda(() => 5 + 2 * 4).toString(), "5 + (2 * 4)");
+            assert.equal(visitor.visitLambda(() => (5 + 2) * 4).toString(), "(5 + 2) * 4");
+        })
     })
 });

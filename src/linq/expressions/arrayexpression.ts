@@ -19,6 +19,10 @@ export class ArrayExpression extends Expression implements IArrayExpression {
 
         return false;
     }
+
+    public toString() {
+        return `[${(this.elements || []).map(element => element.toString()).join(', ')}]`;
+    }
 }
 
 export { IArrayExpression };

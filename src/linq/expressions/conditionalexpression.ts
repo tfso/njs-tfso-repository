@@ -16,6 +16,10 @@ export class ConditionalExpression extends Expression implements IConditionalExp
 
         return false;
     }
+
+    public toString() {
+        return `(${this.condition.toString()} ? ${this.success.toString()} : ${this.failure.toString()})`;
+    }
 }
 
 export { IConditionalExpression }
