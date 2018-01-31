@@ -22,7 +22,7 @@ describe("When using WhereOperator", () => {
         let where = new WhereOperator<ICar>('Javascript', car => car.registrationYear == 2015 && car.location == 'NO' && car.id > 5),
             intersection = where.getExpressionIntersection();
 
-        assert.equal(intersection.length, 3, "Expected trhee expressions from intersection");
+        assert.equal(intersection.length, 3, "Expected three expressions from intersection");
     });
 
     it("should interesect expression properties that is common", () => {
@@ -113,4 +113,23 @@ describe("When using WhereOperator", () => {
         assert.equal((<ILogicalExpression>intersection[0]).right.type, ExpressionType.Literal);
         assert.equal((<ILiteralExpression>(<ILogicalExpression>intersection[0]).right).value, 2015);
     });
+
+    it("should get union expression properties", () => {
+        let where = new WhereOperator<ICar>('Javascript', car => (car.registrationYear == 2015 && car.location == 'NO') || car.registrationYear == 2015 || (car.location == 'SE' && car.registrationYear == 2015)),
+            intersection = where.getExpressionUnion();
+
+        assert.equal(intersection.length, 5, "Expected 5 expression from union");
+    })
+
+    it("should get expression groups", () => {
+        let where = new WhereOperator<ICar>('Javascript', car => (car.registrationYear == 2015 && car.location == 'NO') || car.registrationYear == 2015 || (car.location == 'SE' && car.registrationYear == 2015)),
+            groups = Array
+                        .from(where.getExpressionGroups())
+                        .map(group => Array.from(group));
+
+        assert.equal(groups.length, 3, "Expected 3 expression groups");
+        assert.equal(groups[0].length, 2);
+        assert.equal(groups[1].length, 1);
+        assert.equal(groups[2].length, 2);
+    })
 });

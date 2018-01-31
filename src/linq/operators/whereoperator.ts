@@ -127,7 +127,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
         return visit(this.expression);
     }
 
-    private getExpressionGroups(): Iterable<IterableIterator<ILogicalExpression>> {
+    public getExpressionGroups(): Iterable<IterableIterator<ILogicalExpression>> {
         let it = this._it,
             visit = function* (expression: IExpression): Iterable<IterableIterator<ILogicalExpression>> {
                 let visitGroup = function* (child: LogicalExpression): IterableIterator<ILogicalExpression> {

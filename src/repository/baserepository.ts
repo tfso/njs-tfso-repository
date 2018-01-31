@@ -81,6 +81,23 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         return true;
     }
 
+    protected getCriteriaGroups(query: IEnumerable<TEntity>): Array<FilterCriteria[]> {
+        if(query instanceof Enumerable) 
+        {
+            for (let operator of arguments[0].operations.values())
+                if (operator instanceof WhereOperator) {
+                    return Array
+                        .from((<WhereOperator<TEntity>>operator).getExpressionGroups())
+                        .map(group => Array
+                            .from(group)
+                            .map(expr => new FilterCriteria(expr))
+                        )
+                }
+        }
+
+        return [];
+    }
+
     protected getCriteria(query: IEnumerable<TEntity>): FilterCriteria[] 
     protected getCriteria(expressions: ILogicalExpression[]): FilterCriteria[]
     protected getCriteria() {
