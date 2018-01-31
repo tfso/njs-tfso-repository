@@ -1,0 +1,1 @@
+{"version":3,"file":"compoundexpression.js","sourceRoot":"","sources":["../../../src/linq/expressions/compoundexpression.ts"],"names":[],"mappings":"","sourcesContent":["import { IExpression, Expression, ExpressionType } from './expression';\r\n\r\n/**\r\n * Not in use for now\r\n */\r\nexport { ICompoundExpression } from './interfaces/icompoundexpression';"]}
