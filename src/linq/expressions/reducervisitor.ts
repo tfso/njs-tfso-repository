@@ -201,8 +201,9 @@ export class ReducerVisitor extends ExpressionVisitor {
                         {
                             case 'string':
                             case 'number':
+                            case 'boolean':
                                 break;
-
+                        
                             case 'object':
                                 if (value.getTime && value.getTime() >= 0)
                                     break;

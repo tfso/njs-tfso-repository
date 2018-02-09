@@ -79,5 +79,10 @@
 				"autoUpdateTime": 2000 // -> set timeout between each decorations and lens updates during test writing 
 			}
 		}
+	},
+	"extensions": {
+		"recommendations": [
+			"maty.vscode-mocha-sidebar"
+		]
 	}
 }
