@@ -1,5 +1,4 @@
-﻿
-//===========================================================================
+﻿//===========================================================================
 //  OData Expression Grammar
 //   by Nicolai Gjærum
 // 
@@ -309,14 +308,14 @@ Letter = [a-z] / [A-Z] / [_$] ;
 LetterOrDigit = [a-z] / [A-Z] / [0-9] / [_$] ;
 
 TemplateLiteral
-	= "\`" capture:(TemplateExpression / Escape / "\\" [`] / ![`\\\n\r] . )* "\`"                   
+	= "\`" capture:(  TemplateExpression / Escape / "\\$" ![{] . / "$" ![{] . / "\\${" . / "$\\{" . / "\\$\\{" . / ![$`\\] . )* "\`"                   
     { return { 
         type: 'TemplateLiteral', 
         values: capture.reduce((r, v) => {
             if(Array.isArray(v)) {
             	if(typeof(r[r.length - 1]) != 'string')
-                	r.push('')
-            	r[r.length - 1] += v[0] == undefined ? v[1] : v[0] + v[1]
+                	r.push('')  
+            	r[r.length - 1] += v[0] == undefined ? v[1] : v[0] + (v[1] == undefined ? v[2] : v[1])
             } else {
             	r.push(v);
             }
@@ -421,7 +420,7 @@ StringLiteral
     { return { type: 'Literal', value: chars.map(l => l[0] == undefined ? l[1] : l[0] + l[1]).join('') } }
 
 Escape
-    = "\\" ([btnfr"'\\] / OctalEscape / UnicodeEscape)
+    = "\\" ([btnfr"'`\\] / OctalEscape / UnicodeEscape)
 
 OctalEscape
     = [0-3][0-7][0-7]
