@@ -100,7 +100,7 @@ describe("When using repository to read all", () => {
         assert.equal(list.length, 1);
         assert.equal(list[0].property, 'registrationDate')
         assert.equal(list[0].operator, '==');
-        assert.equal(list[0].value.toString(), 'Fri Dec 01 2017 00:00:00 GMT+0100 (W. Europe Standard Time)');
+        assert.equal(list[0].value.toISOString(), new Date(2017,11,1).toISOString());
     })
 
     it("should handle nested member expressions", () => {
