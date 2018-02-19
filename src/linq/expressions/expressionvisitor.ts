@@ -261,7 +261,7 @@ export class ExpressionVisitor implements IExpressionVisitor {
                     if(first.type == 'TemplateExpression') 
                         literals.push(<ILiteralExpression>this.transform({ type: 'Literal', value: '' }))
 
-                    literals.push(...expression.values.filter(value => value.type == 'Literal').map(value => this.transform(value)));
+                    literals.push(...expression.values.filter(value => value.type == 'Literal').map(value => this.transform(value)).map(literal => { literal.value = literal.value.replace(/(\\)?\$(\\)?\{/g, '${'); return literal; }));
                     expressions.push(...expression.values.filter(value => value.type == 'TemplateExpression').map(value => this.transform(value.value)));
 
                     return new TemplateLiteralExpression(literals, expressions);

@@ -6810,4 +6810,4 @@
   };
 })();
 
-export default { parser }
+export default parser

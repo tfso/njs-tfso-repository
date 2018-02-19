@@ -97,6 +97,14 @@ describe("When using TemplateLiteral for ExpressionVisitor", () => {
         let secondAnswer = template.evaluate(reduced, { answer: 'No'});
         assert.ok((<Expr.ILiteralExpression>secondAnswer).value == 'My answer is Nope all 7 days');
     })
+
+    it("should handle different escaping of placeholders etc", () => {
+        assert.equal((<Expr.ILiteralExpression>template.evaluate(template.visitLambda(() => `My answer is \${1} for now`), {})).value, 'My answer is ${1} for now');
+        assert.equal((<Expr.ILiteralExpression>template.evaluate(template.visitLambda(() => `My answer is $\{2} for now`), {})).value, 'My answer is ${2} for now');
+        assert.equal((<Expr.ILiteralExpression>template.evaluate(template.visitLambda(() => `My answer is \$\{3} for now`), {})).value, 'My answer is ${3} for now');
+        assert.equal((<Expr.ILiteralExpression>template.evaluate(template.visitLambda(() => `My value is $4`), {})).value, 'My value is $4');
+        assert.equal((<Expr.ILiteralExpression>template.evaluate(template.visitLambda(() => `My value is \$5`), {})).value, 'My value is \\$5');
+    })
 })
 
 function tag(parts: TemplateStringsArray, ...expressions: Array<any>) {
