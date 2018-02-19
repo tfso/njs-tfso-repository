@@ -4,6 +4,7 @@ import { IExpression, ExpressionType } from './../expressions/expression';
 import { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './../expressions/logicalexpression';
 import { MemberExpression } from './../expressions/memberexpression';
 import { IdentifierExpression } from './../expressions/identifierexpression';
+import { IUnaryExpression, UnaryOperatorType, UnaryAffixType } from '../expressions/unaryexpression';
 
 import { ReducerVisitor } from './../expressions/reducervisitor';
 import { ODataVisitor } from './../expressions/odatavisitor';
@@ -177,6 +178,12 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                                         else
                                             return expr;
                                         
+                                    case ExpressionType.Unary:
+                                        switch( (<IUnaryExpression>expr).operator ) {
+                                            case UnaryOperatorType.Positive:
+                                                return reduceMemberToIdentifier((<IUnaryExpression>expr).argument);
+                                        }
+
                                     default:
                                         return expr;
                                 }

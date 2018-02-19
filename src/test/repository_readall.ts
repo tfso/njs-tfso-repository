@@ -94,6 +94,15 @@ describe("When using repository to read all", () => {
         //assert.ok(list[0].method == "toLowerCase");
     })
 
+    it("should handle some unary expressions", () => {
+        var list = repository.exposeFilters(new Enumerable<ICar>().where( (it, date) => +it.registrationDate == +date, new Date(2017,11,1)))
+
+        assert.equal(list.length, 1);
+        assert.equal(list[0].property, 'registrationDate')
+        assert.equal(list[0].operator, '==');
+        assert.equal(list[0].value.toString(), 'Fri Dec 01 2017 00:00:00 GMT+0100 (W. Europe Standard Time)');
+    })
+
     it("should handle nested member expressions", () => {
         var list = repository.exposeFilters(new Enumerable<ICar>().where(car => car.type.make == "Toyota"));
 
@@ -112,6 +121,7 @@ interface ICar {
     location: string
 
     registrationYear: number
+    registrationDate: Date
 
     type: {
         make: string
