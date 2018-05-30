@@ -251,7 +251,20 @@ export class ExpressionVisitor implements IExpressionVisitor {
                 return new ConditionalExpression(this.transform(expression.test), this.transform(expression.left), this.transform(expression.right));
 
             case 'ObjectLiteral':
-                return new ObjectExpression(expression.properties ? expression.properties.map(value => <any>{ key: this.transform(value.key), value: this.transform(value.value) }) : []);
+                return new ObjectExpression(expression.properties ? 
+                    expression.properties.map(({key, value}) => {
+                        switch(key.type) {
+                            case 'Identifier':
+                                key = {
+                                    type: 'Literal',
+                                    value: key.name
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        return { key: this.transform(key), value: this.transform(value) }
+                    }) : []);
 
             case 'TemplateLiteral':
                 if(expression.values && expression.values.length > 0) {
