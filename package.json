@@ -16,9 +16,7 @@
     "test": "node node_modules/mocha/bin/_mocha --reporter spec --recursive lib/test/*.js",
     "cover": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- --reporter spec --recursive lib/test/*.js"
   },
-  "dependencies": {
-    "jsep": "^0.3.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/mocha": "^2.2.41",
     "@types/node": "^8.5.9",

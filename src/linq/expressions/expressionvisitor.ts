@@ -70,8 +70,6 @@ export class ExpressionVisitor implements IExpressionVisitor {
     }
 
     public visitOData(filter: string): IExpression {
-        filter = filter.replace(/["']?(\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?)?(?:Z|[+-]\d{2}:\d{2})?)["']?/gi, (value, date) => ['\'', date, '\''].join('')); // odata-parser doesn't support date as type, converting it to string
-
         let ast = ODataParser.parse(filter);
         try {
             if (ast) {
@@ -233,6 +231,9 @@ export class ExpressionVisitor implements IExpressionVisitor {
                     default:
                         throw new Error('Caller of method expression is not a Identifier, but is ' + expression.object.type);
                 }
+
+            case 'DateLiteral':
+                return new LiteralExpression(new Date(expression.value))
 
             case 'NumberLiteral':
                 return new LiteralExpression(Number(expression.value))

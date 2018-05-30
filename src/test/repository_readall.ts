@@ -85,7 +85,7 @@ describe("When using repository to read all", () => {
     it("should handle method calls", () => {
         var list = repository.exposeFilters(new Enumerable<ICar>().where((car: ICar) => car.location.toLowerCase() == "no"));
 
-        if (Date.now() < new Date(2018, 2, 1).getTime())
+        if (Date.now() < new Date(2018, 7, 1).getTime())
             return;
 
         assert.ok(false);

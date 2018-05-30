@@ -35,9 +35,9 @@
 					"name": "Run mocha",
 					"type": "node",
 					"request": "launch",
-					"program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+					"program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
 					"stopOnEntry": false,
-					"args": ["--no-timeouts", "--compilers", "ts:ts-node/register", "--compiler", "--require", "ts-node/register", "${workspaceRoot}/src/test/**/*.ts"],
+					"args": ["--no-timeouts", "--compilers", "ts:ts-node/register", "--compiler", "--require", "ts-node/register", "${workspaceFolder}/src/test/**/*.ts"],
 					"cwd": "${workspaceRoot}",
 					"protocol": "inspector"
 				}

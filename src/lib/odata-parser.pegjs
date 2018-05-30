@@ -42,6 +42,10 @@
 
     return result;
   }
+  
+  function flattenArray(value) {
+  	return Array.isArray(value) ? [].concat.apply([], value.map(function(v) { return flattenArray(v) })) : value
+  }
 }
 
 /* ---- Syntactic Grammar ----- */
@@ -157,6 +161,7 @@ UnaryExpression
 
 Primary
     = ParExpression
+    / DateLiteral
     / QualifiedIdentifier
     / Literal
     
@@ -234,7 +239,7 @@ Letter = [a-z] / [A-Z] / [_$] ;
 LetterOrDigit = [a-z] / [A-Z] / [0-9] / [_$] ;
 
 Literal
-    = literal:( 
+    = literal:(
       FloatLiteral
       / IntegerLiteral          // May be a prefix of FloatLiteral
       / StringLiteral
@@ -267,6 +272,12 @@ BinaryNumeral
 
 OctalNumeral
     = "0" ([_]*[0-7])+
+
+DateLiteral
+	= value:([0-9][0-9][0-9][0-9] "-" [0-9][0-9] "-" [0-9][0-9] ("T" [0-9][0-9] ":" [0-9][0-9] (":" [0-9][0-9] ("." [0-9]*)?)?)? "Z"?)
+    { return { type: 'DateLiteral', value: flattenArray(value).join('') }; }
+    / first:"datetime"i "\'" value:([0-9][0-9][0-9][0-9] "-" [0-9][0-9] "-" [0-9][0-9] ("T" [0-9][0-9] ":" [0-9][0-9] (":" [0-9][0-9] ("." [0-9]*)?)?)? "Z"?) last:"\'"
+    { return { type: 'DateLiteral', value: flattenArray(value).join('') }; }
 
 FloatLiteral
     = ( HexFloat / DecimalFloat )

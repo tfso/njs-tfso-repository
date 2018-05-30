@@ -84,6 +84,11 @@ export class ODataVisitor extends ReducerVisitor {
 
                 break;
 
+            case 'contains': // bool contains(string p0, string p1)
+                if ((params = getParams(expression, 'string', 'string')) != null)
+                    return new LiteralExpression(String(params[0]).indexOf(String(params[1])) >= 0);
+
+                break;
             case 'length': // int length(string p0)
                 if ((params = getParams(expression, 'string')) != null)
                     return new LiteralExpression(String(params[0]).length);
@@ -196,32 +201,6 @@ export class ODataVisitor extends ReducerVisitor {
         }
 
         return new MethodExpression(expression.name, parameters, caller);
-    }
-
-    public evaluate(expression: IExpression, it: Object = null): IExpression {
-        if (expression == null)
-            return null;
-
-        switch (expression.type)
-        {
-            case ExpressionType.Literal: {
-                let literal = (<ILiteralExpression>expression);
-
-                if (typeof (literal.value) == 'string')
-                {
-                    if (/(\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?)?(?:Z|[+-]\d{2}:\d{2})?)/i.test(literal.value)) // check for date for handyness? but it takes some resources as ops/sec goes from 400k to 300k
-                        return new LiteralExpression(new Date(literal.value));
-                }
-
-                break;
-            }
-
-            default:
-                return super.evaluate(expression, it);
-
-        }
-
-        return expression;
     }
 
     public static evaluate(expression: string, it?: Object): any
