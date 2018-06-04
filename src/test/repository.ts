@@ -66,17 +66,17 @@ class CarRepository extends Repository<ICar, number>
              }
         }
 
-        let skip = query.operations.first(SkipOperator);
+        let skip = query.operations.first(OperatorType.Skip);
         if (skip) {
             query.operations.remove(skip); // removing it as we are doing this part at database level instead
         }
 
-        let take = query.operations.first(TakeOperator);
+        let take = query.operations.first(OperatorType.Take);
         if (take) {
             query.operations.remove(take); // removing it as we are doing this part at database level instead
         }
 
-        let where = query.operations.first(WhereOperator);
+        let where = query.operations.first(OperatorType.Where);
         if (where) cars = cars.filter(where.predicate);
 
         if (skip) cars = cars.slice(skip.count); // simulating paging at database level

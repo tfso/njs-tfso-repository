@@ -15,8 +15,6 @@ import { Operations } from './operations';
 
 export { OperatorType };
 
-(Symbol as any).asyncIterator = Symbol.asyncIterator || "__@@asyncIterator__";
-
 export interface IEnumerableOptions<TEntity> {
     query?: IEnumerable<TEntity>
     parent?: IEnumerable<any>

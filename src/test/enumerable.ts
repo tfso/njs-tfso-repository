@@ -452,7 +452,7 @@ describe("When using Enumerable", () => {
         query.skip(1);
         query.take(1);
 
-        let op = query.operations.first(SkipOperator);
+        let op = query.operations.first(SkipOperator)
 
         assert.notEqual(op, null);
         assert.equal(op.type, OperatorType.Skip);
@@ -472,7 +472,7 @@ describe("When using Enumerable", () => {
 
         assert.notEqual(op, null);
         assert.equal(op.type, OperatorType.Skip);
-        assert.equal((<SkipOperator<ICar>>op).count, 5);
+        assert.equal(op.count, 5);
     })
 
     it("should be able to get first Operator by class and remove it for manual operator handling", () => {
@@ -488,7 +488,7 @@ describe("When using Enumerable", () => {
 
         assert.equal(Array.from(query.operations.values()).length, 5);
 
-        skip = query.operations.first(SkipOperator);
+        skip = query.operations.first(OperatorType.Skip);
         
         assert.notEqual(skip, null);
         assert.equal(skip.type, OperatorType.Skip);
@@ -496,7 +496,7 @@ describe("When using Enumerable", () => {
 
         query.operations.remove(skip);
 
-        skip = query.operations.first(SkipOperator);
+        skip = query.operations.first(OperatorType.Skip);
 
         assert.notEqual(skip, null);
         assert.equal(skip.type, OperatorType.Skip);

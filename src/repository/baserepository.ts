@@ -1,5 +1,6 @@
 ﻿import { IFilterCriteria, FilterCriteria } from './filters/filtercriteria';
 import Enumerable, { IEnumerable, IEnumerableOptions } from './../linq/enumerable';
+import { OperatorType } from './../linq/operators/operator';
 import { WhereOperator } from './../linq/operators/whereoperator';
 
 import { IRecordSetMeta } from './db/recordset';
@@ -73,7 +74,7 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
     }
 
     protected isQueryPageable(query: IEnumerable<TEntity>): boolean {
-        let where = query.operations.first(WhereOperator);
+        let where = query.operations.first(OperatorType.Where);
 
         if (where)
             return where.getExpressionCount() == where.getExpressionIntersection().length;
