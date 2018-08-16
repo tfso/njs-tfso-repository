@@ -34,12 +34,12 @@ describe("When using JavascriptVisitor", () => {
         assert.equal((<Expr.LiteralExpression>expr).value, 'ABC');
     })
 
-    it("should evaluate a expression with date as type", () => {
-        let reduced = reducer.visitLambda(() => new Date('2017-06-01Z') > this.date),
-            expr = reducer.evaluate(reduced, vars);
+    // it("should evaluate a expression with date as type", () => {
+    //     let reduced = reducer.visitLambda((date) => date > this.date, new Date('2017-06-01Z')),
+    //         expr = reducer.evaluate(reduced, vars);
 
-        assert.equal(expr.type, Expr.ExpressionType.Literal);
-        assert.equal((<Expr.LiteralExpression>expr).value, true);
-    })
+    //     assert.equal(expr.type, Expr.ExpressionType.Literal);
+    //     assert.equal((<Expr.LiteralExpression>expr).value, true);
+    // })
 
 })
