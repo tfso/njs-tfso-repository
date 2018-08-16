@@ -23,6 +23,8 @@ export interface IEnumerableOptions<TEntity> {
 export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<TEntity> {
     readonly operations: Operations<TEntity>
 
+    
+
     from(items: Array<TEntity>)
     from(items: Iterable<TEntity>)
     from(items: AsyncIterable<TEntity>)
@@ -58,19 +60,35 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<T
     toArrayAsync(): Promise<Array<TEntity>>
 }
 
+export type SqlLanguage = 'sql-ms' | 'sql-mariadb' | 'sql-cosmosdb'
+
+export interface Sql<TEntity> {
+    readonly language: string
+    readonly table: string
+
+    remap<K extends keyof TEntity>(name: K): string
+}
+
 export class Enumerable<TEntity> implements IEnumerable<TEntity>
 {
     private _name: string = null;
+    private _parent: IEnumerable<{}> = null;
 
     protected _operations: Operations<TEntity>;
     
     constructor(items?: Array<TEntity>) 
     constructor(items?: Iterable<TEntity>) 
     constructor(items?: AsyncIterable<TEntity>)
+    constructor(items?: Sql<TEntity> & Iterable<TEntity>)
+    constructor(items?: Sql<TEntity> & AsyncIterable<TEntity>)
     constructor(private items?: any) {
         this._operations = new Operations<TEntity>();
 
         this.from(items);
+    }
+
+    private set parent(value: IEnumerable<any>) {
+        this._parent = value
     }
 
     public get name(): string {
@@ -151,7 +169,10 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
     */
     public select<TResult>(selector: (it: TEntity) => TResult): IEnumerable<TResult> {
         if (typeof this.items == 'object' && typeof this.items[Symbol.asyncIterator] == 'function') {
-            return new Enumerable<TResult>(new SelectOperator<TEntity>(selector).evaluateAsync(this));
+            let t = new Enumerable<TResult>(new SelectOperator<TEntity>(selector).evaluateAsync(this));
+            t.parent = <IEnumerable<any>>this
+
+
         } else {
             return new Enumerable<TResult>(new SelectOperator<TEntity>(selector).evaluate(this));
         }
@@ -313,7 +334,9 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
     public from(items: Array<TEntity>) : this
     public from(items: Iterable<TEntity>) : this
     public from(items: AsyncIterable<TEntity>) : this
-    public from(items: Array<TEntity> | Iterable<TEntity> | AsyncIterable<TEntity>): this {
+    public from(items: Sql<TEntity> & Iterable<TEntity>)
+    public from(items: Sql<TEntity> & AsyncIterable<TEntity>)
+    public from(items: Array<TEntity> | Iterable<TEntity> | AsyncIterable<TEntity> | (Sql<TEntity> & Iterable<TEntity>) | (Sql<TEntity> & AsyncIterable<TEntity>) ): this {
         if (items) {
             if (this._name == null)
                 this._name = items.constructor.name;
