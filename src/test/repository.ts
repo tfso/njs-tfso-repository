@@ -212,6 +212,7 @@ describe("When using Repository", () => {
         let repo = new CarRepository(),
             query = new Enumerable<ICar>(repo).where(it => it.location == 'NO' && it.registrationYear >= 2000);
 
+        assert.equal(repo.exposeCriteriaCount(query), 2);
         assert.equal(repo.exposeIfQueryIsPageable(query), true)
     })
 

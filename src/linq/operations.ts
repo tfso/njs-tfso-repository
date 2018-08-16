@@ -36,7 +36,6 @@ export class Operations<TEntity> {
     
     // https://stackoverflow.com/questions/48207567/derive-generic-type-of-a-class-from-a-specific-factory-method-parameter-value
     public first(): Operator<TEntity>
-    public first<T extends Operator<TEntity>>(operator: { new (...args: any[]): T }): T
     public first<T extends SkipOperator<TEntity>>(operator: { new (...args: any[]): T }): T
     public first<T extends SkipWhileOperator<TEntity>>(operator: { new (...args: any[]): T }): T
     public first<T extends TakeOperator<TEntity>>(operator: { new (...args: any[]): T }): T
@@ -44,7 +43,8 @@ export class Operations<TEntity> {
     public first<T extends SliceOperator<TEntity>>(operator: { new (...args: any[]): T }): T
     public first<T extends SelectOperator<TEntity>>(operator: { new (...args: any[]): T }): T
     public first<T extends OrderByOperator<TEntity>>(operator: { new (...args: any[]): T }): T
-
+    public first<T extends Operator<TEntity>>(operator: { new (...args: any[]): T }): T
+    
     public first<U extends OperatorType.Skip>(operatorType: U): SkipOperator<TEntity>
     public first<U extends OperatorType.SkipWhile>(operatorType: U): SkipWhileOperator<TEntity>
     public first<U extends OperatorType.Take>(operatorType: U): TakeOperator<TEntity>

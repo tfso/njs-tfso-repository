@@ -141,7 +141,7 @@ describe("When using Enumerable", () => {
             let donald = new Enumerable<any>(parents())
                 .where(it => it.id == 2)
                 .join<any, any>(
-                    new Enumerable(childs()).select(it => <any>{ parent: it.parent, name: it.name }), 
+                    new Enumerable(childs()).select(it => <any>{ parent: it.parent, name: it.name }),
                     a => a.id, 
                     b => b.parent, 
                     (a, b) => Object.assign({}, a, { childs: b.toArray() } )
@@ -435,7 +435,7 @@ describe("When using Enumerable", () => {
     it("should be able to convert list by using select", () => {
         let car = new Enumerable(cars)
             .where(it => it.id == 2)
-            .select<ISimpleCar>(it => <ISimpleCar>{ id: it.id, make: it.type.make, model: it.type.model })
+            .select<ISimpleCar>(it => ({ id: it.id, make: it.type.make, model: it.type.model }))
             .first();
 
         assert.equal(car.id, 2);
