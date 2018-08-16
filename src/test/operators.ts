@@ -3,7 +3,8 @@
 import { SkipOperator } from './../linq/operators/skipoperator';
 import { WhereOperator } from './../linq/operators/whereoperator';
 
-//(Symbol as any).asyncIterator = Symbol.asyncIterator || "__@@asyncIterator__";
+if(!Symbol.asyncIterator)
+    (Symbol as any).asyncIterator = Symbol.asyncIterator || "__@@asyncIterator__";
 
 interface ICar {
     id: number

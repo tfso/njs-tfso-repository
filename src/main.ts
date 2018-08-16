@@ -23,7 +23,8 @@ declare global {
     }
 }
 
-(Symbol as any).asyncIterator = Symbol.asyncIterator || "__@@asyncIterator__";
+if(!Symbol.asyncIterator)
+    (Symbol as any).asyncIterator = Symbol.asyncIterator || "__@@asyncIterator__";
 
 
 import Repository from './repository/baserepository';
