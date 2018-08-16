@@ -1,6 +1,6 @@
 {
   "name": "tfso-repository",
-  "version": "0.0.0",
+  "version": "1.2.129",
   "description": "CRUD repository using JavaScript Expressions as a boolean predicate for database queries ",
   "author": {
     "name": "Nicolai"
@@ -19,11 +19,6 @@
   "dependencies": {},
   "devDependencies": {
     "@types/mocha": "^2.2.41",
-    "@types/node": "^8.5.9",
-    "benchmark": "^2.1.4",
-    "istanbul": "^0.4.4",
-    "mocha": "^4.1.0",
-    "ts-node": "^4.1.0",
-    "typescript": "~2.9.1"
+    "@types/node": "^8.5.9"
   }
 }
