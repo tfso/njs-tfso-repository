@@ -133,7 +133,7 @@
     return "Expected " + describeExpected(expected) + " but " + describeFound(found) + " found.";
   };
 
-  function peg$parse(input, options) {
+  function peg$parse(input, options?) {
     options = options !== void 0 ? options : {};
 
     var peg$FAILED = {},
