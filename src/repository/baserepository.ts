@@ -115,10 +115,20 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         return [];
     }
 
+    /**
+     * Async iterable iterator that has the same signature as readAll, may be overridden to support query through pages. 
+     * Method is protected since it's primary used by getIterable or [Symbol.asyncIterator]
+     * @param query 
+     * @param meta 
+     */
+    protected async * query(query: IEnumerable<TEntity>, meta?: IRecordSetMeta, parent?: IParentOptions): AsyncIterableIterator<TEntity> {
+        yield* await this.readAll(query, meta, parent)
+    }
+
     private async * asyncIterator(options?: IEnumerableOptions<TEntity>, meta?: IRecordSetMeta): AsyncIterableIterator<TEntity> {
         if (!options) options = {};
 
-        yield* await this.readAll(options.query || null, meta, { query: options['parent'], keyProperty: options['keyProperty'], keys: options['keys'] });
+        yield* await this.query(options.query || null, meta, { query: options['parent'], keyProperty: options['keyProperty'], keys: options['keys'] });
     }
 
     public getIterable(meta?: IRecordSetMeta): AsyncIterable<TEntity> {

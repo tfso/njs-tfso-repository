@@ -74,15 +74,47 @@ class CarRepository extends Repository<ICar, number>
         let take = query.operations.first(OperatorType.Take);
         if (take) {
             query.operations.remove(take); // removing it as we are doing this part at database level instead
+        } 
+        else {
+            take = new TakeOperator(5) // if left out, take 5 to default to paging
         }
 
         let where = query.operations.first(OperatorType.Where);
         if (where) cars = cars.filter(where.predicate);
 
+        if(meta) meta.totalLength = cars.length // total cars for current filter
+
         if (skip) cars = cars.slice(skip.count); // simulating paging at database level
         if (take) cars = cars.slice(0, take.count); // simulating paging at database level
+    
+        if(meta) meta.length = cars.length // length after paging
 
+        if(meta && take) {
+            if( (cars.length + (skip ? skip.count : 0)) < meta.totalLength )
+                meta.continuationToken = `${cars.length + (skip ? skip.count : 0)}:${meta.totalLength}`
+            else 
+                meta.continuationToken = null
+        }
+        
         return Promise.resolve(cars); // unoptimized
+    }
+
+    public async * query(query: IEnumerable<ICar>, meta?: IRecordSetMeta): AsyncIterableIterator<ICar> {
+        if(!meta)
+            meta = { }
+        
+        let skip = 0
+        while(true) {
+            let cars = await this.readAll(query.skip(skip).take(2), meta)
+
+            yield * cars
+
+            // two ways, depends how readAll is implemented 
+            if(meta.continuationToken == null || (skip + cars.length >= meta.totalLength))
+                break;
+
+            skip += cars.length
+        }
     }
 
     public async create(car: ICar): Promise<ICar> {
@@ -140,6 +172,12 @@ class LocationRepository extends Repository<ILocation, string>
 describe("When using Repository", () => {
     beforeEach(() => {
 
+    })
+
+    it("should work with query", async () => {
+        let ar = await new Enumerable(new CarRepository()).toArrayAsync()
+
+        assert.equal(ar.length, 8)
     })
 
     it("should work with joins", async () => {

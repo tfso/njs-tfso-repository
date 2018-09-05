@@ -5,11 +5,11 @@
 }
 
 export interface IRecordSetMeta {
-    affected: number
-    totalLength: number
-    length: number
-    executionTime: number
-    continuationToken: any
+    affected?: number
+    totalLength?: number
+    length?: number
+    executionTime?: number
+    continuationToken?: any
 }
 
 export class RecordSet<TEntity> implements IRecordSet<TEntity> {
