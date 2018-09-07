@@ -336,6 +336,15 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         return this;
     }
 
+    public copy(): IEnumerable<TEntity> {
+        let enumerable = new Enumerable<TEntity>(this.items)
+
+        for(let operation of this.operations.values())
+            enumerable.operations.add(operation)
+
+        return enumerable
+    }
+
     public first(items?: Array<TEntity>): TEntity {
         if (items)
             this.from(items);
@@ -368,6 +377,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
 
         return result;
     }
+
         
     public async toArrayAsync(items?: Iterable<TEntity>): Promise<Array<TEntity>> {
         if (items)

@@ -55,6 +55,24 @@ describe("When using Enumerable", () => {
         ]
     })
 
+    describe("with copy", () => {
+        
+        it("should be able to copy", async() => {
+            let original = new Enumerable(cars).where(it => it.location == 'PORSGRUNN'),
+                copy = original.copy()
+
+            assert.equal(copy.toArray().length, 2)
+        })
+
+        it("should be able to copy without affect original", async() => {
+            let original = new Enumerable(cars).where(it => it.registrationYear >= 2010),
+                copy = original.copy().where(it => it.location == 'PORSGRUNN')
+
+            assert.equal(original.toArray().length, 4)
+            assert.equal(copy.toArray().length, 1)
+        })
+    })
+
     describe("with iterable", () => {
 
         it("should be able to iterate", async () => {
