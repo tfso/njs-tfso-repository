@@ -31,12 +31,12 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<T
      * A remapper of identifier names, members is seperated with dot.
      * @param remapper Function that returns the new name of the identifier
      */
-    remap(remapper: (name: string) => string) : this
+    remap<TResult>(remapper: (name: string) => string) : IEnumerable<TResult>
     /**
      * A remapper of values that corresponds to a identifier name
      * @param remapper Function that returns the new value
      */
-    remap(remapper: (name: string, value: any) => any) : this
+    remap<TResult>(remapper: (name: string, value: any) => any) : IEnumerable<TResult>
 
     /**
     * Where clause using OData $filter expression returning either true or false. Any parameters used is properties of TEntity
@@ -185,13 +185,13 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * A remapper of identifier names, members is seperated with dot.
      * @param remapper Function that returns the new name of the identifier
      */
-    public remap(remapper: (name: string) => string) : this
+    public remap<TResult>(remapper: (name: string) => string) : IEnumerable<TResult>
     /**
      * A remapper of values that corresponds to a identifier name
      * @param remapper Function that returns the new value
      */
-    public remap(remapper: (name: string, value: any) => any) : this
-    public remap(remapper: (...args) => any) : this {
+    public remap<TResult>(remapper: (name: string, value: any) => any) : IEnumerable<TResult>
+    public remap<TResult>(remapper: (...args) => any) : IEnumerable<TResult> {
         let visitor = remapper.length == 2 ? new RemapVisitor(null, remapper) : new RemapVisitor(remapper, null);
     
         for (let item of this._operations.values()) {
@@ -202,7 +202,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
             }
         }
 
-        return this;
+        return this as any;
     }
 
     /**

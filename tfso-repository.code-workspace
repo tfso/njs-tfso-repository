@@ -71,6 +71,7 @@
 		"mocha.requires": [
 			"ts-node/register"
 		],
+		"mocha.parallelTests": 30,
 		//Mocha: this option allows you to enable/disable lens decorations and set update threshold "
 		"mocha.sideBarOptions": {
 			"default": {

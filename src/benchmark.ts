@@ -45,19 +45,19 @@ var number = 5;
 // add tests 
 suite
     .add('TemplateLiteral', function () {
-        `template strings adds ${2 + number} like nothing`;
+        `template strings adds ${2 + number++} like nothing`;
     })
     .add('RepositoryLiteral', function () {
-        TemplateLiteralVisitor.evaluate(expression, { number: number });
+        TemplateLiteralVisitor.evaluate(expression, { number: number++ });
     })
     .add('Eval', function () {
         eval('`template string adds ${2 + number} like nothing`');
     })
     .add('Function', function () {
-        new Function('number', 'return `template string adds ${2 + number} like nothing`;')(5);
+        new Function('number', 'return `template string adds ${2 + number++} like nothing`;')(5);
     })
     .add('RegExp Replace', function () {
-        template({ number: 2 + number });
+        template({ number: 2 + number++ });
     })
     // add listeners 
     .on('cycle', function (event) {

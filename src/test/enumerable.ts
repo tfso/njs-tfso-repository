@@ -308,7 +308,7 @@ describe("When using Enumerable", () => {
             let query: Enumerable<ICar> = new Enumerable<ICar>();
 
             query.where("tolower(Place) eq 'brevik'");
-            query.remap((name) => {
+            query.remap<ICar>((name) => {
                 if (name == 'Place') return 'location';
             })
 
