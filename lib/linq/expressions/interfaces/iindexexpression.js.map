@@ -1,0 +1,1 @@
+{"version":3,"file":"iindexexpression.js","sourceRoot":"","sources":["../../../../src/linq/expressions/interfaces/iindexexpression.ts"],"names":[],"mappings":"","sourcesContent":["import { IExpression } from './iexpression';\n\nexport interface IIndexExpression extends IExpression {\n    object: IExpression\n    index: IExpression\n}\n"]}
