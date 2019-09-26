@@ -232,8 +232,13 @@ export class ExpressionVisitor implements IExpressionVisitor {
                         throw new Error('Caller of method expression is not a Identifier, but is ' + expression.object.type);
                 }
 
-            case 'DateLiteral':
+            case 'DateTimeLiteral':
                 return new LiteralExpression(new Date(expression.value))
+
+            case 'DateLiteral':
+                let value = new Date(expression.value)
+                
+                return new LiteralExpression(new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate(), 12, 0, 0, 999)))
 
             case 'NumberLiteral':
                 return new LiteralExpression(Number(expression.value))

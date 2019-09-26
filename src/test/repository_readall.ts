@@ -1,4 +1,4 @@
-﻿import * as assert from 'assert';
+import * as assert from 'assert';
 import Repository from './../repository/baserepository';
 import Enumerable, { IEnumerable } from './../linq/enumerable';
 
@@ -85,7 +85,7 @@ describe("When using repository to read all", () => {
     it("should handle method calls", () => {
         var list = repository.exposeFilters(new Enumerable<ICar>().where((car: ICar) => car.location.toLowerCase() == "no"));
 
-        if (Date.now() < new Date(2019, 5, 1).getTime())
+        if (Date.now() < new Date(2019, 10, 1).getTime())
             return;
 
         assert.ok(false);

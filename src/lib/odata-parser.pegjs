@@ -161,6 +161,7 @@ UnaryExpression
 
 Primary
     = ParExpression
+    / DateTimeLiteral
     / DateLiteral
     / QualifiedIdentifier
     / Literal
@@ -273,10 +274,16 @@ BinaryNumeral
 OctalNumeral
     = "0" ([_]*[0-7])+
 
-DateLiteral
-	= value:([0-9][0-9][0-9][0-9] "-" [0-9][0-9] "-" [0-9][0-9] ("T" [0-9][0-9] ":" [0-9][0-9] (":" [0-9][0-9] ("." [0-9]*)?)?)? "Z"?) __
-    { return { type: 'DateLiteral', value: flattenArray(value).join('') }; }
+DateTimeLiteral
+	= value:([0-9][0-9][0-9][0-9] "-" [0-9][0-9] "-" [0-9][0-9] ("T" [0-9][0-9] ":" [0-9][0-9] (":" [0-9][0-9] ("." [0-9]*)?)?) "Z"?) __
+    { return { type: 'DateTimeLiteral', value: flattenArray(value).join('') }; }
     / first:"datetime"i "\'" value:([0-9][0-9][0-9][0-9] "-" [0-9][0-9] "-" [0-9][0-9] ("T" [0-9][0-9] ":" [0-9][0-9] (":" [0-9][0-9] ("." [0-9]*)?)?)? "Z"?) last:"\'" __
+    { return { type: 'DateTimeLiteral', value: flattenArray(value).join('') }; }
+
+DateLiteral
+	= value:([0-9][0-9][0-9][0-9] "-" [0-9][0-9] "-" [0-9][0-9] "Z"?) __
+    { return { type: 'DateLiteral', value: flattenArray(value).join('') }; }
+    / first:"date"i "\'" value:([0-9][0-9][0-9][0-9] "-" [0-9][0-9] "-" [0-9][0-9] "Z"?) last:"\'" __
     { return { type: 'DateLiteral', value: flattenArray(value).join('') }; }
 
 FloatLiteral
