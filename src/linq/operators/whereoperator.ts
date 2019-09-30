@@ -8,6 +8,8 @@ import { IUnaryExpression, UnaryOperatorType, UnaryAffixType } from '../expressi
 
 import { ReducerVisitor } from './../expressions/reducervisitor';
 import { ODataVisitor } from './../expressions/odatavisitor';
+import { MethodExpression } from '../expressions/methodexpression';
+import { LiteralExpression } from '../expressions/literalexpression';
 
 export type PredicateType = 'Javascript' | 'OData';
 
@@ -21,7 +23,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
 
     constructor(predicateType: 'OData', predicate: string)
     constructor(predicateType: 'Javascript', predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: Array<any>)
-    constructor(predicateType: PredicateType, predicate: any, ...parameters: any[]) {
+    constructor(private predicateType: PredicateType, predicate: any, ...parameters: any[]) {
         super(OperatorType.Where);
 
         //this._parameters = parameters;
@@ -119,7 +121,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                         default:
                             return 1;
                     }
-
+                
                 default:
                     return 0;
             }
@@ -129,16 +131,17 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
     }
 
     public getExpressionGroups(): Iterable<IterableIterator<ILogicalExpression>> {
-        let it = this._it,
+        let me = this,
+            it = this._it,
             visit = function* (expression: IExpression): Iterable<IterableIterator<ILogicalExpression>> {
-                let visitGroup = function* (child: LogicalExpression): IterableIterator<ILogicalExpression> {
-                    switch (child.operator) {
+                let visitGroup = function* (child: LogicalExpression | MethodExpression): IterableIterator<ILogicalExpression> {
+                    switch (child.type == ExpressionType.Logical ? (<LogicalExpression>child).operator : -1) {
                         case LogicalOperatorType.Or:
                             break;
 
                         case LogicalOperatorType.And:
-                            if (child.left instanceof LogicalExpression) yield* visitGroup(child.left);
-                            if (child.right instanceof LogicalExpression) yield* visitGroup(child.right);
+                            if ((<LogicalExpression>child).left instanceof LogicalExpression) yield* visitGroup(<LogicalExpression>(<LogicalExpression>child).left);
+                            if ((<LogicalExpression>child).right instanceof LogicalExpression) yield* visitGroup(<LogicalExpression>(<LogicalExpression>child).right);
                             break;
 
                         default:                      
@@ -184,6 +187,52 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                                                 return reduceMemberToIdentifier((<IUnaryExpression>expr).argument);
                                         }
 
+                                    case ExpressionType.Method:
+                                        if(me.predicateType == 'OData') {
+                                            switch((<MethodExpression>expr).name) {
+                                                case 'tolower':
+                                                case 'toupper':
+                                                    return reduceMemberToIdentifier((<MethodExpression>expr).parameters[0])
+
+                                                case 'contains': // bool contains(string p0, string p1)
+                                                case 'substringof': { // bool substringof(string po, string p1)                                   
+                                                    let left = reduceMemberToIdentifier((<MethodExpression>expr).parameters[0]),
+                                                        right = reduceMemberToIdentifier((<MethodExpression>expr).parameters[1]);
+
+                                                    if (right.type == ExpressionType.Literal) {
+                                                        (<LiteralExpression>right).value = `*${(<LiteralExpression>right).value}*`
+
+                                                        return new LogicalExpression(LogicalOperatorType.Equal, left, right)
+                                                    }
+
+                                                    return expr;
+                                                }
+                                                case 'endswith': { // bool endswith(string p0, string p1)
+                                                    let left = reduceMemberToIdentifier((<MethodExpression>expr).parameters[0]),
+                                                        right = reduceMemberToIdentifier((<MethodExpression>expr).parameters[1]);
+
+                                                    if (right.type == ExpressionType.Literal) {
+                                                        (<LiteralExpression>right).value = `*${(<LiteralExpression>right).value}`
+
+                                                        return new LogicalExpression(LogicalOperatorType.Equal, left, right)
+                                                    }
+                                                }
+                                                case 'startswith': { // bool startswith(string p0, string p1)
+                                                    let left = reduceMemberToIdentifier((<MethodExpression>expr).parameters[0]),
+                                                        right = reduceMemberToIdentifier((<MethodExpression>expr).parameters[1]);
+
+                                                    if (right.type == ExpressionType.Literal) {
+                                                        (<LiteralExpression>right).value = `${(<LiteralExpression>right).value}*`
+
+                                                        return new LogicalExpression(LogicalOperatorType.Equal, left, right)
+                                                    }
+                                                } 
+    
+                                            }    
+                                        }
+                                    
+                                        return expr; 
+
                                     default:
                                         return expr;
                                 }
@@ -195,6 +244,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                     }
                 }
 
+
                 if (expression instanceof LogicalExpression) {
                     if (expression.operator == LogicalOperatorType.Or) {
                         yield* visit(expression.left);
@@ -202,6 +252,12 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                     }
                     else {
                         yield visitGroup(expression);
+                    }
+                } 
+                else if (me.predicateType == 'OData') {
+                    if (expression instanceof MethodExpression) {
+                        if(['contains', 'substringof', 'endswith', 'startswith'].indexOf(expression.name) >= 0)
+                            yield visitGroup(expression)
                     }
                 }
             };

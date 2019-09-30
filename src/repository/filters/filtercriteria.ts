@@ -4,7 +4,7 @@ export interface IFilterCriteria {
     property: string
     operator: string
     value: any
-
+    wildcard: 'none' | 'left' | 'right' | 'both'
     isValid: boolean
 }
 
@@ -54,6 +54,19 @@ export class FilterCriteria implements IFilterCriteria {
             default:
                 return "";
         }
+    }
+
+    public get wildcard() {
+        let value = String(this.getValue())
+
+        if(value.startsWith('*') && value.endsWith('*')) 
+            return 'both'
+        else if(value.startsWith('*'))
+            return 'left'
+        else if(value.endsWith('*'))
+            return 'right'
+            
+        return 'none'
     }
 
     public get operator() {
@@ -111,6 +124,10 @@ export class FilterCriteria implements IFilterCriteria {
     }
 
     public get value() {
+        return this.cleanWildcard(this.getValue())
+    }
+
+    private getValue() {
         switch (this._expression.left.type) {
             case ExpressionType.Literal:
                 return (<ILiteralExpression>this._expression.left).value;
@@ -201,4 +218,17 @@ export class FilterCriteria implements IFilterCriteria {
         return result.filter((criteria) => criteria.isValid);
     }
 
+    private cleanWildcard(value: any) {
+        if(typeof value == 'string') {
+
+            let match = /^\*?(.*?)\*?$/.exec(value)
+            if(match) {
+                return match[1]
+            }
+
+            return value
+        }
+
+        return value
+    }
 }

@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+﻿import * as assert from 'assert';
 import Repository from './../repository/baserepository';
 import Enumerable, { IEnumerable } from './../linq/enumerable';
 
@@ -111,6 +111,45 @@ describe("When using repository to read all", () => {
         assert.equal(list[0].operator, '==');
         assert.equal(list[0].value, 'Toyota');
 
+    })
+
+    it("should handle odata using exact query", () => {
+        var list = repository.exposeFilters(new Enumerable<ICar>().where("tolower(location) eq 'porsgrunn'"))
+
+        assert.equal(list.length, 1);
+        assert.equal(list[0].property, 'location')
+        assert.equal(list[0].operator, '==');
+        assert.equal(list[0].value, 'porsgrunn');
+    })
+
+    it("should handle odata using wildcard (starts) query", () => {
+        var list = repository.exposeFilters(new Enumerable<ICar>().where("startswith(tolower(location), 'porsgr')"))
+
+        assert.equal(list.length, 1);
+        assert.equal(list[0].property, 'location')
+        assert.equal(list[0].operator, '==');
+        assert.equal(list[0].value, 'porsgr');
+        assert.equal(list[0].wildcard, 'right');
+    })
+    
+    it("should handle odata using wildcard (ends) query", () => {
+        var list = repository.exposeFilters(new Enumerable<ICar>().where("endswith(tolower(location), 'grunn')"))
+
+        assert.equal(list.length, 1);
+        assert.equal(list[0].property, 'location')
+        assert.equal(list[0].operator, '==');
+        assert.equal(list[0].value, 'grunn');
+        assert.equal(list[0].wildcard, 'left');
+    })
+
+    it("should handle odata using wildcard (starts/ends) query", () => {
+        var list = repository.exposeFilters(new Enumerable<ICar>().where("contains(tolower(location), 'orsgru')"))
+
+        assert.equal(list.length, 1);
+        assert.equal(list[0].property, 'location')
+        assert.equal(list[0].operator, '==');
+        assert.equal(list[0].value, 'orsgru');
+        assert.equal(list[0].wildcard, 'both');
     })
 });
 
