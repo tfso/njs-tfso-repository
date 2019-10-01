@@ -140,8 +140,8 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                             break;
 
                         case LogicalOperatorType.And:
-                            if ((<LogicalExpression>child).left instanceof LogicalExpression) yield* visitGroup(<LogicalExpression>(<LogicalExpression>child).left);
-                            if ((<LogicalExpression>child).right instanceof LogicalExpression) yield* visitGroup(<LogicalExpression>(<LogicalExpression>child).right);
+                            yield* visitGroup(<LogicalExpression>(<LogicalExpression>child).left);
+                            yield* visitGroup(<LogicalExpression>(<LogicalExpression>child).right);
                             break;
 
                         default:                      

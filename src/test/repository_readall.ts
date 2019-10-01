@@ -151,6 +151,12 @@ describe("When using repository to read all", () => {
         assert.equal(list[0].value, 'orsgru');
         assert.equal(list[0].wildcard, 'both');
     })
+
+    it("should handle odata using wildcard with other queries", () => {
+        var list = repository.exposeFilters(new Enumerable<ICar>().where("reqistrationYear eq 2017 and contains(tolower(location), 'ors')"))
+
+        assert.equal(list.length, 2);
+    })
 });
 
 
