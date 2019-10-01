@@ -200,9 +200,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                                                         right = reduceMemberToIdentifier((<MethodExpression>expr).parameters[1]);
 
                                                     if (right.type == ExpressionType.Literal) {
-                                                        (<LiteralExpression>right).value = `*${(<LiteralExpression>right).value}*`
-
-                                                        return new LogicalExpression(LogicalOperatorType.Equal, left, right)
+                                                        return new LogicalExpression(LogicalOperatorType.Equal, left, new LiteralExpression(`*${(<LiteralExpression>right).value}*`))
                                                     }
 
                                                     return expr;
@@ -212,9 +210,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                                                         right = reduceMemberToIdentifier((<MethodExpression>expr).parameters[1]);
 
                                                     if (right.type == ExpressionType.Literal) {
-                                                        (<LiteralExpression>right).value = `*${(<LiteralExpression>right).value}`
-
-                                                        return new LogicalExpression(LogicalOperatorType.Equal, left, right)
+                                                        return new LogicalExpression(LogicalOperatorType.Equal, left, new LiteralExpression(`*${(<LiteralExpression>right).value}`))
                                                     }
                                                 }
                                                 case 'startswith': { // bool startswith(string p0, string p1)
@@ -222,9 +218,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                                                         right = reduceMemberToIdentifier((<MethodExpression>expr).parameters[1]);
 
                                                     if (right.type == ExpressionType.Literal) {
-                                                        (<LiteralExpression>right).value = `${(<LiteralExpression>right).value}*`
-
-                                                        return new LogicalExpression(LogicalOperatorType.Equal, left, right)
+                                                        return new LogicalExpression(LogicalOperatorType.Equal, left, new LiteralExpression(`${(<LiteralExpression>right).value}*`))
                                                     }
                                                 } 
     
