@@ -23,9 +23,9 @@ export interface IEnumerableOptions<TEntity> {
 export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<TEntity> {
     readonly operations: Operations<TEntity>
 
-    from(items: Array<TEntity>)
-    from(items: Iterable<TEntity>)
-    from(items: AsyncIterable<TEntity>)
+    from(items: Array<TEntity>): this
+    from(items: Iterable<TEntity>): this
+    from(items: AsyncIterable<TEntity>): this
 
     /**
      * A remapper of identifier names, members is seperated with dot.
