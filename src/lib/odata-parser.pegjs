@@ -320,10 +320,11 @@ HexDigit
 
 StringLiteral
     = "\'" chars:(Escape / !['\\\n\r] . )* "\'"                   
-    { return { type: 'Literal', value: chars.map(l => l[0] == undefined ? l[1] : l[0] + l[1]).join('') } }
+    { return { type: 'Literal', value: chars.map(l => l[0] == undefined ? l[1] : l[0] + l[1]).join('').replace(/\\(["'\\])|'(')/g, '$1$2') } }
 
 Escape
-    = "\\" ([btnfr"'\\] / OctalEscape / UnicodeEscape)
+    = "''" 
+    / "\\" ([btnfr"'\\] / OctalEscape / UnicodeEscape)
 
 OctalEscape
     = [0-3][0-7][0-7]
