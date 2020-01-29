@@ -139,9 +139,9 @@ export class ReducerVisitor extends ExpressionVisitor {
 
             switch (expression.operator) {
                 case LogicalOperatorType.Equal:
-                    return new LiteralExpression(leftValue == rightValue);
+                    return new LiteralExpression(leftValue >= rightValue && leftValue <= rightValue); // fixes date comparements
                 case LogicalOperatorType.NotEqual:
-                    return new LiteralExpression(leftValue != rightValue);
+                    return new LiteralExpression(leftValue < rightValue || leftValue > rightValue); // fixes date comparements
                 case LogicalOperatorType.And:
                     return new LiteralExpression(leftValue && rightValue);
                 case LogicalOperatorType.Or:

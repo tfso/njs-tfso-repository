@@ -238,7 +238,7 @@ export class ExpressionVisitor implements IExpressionVisitor {
             case 'DateLiteral':
                 let value = new Date(expression.value)
                 
-                return new LiteralExpression(new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate(), 12, 0, 0, 999)))
+                return new LiteralExpression(new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate(), 0, 0, 0, 0)))
 
             case 'NumberLiteral':
                 return new LiteralExpression(Number(expression.value))

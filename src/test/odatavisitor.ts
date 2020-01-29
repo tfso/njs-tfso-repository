@@ -4,7 +4,7 @@ import { ODataVisitor } from './../linq/expressions/odatavisitor';
 
 describe("When using OData for ExpressionVisitor", () => {
     var reducer: ODataVisitor,
-        vars = { number: 5, stringhavingdate: '2018-05-30Z', string: 'abc', decimal: 5.50, date: new Date("2017-05-10T06:48:00Z"), object: { number: 7 } }
+        vars = { number: 5, stringhavingdate: '2018-05-30Z', string: 'abc', decimal: 5.50, dateonly: new Date("2020-01-28Z"), date: new Date("2017-05-10T06:48:00Z"), object: { number: 7 } }
 
     beforeEach(() => {
         reducer = new ODataVisitor();
@@ -97,6 +97,23 @@ describe("When using OData for ExpressionVisitor", () => {
         assert.equal(expr.type, Expr.ExpressionType.Literal);
         assert.equal((<Expr.LiteralExpression>expr).value, true);
     })
+
+    it("should evaluate a expression with date as type for greater and equal", () => {
+        let reduced = reducer.visitOData("dateonly ge 2020-01-28Z"),
+            expr = reducer.evaluate(reduced, vars);
+
+        assert.equal(expr.type, Expr.ExpressionType.Literal);
+        assert.equal((<Expr.LiteralExpression>expr).value, true);
+    })
+
+    it("should evaluate a expression with date as type for equal", () => {
+        let reduced = reducer.visitOData("dateonly eq 2020-01-28Z"),
+            expr = reducer.evaluate(reduced, vars);
+
+        assert.equal(expr.type, Expr.ExpressionType.Literal);
+        assert.equal((<Expr.LiteralExpression>expr).value, true);
+    })
+
 
     it("should evaluate a expression with date as string", () => {
         let reduced = reducer.visitOData("date ge datetime'2017-05-01Z'"),
