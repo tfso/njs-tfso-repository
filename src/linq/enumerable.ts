@@ -51,6 +51,7 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<T
     where(predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: any[]): this
 
     orderBy(property: (it: TEntity) => void): this
+    orderBy(property: keyof TEntity): this
 
     //range(start: number, count: number): this
     
@@ -381,7 +382,9 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         return this;
     }
 
-    public orderBy(property: (it: TEntity) => void): this {
+    public orderBy(property: (it: TEntity) => void): this
+    public orderBy(property: keyof TEntity): this 
+    public orderBy(property: keyof TEntity | ((it: TEntity) => void)): this {
         this._operations.add(new OrderByOperator<TEntity>(property));
 
         return this;

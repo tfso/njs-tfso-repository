@@ -393,8 +393,20 @@ describe("When using Enumerable", () => {
         assert.deepEqual(ar.map(item => item.location), ["BREVIK", "BREVIK", "HEISTAD", "LANGESUND", "LARVIK", "PORSGRUNN", "PORSGRUNN", "SKIEN"]);
     })
 
-    it("should be able to get first element", () => {
+    it("should be able to get first element after order by a property", () => {
         var el = new Enumerable(cars).orderBy(it => it.location).first();
+
+        assert.equal(el.id, 5);
+    })
+
+    it("should order by a string", () => {
+        var ar = new Enumerable(cars).orderBy('location').toArray();
+        
+        assert.deepEqual(ar.map(item => item.location), ["BREVIK", "BREVIK", "HEISTAD", "LANGESUND", "LARVIK", "PORSGRUNN", "PORSGRUNN", "SKIEN"]);
+    })
+
+    it("should be able to get first element after order by a string", () => {
+        var el = new Enumerable(cars).orderBy('location').first();
 
         assert.equal(el.id, 5);
     })

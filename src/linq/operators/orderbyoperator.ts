@@ -2,52 +2,43 @@
 import { ExpressionVisitor, IExpression, ExpressionType, IMemberExpression, IIdentifierExpression } from './../expressions/expressionvisitor';
 
 export class OrderByOperator<TEntity> extends Operator<TEntity> {
-    private _expression: IExpression;
+    private property: string | number | symbol
 
-    constructor(public property: (it: TEntity) => void) {
+    constructor(property: keyof TEntity | ((it: TEntity) => void)) {
         super(OperatorType.OrderBy);
 
-        this._expression = new ExpressionVisitor().visitLambda(property);
+        if(typeof property == 'function') {
+            let expression = new ExpressionVisitor().visitLambda(property);
+
+            if (expression.type != ExpressionType.Member)
+                throw new TypeError('Order by is expecting a member property as sorting property');
+
+            if ((<IMemberExpression>expression).property.type != ExpressionType.Identifier)
+                throw new TypeError('Order by is expecting a member property as sorting property');
+
+            this.property = (<IIdentifierExpression>(<IMemberExpression>expression).property).name
+        }
+        else {
+            this.property = property
+        }
     }
 
     public * evaluate(items: Iterable<TEntity>): IterableIterator<TEntity> {
-        if (this._expression.type != ExpressionType.Member)
-            throw new TypeError('Order by is expecting a member property as sorting property');
-
-        var memberProperty: IExpression = (<IMemberExpression>this._expression).property,
-            property: IIdentifierExpression;
-
-        if (memberProperty.type != ExpressionType.Identifier)
-            throw new TypeError('Order by is expecting a member property as sorting property');
-
-        property = <IIdentifierExpression>memberProperty;
-
         let ar = Array.from(items);
         ar.sort((a, b) => {
-            return a[property.name] == b[property.name] ? 0 : a[property.name] < b[property.name] ? -1 : 1;
+            return a[this.property] == b[this.property] ? 0 : a[this.property] < b[this.property] ? -1 : 1;
         })
 
-        yield* ar;   
+        yield* ar;
     }
 
     public async * evaluateAsync(items: AsyncIterable<TEntity>): AsyncIterableIterator<TEntity> {
-        if (this._expression.type != ExpressionType.Member)
-            throw new TypeError('Order by is expecting a member property as sorting property');
-
-        var memberProperty: IExpression = (<IMemberExpression>this._expression).property,
-            property: IIdentifierExpression;
-
-        if (memberProperty.type != ExpressionType.Identifier)
-            throw new TypeError('Order by is expecting a member property as sorting property');
-
-        property = <IIdentifierExpression>memberProperty;
-
         let ar: Array<TEntity> = [];
         for await(let item of items)
             ar.push(item);
 
         ar.sort((a, b) => {
-            return a[property.name] == b[property.name] ? 0 : a[property.name] < b[property.name] ? -1 : 1;
+            return a[this.property] == b[this.property] ? 0 : a[this.property] < b[this.property] ? -1 : 1;
         })
 
         yield* ar;   
