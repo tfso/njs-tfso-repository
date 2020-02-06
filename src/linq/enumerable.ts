@@ -243,11 +243,13 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
     * returns a new IEnumerable of TResult
     * @param selector
     */
-    public select<TResult>(selector: (it: TEntity) => TResult): IEnumerable<TResult> {
+    public select<TResult>(selector: (it: TEntity) => TResult): IEnumerable<TResult>
+    public select<TResult extends Partial<TEntity>>(selector: string): IEnumerable<TResult>
+    public select(selector: string | ((it: TEntity) => Record<string, any>)): IEnumerable<Record<string, any>> {
         if (typeof this.items == 'object' && typeof this.items[Symbol.asyncIterator] == 'function') {
-            return new Enumerable<TResult>(new SelectOperator<TEntity>(selector).evaluateAsync(this));
+            return new Enumerable(new SelectOperator(selector).evaluateAsync(this));
         } else {
-            return new Enumerable<TResult>(new SelectOperator<TEntity>(selector).evaluate(this));
+            return new Enumerable(new SelectOperator(selector).evaluate(this));
         }
     }
 

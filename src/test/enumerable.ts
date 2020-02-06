@@ -461,6 +461,16 @@ describe("When using Enumerable", () => {
         assert.equal(car.model, 'QASHQAI');
     })
 
+    it("should be able to convert list by using select by string", () => {
+        let car = new Enumerable(cars)
+            .where(it => it.id == 2)
+            .select('id, type/make')
+            .first();
+
+        assert.equal(car.id, 2);
+        assert.equal(car.type.make, 'NISSAN')
+    })
+
     it("should be able to get first Operator by class", () => {
         let query: Enumerable<ICar> = new Enumerable<ICar>();
 
