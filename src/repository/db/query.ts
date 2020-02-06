@@ -93,7 +93,7 @@ export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>>
          */
     protected abstract executeQuery(): Promise<IRecordSet<TEntity>>
 
-    private execute<U>(onFulfilled?: (value: IRecordSet<TEntity>) => U | PromiseLike<U>, onRejected?: (error: Error) => U | PromiseLike<U>): Promise<U> {
+    private execute<U, V>(onFulfilled?: (value: IRecordSet<TEntity>) => U | PromiseLike<U>, onRejected?: (error: Error) => V | PromiseLike<V>): Promise<U | V> {
         var stamped = Date.now();
 
         if (!this._promise) {
@@ -110,12 +110,12 @@ export abstract class Query<TEntity> implements PromiseLike<IRecordSet<TEntity>>
             .then(onFulfilled, onRejected);
     }
 
-    public then<U>(onFulfilled?: (value: IRecordSet<TEntity>) => U | PromiseLike<U>, onRejected?: (error: Error) => U | PromiseLike<U>): Promise<U> {
-        return this.execute<U>(onFulfilled, onRejected);
+    public then<U, V>(onFulfilled?: (value: IRecordSet<TEntity>) => U | PromiseLike<U>, onRejected?: (error: Error) => V | PromiseLike<V>): Promise<U | V> {
+        return this.execute<U, V>(onFulfilled, onRejected);
     }
 
     public catch<U>(onRejected?: (error: Error) => U | PromiseLike<U>): Promise<U> {
-        return this.execute<U>(undefined, onRejected);
+        return this.execute<never, U>(undefined, onRejected);
     }
 }
 

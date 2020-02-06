@@ -2,9 +2,14 @@
   "compileOnSave": true,
   "compilerOptions": {
     "target": "ES2017",
+    "lib": [
+        "es2018",
+        "es2018.asynciterable"
+    ],
     "downlevelIteration": true,
     //"types": ["node", "mocha"],
     "module": "commonjs",
+    "skipLibCheck": true,
     "declaration": true,
     "newLine": "LF",
     //"noImplicitAny": true,
