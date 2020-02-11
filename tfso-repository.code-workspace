@@ -1,13 +1,11 @@
 {
 	"folders": [
 		{
-			"path": "."
+			"path": ".",
+			"name": "tfso-repository"
 		}
 	],
 	"settings": {
-		"mocha.env": {
-			"TS_NODE_COMPILER": "${workspaceRoot}/node_modules/typescript/bin/tsc"
-		},
 		"launch": {
 			"verison": "0.2.0",
 			"configurations": [
@@ -17,9 +15,12 @@
 					"name": "Run program",
 					"args": ["src/main.ts"],
 					"runtimeArgs": ["-r", "ts-node/register"],
-					"cwd": "${workspaceRoot}",
+					"cwd": "${workspaceFolder:tfso-repository}",
 					"protocol": "inspector",
-					"internalConsoleOptions": "openOnSessionStart"
+					"internalConsoleOptions": "openOnSessionStart",
+					"env": {
+						"TS_NODE_TRANSPILE_ONLY": "1"
+					}
 				},
 				{
 					"type": "node",
@@ -27,19 +28,25 @@
 					"name": "Run current file",
 					"args": ["${relativeFile}"],
 					"runtimeArgs": ["-r", "ts-node/register"],
-					"cwd": "${workspaceRoot}",
+					"cwd": "${workspaceFolder:tfso-repository}",
 					"protocol": "inspector",
-					"internalConsoleOptions": "openOnSessionStart"
+					"internalConsoleOptions": "openOnSessionStart",
+					"env": {
+						"TS_NODE_TRANSPILE_ONLY": "1"
+					}
 				},
 				{
 					"name": "Run mocha",
 					"type": "node",
 					"request": "launch",
-					"program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+					"program": "${workspaceFolder:tfso-repository}/node_modules/mocha/bin/_mocha",
 					"stopOnEntry": false,
 					"args": ["--no-timeouts", "--compilers", "ts:ts-node/register", "--compiler", "--require", "ts-node/register", "${workspaceFolder}/src/test/**/*.ts"],
-					"cwd": "${workspaceRoot}",
-					"protocol": "inspector"
+					"cwd": "${workspaceFolder:tfso-repository}",
+					"protocol": "inspector",
+					"env": {
+						"TS_NODE_TRANSPILE_ONLY": "1"
+					}
 				}
 			]
 		},
@@ -61,17 +68,15 @@
 			"obj": true,
 			"typings": true
 		},
-		"typescript.tsdk": "./node_modules/typescript/lib",
-		"mocha.options": {
-			"compilers": {
-				"ts": "ts-node/register"
-			}
-		},			
+		"typescript.tsdk": "./node_modules/typescript/lib",		
 		"mocha.files.glob": "src/test/*.ts",
 		"mocha.requires": [
 			"ts-node/register"
 		],
-		"mocha.parallelTests": 30,
+		"mocha.env": {
+			"TS_NODE_TRANSPILE_ONLY": "1"
+		},
+		"mocha.parallelTests": 5,
 		//Mocha: this option allows you to enable/disable lens decorations and set update threshold "
 		"mocha.sideBarOptions": {
 			"default": {

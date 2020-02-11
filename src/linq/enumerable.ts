@@ -52,6 +52,7 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<T
 
     orderBy(property: (it: TEntity) => void): this
     orderBy(property: keyof TEntity): this
+    orderBy(property: string): this
 
     //range(start: number, count: number): this
     
@@ -186,19 +187,24 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * A remapper of identifier names, members is seperated with dot.
      * @param remapper Function that returns the new name of the identifier
      */
-    public remap<TResult>(remapper: (name: string) => string) : IEnumerable<TResult>
+    public remap<TResult>(remapper: (name: string) => string) : Enumerable<TResult>
     /**
      * A remapper of values that corresponds to a identifier name
      * @param remapper Function that returns the new value
      */
-    public remap<TResult>(remapper: (name: string, value: any) => any) : IEnumerable<TResult>
-    public remap<TResult>(remapper: (...args) => any) : IEnumerable<TResult> {
+    public remap<TResult>(remapper: (name: string, value: any) => any) : Enumerable<TResult>
+    public remap<TResult>(remapper: (...args) => any) : Enumerable<TResult> {
         let visitor = remapper.length == 2 ? new RemapVisitor(null, remapper) : new RemapVisitor(remapper, null);
     
         for (let item of this._operations.values()) {
             switch (item.type) {
                 case OperatorType.Where:
                     (<WhereOperator<TEntity>>item).expression = visitor.visit((<WhereOperator<TEntity>>item).expression);
+                    break;
+
+                case OperatorType.OrderBy:
+                    if(remapper.length == 1)     
+                        (<OrderByOperator<TEntity>>item).property = remapper((<OrderByOperator<TEntity>>item).property);
                     break;
             }
         }
@@ -244,9 +250,9 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
     * returns a new IEnumerable of TResult
     * @param selector
     */
-    public select<TResult>(selector: (it: TEntity) => TResult): IEnumerable<TResult>
-    public select<TResult extends Partial<TEntity>>(selector: string): IEnumerable<TResult>
-    public select(selector: string | ((it: TEntity) => Record<string, any>)): IEnumerable<Record<string, any>> {
+    public select<TResult>(selector: (it: TEntity) => TResult): Enumerable<TResult>
+    public select<TResult extends Partial<TEntity>>(selector: string): Enumerable<TResult>
+    public select(selector: string | ((it: TEntity) => Record<string, any>)): Enumerable<Record<string, any>> {
         if (typeof this.items == 'object' && typeof this.items[Symbol.asyncIterator] == 'function') {
             return new Enumerable(new SelectOperator(selector).evaluateAsync(this));
         } else {
@@ -263,7 +269,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * @param indexing If set to true an Array of outerKey will be passed into iterator of TInner as { keys: Array<any> }. Cons, all elements of outer iterator will be be kept in memory.
      * @returns IEnumerable<TResult>
      */
-    public groupJoin<TInner, TResult>(inner: Iterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing?: boolean): IEnumerable<TResult>
+    public groupJoin<TInner, TResult>(inner: Iterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing?: boolean): Enumerable<TResult>
     /**
      * returns a new IEnumerable of TResult (Left Join)
      * @param inner
@@ -273,8 +279,8 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * @param indexing If set to true an Array of outerKey will be passed into iterator of TInner as { keys: Array<any> }. Cons, all elements of outer iterator will be be kept in memory.
      * @returns IEnumerable<TResult>
      */
-    public groupJoin<TInner, TResult>(inner: AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing?: boolean): IEnumerable<TResult> 
-    public groupJoin<TInner, TResult>(inner: Iterable<TInner> | AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing: boolean = false): IEnumerable<TResult> {
+    public groupJoin<TInner, TResult>(inner: AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing?: boolean): Enumerable<TResult> 
+    public groupJoin<TInner, TResult>(inner: Iterable<TInner> | AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing: boolean = false): Enumerable<TResult> {
         let iterable: Iterable<TInner> | AsyncIterable<TInner> = ((scope) => <any>{
             [Symbol.asyncIterator]: (options) => {
                 return inner[Symbol.asyncIterator](Object.assign({ parent: scope }, options));
@@ -300,7 +306,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * @param indexing If set to true an Array of outerKey will be passed into iterator of TInner as { keys: Array<any> }. Cons, all elements of outer iterator will be be kept in memory.
      * @returns IEnumerable<TResult>
      */
-    public join<TInner, TResult>(inner: Iterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing?: boolean): IEnumerable<TResult> 
+    public join<TInner, TResult>(inner: Iterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing?: boolean): Enumerable<TResult> 
     /**
      * returns a new IEnumerable of TResult (Inner Join)
      * @param inner
@@ -310,8 +316,8 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * @param indexing If set to true an Array of outerKey will be passed into iterator of TInner as { keys: Array<any> }. Cons, all elements of outer iterator will be be kept in memory.
      * @returns IEnumerable<TResult>
      */
-    public join<TInner, TResult>(inner: AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing?: boolean): IEnumerable<TResult>
-    public join<TInner, TResult>(inner: Iterable<TInner> | AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing: boolean = false): IEnumerable<TResult> {
+    public join<TInner, TResult>(inner: AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing?: boolean): Enumerable<TResult>
+    public join<TInner, TResult>(inner: Iterable<TInner> | AsyncIterable<TInner>, outerKey: (outer: TEntity) => void, innerKey: (inner: TInner) => void, selector: (outer: TEntity, inner: IEnumerable<TInner>) => TResult, indexing: boolean = false): Enumerable<TResult> {
         let iterable: Iterable<TInner> | AsyncIterable<TInner> = ((scope) => <any>{
             [Symbol.asyncIterator]: (options) => {
                 return inner[Symbol.asyncIterator](Object.assign({ parent: scope }, options));
@@ -384,7 +390,8 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
 
     public orderBy(property: (it: TEntity) => void): this
     public orderBy(property: keyof TEntity): this 
-    public orderBy(property: keyof TEntity | ((it: TEntity) => void)): this {
+    public orderBy(property: string): this 
+    public orderBy(property: string | keyof TEntity | ((it: TEntity) => void)): this {
         this._operations.add(new OrderByOperator<TEntity>(property));
 
         return this;

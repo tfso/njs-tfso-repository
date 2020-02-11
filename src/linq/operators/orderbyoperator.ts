@@ -2,9 +2,9 @@
 import { ExpressionVisitor, IExpression, ExpressionType, IMemberExpression, IIdentifierExpression } from './../expressions/expressionvisitor';
 
 export class OrderByOperator<TEntity> extends Operator<TEntity> {
-    private property: string | number | symbol
+    public property: string | number | symbol
 
-    constructor(property: keyof TEntity | ((it: TEntity) => void)) {
+    constructor(property: string | keyof TEntity | ((it: TEntity) => void)) {
         super(OperatorType.OrderBy);
 
         if(typeof property == 'function') {
