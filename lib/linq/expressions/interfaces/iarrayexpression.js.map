@@ -1,0 +1,1 @@
+{"version":3,"file":"iarrayexpression.js","sourceRoot":"","sources":["../../../../src/linq/expressions/interfaces/iarrayexpression.ts"],"names":[],"mappings":"","sourcesContent":["import { IExpression } from './iexpression';\n\nexport interface IArrayExpression extends IExpression {\n    elements: Array<IExpression>\n}"]}
