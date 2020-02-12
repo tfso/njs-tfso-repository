@@ -11,7 +11,7 @@ describe("When using TemplateLiteral for ExpressionVisitor", () => {
             switch (typeof value)
             {
                 case 'object':
-                    if ((<Object>value).hasOwnProperty('key'))
+                    if (typeof value == 'object' && 'key' in value)
                         return '<a href="#' + value['key'] + '">' + value['value'] + '</a>';
                     else
                         return '<a href="#' + value['value'] + '">' + value['value'] + '</a>';
