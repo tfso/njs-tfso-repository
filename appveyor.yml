@@ -15,13 +15,11 @@ install:
   # install modules
   - npm install
   - npm install -g tfso/AppVeyor#1.0.110
-  - npm install -g mocha-appveyor-reporter
-  - npm install -g mocha
 build_script:
   - node node_modules\typescript\bin\tsc
   - patch-version
 test_script:
-  - mocha --reporter mocha-appveyor-reporter ./lib/test/ --no-exit
+  - npm run test
 after_test:
   # remove npm_modules as this should be installed whenever this package is used
   - FOR /f %%n IN ('dir .\node_modules /d /b /a:d ^| findstr /R /C:"^[A-Za-z].*$"') DO npm uninstall %%n
