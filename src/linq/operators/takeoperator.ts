@@ -13,6 +13,9 @@ export class TakeOperator<TEntity> extends Operator<TEntity> {
                 break;
 
             yield item;
+
+            if (idx == this.count && this.removed == false)
+                break;
         }
     }
 
@@ -24,6 +27,9 @@ export class TakeOperator<TEntity> extends Operator<TEntity> {
                 break;
 
             yield item;
+
+            if (idx == this.count && this.removed == false)
+                break;
         }
     }
 }
