@@ -1,0 +1,1 @@
+{"version":3,"file":"imethodexpression.js","sourceRoot":"","sources":["../../../../src/linq/expressions/interfaces/imethodexpression.ts"],"names":[],"mappings":"","sourcesContent":["import { IExpression } from './iexpression';\n\nexport interface IMethodExpression extends IExpression {\n    name: string\n    parameters: Array<IExpression>\n    caller: IExpression\n}\n"]}

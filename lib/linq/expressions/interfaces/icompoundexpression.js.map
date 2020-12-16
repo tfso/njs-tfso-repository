@@ -1,0 +1,1 @@
+{"version":3,"file":"icompoundexpression.js","sourceRoot":"","sources":["../../../../src/linq/expressions/interfaces/icompoundexpression.ts"],"names":[],"mappings":"","sourcesContent":["import { IExpression } from './iexpression';\n\nexport interface ICompoundExpression extends IExpression {\n    body: Array<IExpression>\n}"]}
