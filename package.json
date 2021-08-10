@@ -1,20 +1,23 @@
 {
   "name": "tfso-repository",
-  "version": "0.0.0",
+  "version": "1.2.151",
   "description": "CRUD repository using JavaScript Expressions as a boolean predicate for database queries ",
   "author": {
-    "name": "Nicolai"
+    "name": "Lostfields"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tfso/njs-tfso-repository.git"
+    "url": "https://github.com/tfso/njs-tfso-repository"
   },
-  "main": "./lib/main.js",
+  "main": "./lib/main",
   "typings": "./lib/main",
   "scripts": {
     "test": "node node_modules/mocha/bin/_mocha --reporter spec --recursive lib/test/*.js",
-    "cover": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- --reporter spec --recursive lib/test/*.js"
+    "cover": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- --reporter spec --recursive lib/test/*.js",
+    "build": "tsc",
+    "preversion": "npm run build && npm test",
+    "postversion": "git push --tags"
   },
   "dependencies": {},
   "devDependencies": {

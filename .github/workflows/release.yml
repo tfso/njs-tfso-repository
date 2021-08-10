@@ -1,49 +1,60 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
-
-name: Node.js Package
-
 on:
   release:
     types: [created]
 
+name: release
+
 jobs:
   build:
+    name: create release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: setup
+        uses: actions/setup-node@v1
         with:
-          node-version: 12
-      - run: npm ci
-      - run: npm test
-      - run: npm run lint
-      - run: npm run build
+          node-version: 12        
+      - name: build project
+        run: |
+          npm ci
+          npm run build
+          npm test
+        env:
+          CI: true
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NPM_TFSO_TOKEN: ${{secrets.NPM_TFSO_TOKEN}}
+      - name: upload artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: artifact
+          path: | 
+            lib/
+            src/
+            package.json
+            README.md
+            LICENSE
 
-#  publish-npm:
-#    needs: build
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - uses: actions/setup-node@v1
-#        with:
-#          node-version: 12
-#          registry-url: https://registry.npmjs.org/
-#      - run: npm ci
-#      - run: npm publish
-#        env:
-#          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-
-  publish-gpr:
+  publish-github:
+    name: publish npm to github
+    if: "!github.event.release.prerelease" # https://developer.github.com/v3/activity/events/types/#releaseevent
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write    
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: download artifact
+        uses: actions/download-artifact@v2.0.10
+        with:
+          name: artifact
+      - name: setup
+        uses: actions/setup-node@v1
         with:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
-      - run: npm ci
-      - run: npm publish
+      - name: publish
+        run: |
+          npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
