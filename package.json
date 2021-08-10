@@ -1,5 +1,5 @@
 {
-  "name": "tfso-repository",
+  "name": "@tfso/njs-repository",
   "version": "1.2.152",
   "description": "CRUD repository using JavaScript Expressions as a boolean predicate for database queries ",
   "author": {
