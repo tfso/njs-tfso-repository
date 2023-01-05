@@ -81,7 +81,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
     
     public async * evaluateAsync(items: AsyncIterable<TEntity>): AsyncIterableIterator<TEntity> {    
         for await (let item of items)
-            if (this._predicate(item)) yield item;
+            if (this.removed || this._predicate(item)) yield item;
     }
 
     public getExpressionIntersection(): ILogicalExpression[] {
