@@ -36,7 +36,7 @@ describe("When using Enumerable", () => {
 
     beforeEach(() => {
         cars = [
-            <ICar>{ id: 1, location: 'SKIEN', registrationYear: 2016, type: { make: 'SAAB', model: '9-3' } },
+            <ICar>{ id: 1, location: 'SKIEN', registrationYear: 2016, optional: null, type: { make: 'SAAB', model: '9-3' } },
             <ICar>{ id: 2, location: 'PORSGRUNN', registrationYear: 2010, optional: 'yes', type: { make: 'NISSAN', model: 'QASHQAI' } },
             <ICar>{ id: 3, location: 'PORSGRUNN', registrationYear: 2005, type: { make: 'SAAB', model: '9-3' } },
             <ICar>{ id: 4, location: 'LANGESUND', registrationYear: 2004, optional: 'yes', type: { make: 'NISSAN', model: 'LEAF' } },
@@ -344,6 +344,15 @@ describe("When using Enumerable", () => {
             assert.equal(result.length, 2);
 
             let where = query.operations.first(WhereOperator);
+        })
+
+        it("should be able to use methods on optional values", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>();
+
+            query.where("contains(optional, 'es')");
+            
+            let result = query.toArray(cars);
+            assert.equal(result.length, 4);
         })
     })
 
