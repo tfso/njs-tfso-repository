@@ -354,6 +354,16 @@ describe("When using Enumerable", () => {
             let result = query.toArray(cars);
             assert.equal(result.length, 4);
         })
+
+        it("should be able to use nested methods on optional values", () => {
+            let query: Enumerable<ICar> = new Enumerable<ICar>();
+
+            query.where("contains(toupper(optional), 'ES')");
+            
+            let result = query.toArray(cars);
+            assert.equal(result.length, 4);
+        })
+
     })
 
     it("should take top 1", () => {
