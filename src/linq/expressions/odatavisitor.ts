@@ -133,15 +133,19 @@ export class ODataVisitor extends ReducerVisitor {
                 break;
                     
             case 'tolower': // string tolower(string p0)
-                if ((params = getParams(expression, 'string')) != null)
+                if ((params = getParams(expression, 'string|undefined')) != null) {
+                    if(params[0] == null)
+                        return new LiteralExpression(params[0])
                     return new LiteralExpression(String(params[0]).toLowerCase());
-
+                }
                 break;
 
             case 'toupper': // string toupper(string p0)
-                if ((params = getParams(expression, 'string')) != null)
+                if ((params = getParams(expression, 'string|undefined')) != null) {
+                    if(params[0] == null)
+                        return new LiteralExpression(params[0])
                     return new LiteralExpression(String(params[0]).toUpperCase());
-
+                }
                 break;
 
             case 'trim': // string trim(string p0)
