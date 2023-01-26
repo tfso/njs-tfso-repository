@@ -123,7 +123,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
                     }
                 
                 default:
-                    return 0;
+                    return 1;
             }
         }
 

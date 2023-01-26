@@ -114,6 +114,37 @@ describe("When using WhereOperator", () => {
         assert.equal((<ILiteralExpression>(<ILogicalExpression>intersection[0]).right).value, 2015);
     });
 
+    it("should be able to count expression properties", () => {
+        let where = new WhereOperator<ICar>('Javascript', car => (car.registrationYear >= 2015 && car.location == 'NO') || 2015 <= car.registrationYear || (car.location == 'SE' && car.registrationYear >= 2015)),
+            counts = where.getExpressionCount();
+
+        assert.equal(counts, 5);
+    })
+
+    it("should be able to count expression properties for odata", () => {
+        let where = new WhereOperator<ICar>('OData', `date ge 2023-01-01 and date le 2023-02-01 and contains(tolower(invoiceNo), tolower('invhoi2'))`),
+            counts = where.getExpressionCount();
+
+        assert.equal(counts, 3);
+    })
+
+
+    it("should be able to count and find intersections", () => {
+        let where = new WhereOperator<ICar>('OData', `date ge 2023-01-01 and date le 2023-02-01 and contains(tolower(invoiceNo), tolower('invhoi2'))`),
+            intersection = where.getExpressionIntersection(),
+            counts = where.getExpressionCount();
+
+        assert.equal(counts, intersection.length);
+    })
+
+    it("should be able to count expression properties where there is difference", () => {
+        let where = new WhereOperator<ICar>('Javascript', car => (car.registrationYear >= 2015 && car.location == 'NO') || 2015 <= car.registrationYear || (car.location == 'SE' && car.registrationYear >= 2015)),
+            intersection = where.getExpressionIntersection(),
+            counts = where.getExpressionCount();
+
+        assert.notEqual(counts, intersection);
+    })
+
     it("should get union expression properties", () => {
         let where = new WhereOperator<ICar>('Javascript', car => (car.registrationYear == 2015 && car.location == 'NO') || car.registrationYear == 2015 || (car.location == 'SE' && car.registrationYear == 2015)),
             intersection = where.getExpressionUnion();
