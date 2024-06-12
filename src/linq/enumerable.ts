@@ -48,7 +48,7 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<T
      * @param predicate javascript expression
      * @param parameters any javascript parameters has to be declared
      */
-    where(predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: any[]): this
+    where(predicate: (it: Required<TEntity>, ...param: any[]) => boolean, ...parameters: any[]): this
 
     orderBy(property: (it: TEntity) => void): this
     orderBy(property: keyof TEntity): this
@@ -142,8 +142,8 @@ export interface IEnumerable<TEntity> extends Iterable<TEntity>, AsyncIterable<T
     */
     select<TResult>(selector: (it: TEntity) => TResult): IEnumerable<TResult>
 
-    first(items?: Array<TEntity>): TEntity
-    firstAsync(items?: Array<TEntity>): Promise<TEntity>
+    first(items?: Array<TEntity>): TEntity | null
+    firstAsync(items?: Array<TEntity>): Promise<TEntity | null>
 
     toArray(items: Array<TEntity>): Array<TEntity>
     toArray(): Array<TEntity>
@@ -222,7 +222,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
      * @param predicate javascript expression
      * @param parameters any javascript parameters has to be declared
      */
-    public where(predicate: (it: TEntity, ...param: any[]) => boolean, ...parameters: any[]): this
+    public where(predicate: (it: Required<TEntity>, ...param: any[]) => boolean, ...parameters: any[]): this
     public where(): this {
         let predicate: any = arguments[0],
             parameters: Array<any> = [];
@@ -232,11 +232,11 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
 
         switch (typeof predicate) {
             case 'string':
-                this._operations.add(new WhereOperator<TEntity>('OData', predicate));
+                this._operations.add(new WhereOperator<Required<TEntity>>('OData', predicate));
                 break;
 
             case 'function':
-                this._operations.add(new WhereOperator<TEntity>('Javascript', predicate, ...parameters));
+                this._operations.add(new WhereOperator<Required<TEntity>>('Javascript', predicate, ...parameters));
                 break;
 
             default:
@@ -451,7 +451,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         return enumerable
     }
 
-    public first(items?: Array<TEntity>): TEntity {
+    public first(items?: Array<TEntity>): TEntity | null {
         if (items)
             this.from(items);
 
@@ -462,7 +462,7 @@ export class Enumerable<TEntity> implements IEnumerable<TEntity>
         return null;
     }
 
-    public async firstAsync(items?: Array<TEntity>): Promise<TEntity> {
+    public async firstAsync(items?: Array<TEntity>): Promise<TEntity | null> {
         if (items)
             this.from(items);
 

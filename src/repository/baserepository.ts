@@ -10,12 +10,14 @@ import { ILogicalExpression, LogicalExpression, LogicalOperatorType } from './..
 export { IEnumerable, IRecordSetMeta }
 
 export interface IBaseRepository<TEntity, TEntityId> {
-    create(entity: TEntity, meta?: IRecordSetMeta): Promise<TEntity>
+    create(entity: TEntity, meta?: IRecordSetMeta): Promise<TEntity | null>
+    create(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<TEntity | null>
+    create<T extends TEntity>(entity: T, meta?: IRecordSetMeta): Promise<T | null>
 
-    read(id: TEntityId, meta?: IRecordSetMeta): Promise<TEntity>
+    read(id?: TEntityId, meta?: IRecordSetMeta): Promise<TEntity | null>
     readAll(query: IEnumerable<TEntity>, meta?: IRecordSetMeta): Promise<TEntity[]>
 
-    update(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
+    update(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<TEntity | boolean | null>
     delete(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
 }
 
@@ -31,34 +33,20 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
 
     }
 
-    abstract read(id: TEntityId): Promise<TEntity>
-    abstract read(id: Partial<TEntityId>): Promise<TEntity>
-    abstract read(id: TEntityId, meta?: IRecordSetMeta): Promise<TEntity>
-    abstract read(id: Partial<TEntityId>, meta?: IRecordSetMeta): Promise<TEntity>
-    abstract read(id: TEntityId, meta?: IRecordSetMeta): Promise<TEntity>
-
+    abstract read(id?: TEntityId, meta?: IRecordSetMeta): Promise<TEntity | null>
+    abstract read(id?: Partial<TEntityId>, meta?: IRecordSetMeta): Promise<TEntity | null>
+    
     // ((t) => t.gender == 'female' && t.age >= 16)({gender: 'female', age: 17})     => true
     // ((t) => t.gender == 'female' && t.age >= 16).toString()                       => (t) => t.gender == \'female\' && t.age >= 16
-    abstract readAll(query: IEnumerable<TEntity>): Promise<TEntity[]>
-    abstract readAll(query: IEnumerable<TEntity>, meta?: IRecordSetMeta): Promise<TEntity[]>
-    abstract readAll(query: IEnumerable<TEntity>, meta?: IRecordSetMeta, parent?: IParentOptions): Promise<TEntity[]>
+    abstract readAll(query?: IEnumerable<TEntity>, meta?: IRecordSetMeta, parent?: IParentOptions): Promise<TEntity[]>
 
-    abstract create(entity: TEntity): Promise<TEntity>
-    abstract create(entity: Partial<TEntity>): Promise<TEntity>
-    abstract create(entity: TEntity, meta?: IRecordSetMeta): Promise<TEntity>
-    abstract create(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<TEntity>
-    abstract create(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<TEntity>
-
-    abstract update(entity: TEntity): Promise<boolean>
-    abstract update(entity: Partial<TEntity>): Promise<boolean>
-    abstract update(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
-    abstract update(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<boolean>
-    abstract update(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<boolean>
-
-    abstract delete(entity: TEntity): Promise<boolean>
-    abstract delete(entity: Partial<TEntity>): Promise<boolean>
+    abstract create(entity: TEntity, meta?: IRecordSetMeta): Promise<TEntity | null>
+    abstract create(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<TEntity | null>
+    
+    abstract update(entity: TEntity, meta?: IRecordSetMeta): Promise<TEntity | boolean | null>
+    abstract update(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<TEntity | boolean | null>
+    
     abstract delete(entity: TEntity, meta?: IRecordSetMeta): Promise<boolean>
-    abstract delete(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<boolean>
     abstract delete(entity: Partial<TEntity>, meta?: IRecordSetMeta): Promise<boolean>
 
     public beginTransaction(): Promise<void> {
