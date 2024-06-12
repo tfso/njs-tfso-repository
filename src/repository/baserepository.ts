@@ -61,7 +61,10 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         return Promise.resolve();
     }
 
-    protected isQueryPageable(query: IEnumerable<TEntity>): boolean {
+    protected isQueryPageable(query?: IEnumerable<TEntity>): boolean {
+        if(query == null)
+            return true 
+        
         let where = query.operations.first(OperatorType.Where);
 
         if (where)
@@ -70,7 +73,7 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         return true;
     }
 
-    protected getCriteriaGroups(query: IEnumerable<TEntity>): Array<FilterCriteria[]> {
+    protected getCriteriaGroups(query?: IEnumerable<TEntity>): Array<FilterCriteria[]> {
         if(query instanceof Enumerable) 
         {
             for (let operator of query.operations.values())
@@ -87,8 +90,8 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
         return [];
     }
 
-    protected getCriteria(query: IEnumerable<TEntity>): FilterCriteria[] 
-    protected getCriteria(expressions: ILogicalExpression[]): FilterCriteria[]
+    protected getCriteria(query?: IEnumerable<TEntity>): FilterCriteria[] 
+    protected getCriteria(expressions?: ILogicalExpression[]): FilterCriteria[]
     protected getCriteria() {
         if(arguments[0] instanceof Enumerable) 
         {
@@ -137,4 +140,3 @@ abstract class BaseRepository<TEntity, TEntityId> implements IBaseRepository<TEn
 }
 
 export default BaseRepository
-
