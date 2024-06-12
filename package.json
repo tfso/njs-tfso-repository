@@ -21,11 +21,11 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/mocha": "^2.2.41",
-    "@types/node": "^8.5.9",
+    "@types/mocha": "^5",
+    "@types/node": "^12",
     "benchmark": "^2.1.4",
     "istanbul": "^0.4.4",
-    "mocha": "^4.1.0",
+    "mocha": "^5",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
   }
