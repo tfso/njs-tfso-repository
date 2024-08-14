@@ -76,7 +76,7 @@ export class WhereOperator<TEntity> extends Operator<TEntity> {
 
     public* evaluate(items: Iterable<TEntity>): IterableIterator<TEntity> {
         for (let item of items)
-            if (this._predicate(item)) yield item;
+            if (this.removed || this._predicate(item)) yield item;
     }
     
     public async * evaluateAsync(items: AsyncIterable<TEntity>): AsyncIterableIterator<TEntity> {    
