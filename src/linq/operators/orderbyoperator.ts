@@ -25,9 +25,12 @@ export class OrderByOperator<TEntity> extends Operator<TEntity> {
 
     public * evaluate(items: Iterable<TEntity>): IterableIterator<TEntity> {
         let ar = Array.from(items);
-        ar.sort((a, b) => {
-            return a[this.property] == b[this.property] ? 0 : a[this.property] < b[this.property] ? -1 : 1;
-        })
+        
+        if(this.removed == false) {
+            ar.sort((a, b) => {
+                return a[this.property] == b[this.property] ? 0 : a[this.property] < b[this.property] ? -1 : 1;
+            })
+        }
 
         yield* ar;
     }
@@ -37,9 +40,11 @@ export class OrderByOperator<TEntity> extends Operator<TEntity> {
         for await(let item of items)
             ar.push(item);
 
-        ar.sort((a, b) => {
-            return a[this.property] == b[this.property] ? 0 : a[this.property] < b[this.property] ? -1 : 1;
-        })
+        if(this.removed == false) {
+            ar.sort((a, b) => {
+                return a[this.property] == b[this.property] ? 0 : a[this.property] < b[this.property] ? -1 : 1;
+            })
+        }
 
         yield* ar;   
     }
